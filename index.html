@@ -8,119 +8,78 @@
     <title>Family Fit OS</title>
     <style>
         :root {
-            /* Core Theme */
-            --bg-dark: #000000;
-            --surface: rgba(28, 28, 30, 0.7);
-            --surface-solid: #1C1C1E;
-            --elevated: rgba(44, 44, 46, 0.8);
-            --text-main: #FFFFFF;
-            --text-muted: #8E8E93;
+            --bg-dark: #000000; --surface: rgba(28, 28, 30, 0.7); --surface-solid: #1C1C1E;
+            --elevated: rgba(44, 44, 46, 0.8); --text-main: #FFFFFF; --text-muted: #8E8E93;
             --border: rgba(255, 255, 255, 0.1);
-            
-            /* User Accents */
-            --accent-ali: #0A84FF;
-            --accent-kristen: #BF5AF2;
-            --accent-kam: #FF9F0A;
-            --accent-ashton: #32D74B;
-            --current-accent: #0A84FF; /* Dynamically changed via JS */
-            
-            --success: #32D74B;
-            --danger: #FF453A;
+            --accent-ali: #0A84FF; --accent-kristen: #BF5AF2; --accent-kam: #FF9F0A; --accent-ashton: #32D74B;
+            --current-accent: #0A84FF; --success: #32D74B; --danger: #FF453A;
             --glass-blur: blur(20px);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
 
-        body {
-            background-color: var(--bg-dark); color: var(--text-main);
-            display: flex; justify-content: center; -webkit-user-select: none; user-select: none;
-            overflow-x: hidden;
-        }
+        body { background-color: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; -webkit-user-select: none; user-select: none; overflow-x: hidden; }
 
-        /* Ambient Background Glow */
-        .ambient-glow {
-            position: fixed; top: -10vh; left: -10vw; width: 120vw; height: 50vh;
-            background: radial-gradient(circle, var(--current-accent) 0%, transparent 70%);
-            opacity: 0.15; z-index: -1; transition: background 0.5s ease; pointer-events: none;
-        }
+        .ambient-glow { position: fixed; top: -10vh; left: -10vw; width: 120vw; height: 50vh; background: radial-gradient(circle, var(--current-accent) 0%, transparent 70%); opacity: 0.15; z-index: -1; transition: background 0.5s ease; pointer-events: none; }
 
         #app { width: 100%; max-width: 430px; min-height: 100vh; position: relative; padding-bottom: 120px; display: flex; flex-direction: column; }
 
-        /* Header */
-        header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 24px 20px 16px 20px; padding-top: max(24px, env(safe-area-inset-top));
-            background: rgba(0,0,0,0.5); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border);
-        }
+        header { display: flex; align-items: center; justify-content: space-between; padding: 24px 20px 16px 20px; padding-top: max(24px, env(safe-area-inset-top)); background: rgba(0,0,0,0.5); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
         .header-title { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--current-accent); transition: color 0.3s; }
         .back-btn { background: none; border: none; color: var(--text-main); font-size: 16px; font-weight: 600; cursor: pointer; display: none; padding: 8px 12px 8px 0; }
 
-        /* Screens */
         .screen { display: none; padding: 20px; animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); flex: 1; }
         .screen.active { display: block; }
         @keyframes scaleIn { 0% { opacity: 0; transform: scale(0.97) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* Typography */
         h1 { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; line-height: 1.1; }
         .subtitle { color: var(--text-muted); font-size: 16px; font-weight: 500; margin-bottom: 32px; line-height: 1.4; }
         .section-header { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; margin: 32px 0 16px 0; }
 
-        /* Profile Selection */
+        /* Profiles */
         .profile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        .profile-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
-            padding: 24px 16px; text-align: center; cursor: pointer; transition: 0.2s;
-            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-        }
+        .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 24px 16px; text-align: center; cursor: pointer; transition: 0.2s; backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
         .profile-card:active { transform: scale(0.95); background: var(--elevated); }
-        .avatar { width: 72px; height: 72px; border-radius: 36px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; background: rgba(0,0,0,0.5); border: 2px solid; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+        .avatar { width: 72px; height: 72px; border-radius: 36px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; background: rgba(0,0,0,0.5); border: 2px solid; }
         .profile-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
         .profile-desc { font-size: 13px; color: var(--text-muted); font-weight: 500; }
 
-        /* Smart Status Banner */
-        .status-banner {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-            padding: 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;
-        }
+        /* Status Banner */
+        .status-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; }
         .status-icon { font-size: 24px; }
         .status-text h4 { font-size: 15px; margin-bottom: 4px; }
         .status-text p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
 
-        /* Routine Menus */
+        /* Menus */
         .menu-list { display: flex; flex-direction: column; gap: 12px; }
-        .menu-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
-            padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-        }
+        .menu-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .menu-card:active { background: var(--elevated); }
         .menu-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
-        .menu-meta { font-size: 14px; color: var(--text-muted); font-weight: 500; display: flex; gap: 8px; }
+        .menu-meta { font-size: 14px; color: var(--text-muted); font-weight: 500; }
 
-        /* --- THE EXERCISE ENGINE --- */
-        .exercise-card {
-            background: var(--surface-solid); border-radius: 24px; margin-bottom: 24px;
-            border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
+        /* EXERCISE CARDS WITH VISUALS */
+        .exercise-card { background: var(--surface-solid); border-radius: 24px; margin-bottom: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
         .ex-header { padding: 20px; background: rgba(255,255,255,0.02); }
         .ex-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
         .ex-target { font-size: 12px; font-weight: 700; color: var(--current-accent); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Setup Matrix */
-        .setup-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-        .setup-cell { background: var(--surface-solid); padding: 12px 16px; }
-        .setup-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block; }
-        .setup-val { font-size: 14px; font-weight: 700; color: #FFF; }
+        /* Media Placeholder */
+        .visual-hero { width: 100%; height: 180px; background: #111; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--text-muted); font-size: 12px; border-bottom: 1px solid var(--border); }
+        .visual-hero svg { width: 40px; height: 40px; margin-bottom: 8px; opacity: 0.5; }
 
-        /* Coach Expandable */
-        .coach-toggle {
-            width: 100%; background: none; border: none; border-bottom: 1px solid var(--border);
-            padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
-            font-size: 14px; font-weight: 700; color: var(--text-main); cursor: pointer;
-        }
+        /* Visual Setup Grid */
+        .visual-setup-grid { display: grid; grid-template-columns: 1fr 1fr; background: var(--border); gap: 1px; border-bottom: 1px solid var(--border); }
+        .vs-cell { background: var(--surface-solid); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .vs-header { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .vs-body { display: flex; align-items: center; gap: 12px; }
+        .vs-icon-box { width: 44px; height: 44px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
+        .vs-icon-box svg { width: 24px; height: 24px; fill: none; stroke: var(--current-accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .vs-text { font-size: 14px; font-weight: 700; color: #FFF; line-height: 1.2; }
+
+        /* Coach Toggle */
+        .coach-toggle { width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; color: var(--text-main); cursor: pointer; }
         .coach-content { display: none; padding: 20px; font-size: 15px; line-height: 1.5; color: #D1D1D6; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
-        .coach-content.active { display: block; animation: slideDown 0.2s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .coach-content.active { display: block; }
         .coach-content ul { padding-left: 20px; margin-bottom: 16px; }
         .coach-content li { margin-bottom: 10px; }
         .tip-box { background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; border-left: 4px solid var(--current-accent); }
@@ -130,20 +89,10 @@
         .tracker-table { width: 100%; border-collapse: separate; border-spacing: 0 12px; }
         .tracker-table th { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; padding-bottom: 4px; }
         .tracker-table td { text-align: center; vertical-align: middle; }
-        
         .set-pill { background: rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-weight: 700; font-size: 13px; color: var(--text-muted); }
-        
-        .val-input {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #FFF;
-            width: 70px; padding: 12px 4px; border-radius: 12px; text-align: center;
-            font-size: 18px; font-weight: 700; -moz-appearance: textfield; transition: 0.2s;
-        }
+        .val-input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #FFF; width: 70px; padding: 12px 4px; border-radius: 12px; text-align: center; font-size: 18px; font-weight: 700; -moz-appearance: textfield; }
         .val-input:focus { outline: none; border-color: var(--current-accent); background: rgba(0,0,0,0.5); }
-        
-        .check-btn {
-            background: rgba(255,255,255,0.1); border: none; width: 56px; height: 44px; border-radius: 14px;
-            margin: 0 auto; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s;
-        }
+        .check-btn { background: rgba(255,255,255,0.1); border: none; width: 56px; height: 44px; border-radius: 14px; margin: 0 auto; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
         .check-btn svg { fill: var(--text-muted); width: 22px; height: 22px; transition: 0.3s; }
         
         .row-done .check-btn { background: var(--success); transform: scale(1.05); }
@@ -151,31 +100,15 @@
         .row-done .val-input { background: transparent; border-color: transparent; color: var(--success); pointer-events: none; }
         .row-done .set-pill { background: var(--success); color: #000; }
 
-        /* Global Controls */
-        .finish-btn {
-            width: 100%; background: var(--current-accent); color: #FFF; border: none;
-            padding: 20px; border-radius: 20px; font-size: 18px; font-weight: 800; cursor: pointer;
-            margin-top: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: 0.2s;
-        }
+        .finish-btn { width: 100%; background: var(--current-accent); color: #FFF; border: none; padding: 20px; border-radius: 20px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: 0.2s; }
         .finish-btn:active { transform: scale(0.97); }
 
         /* Rest Timer Bottom Sheet */
-        #timer-sheet {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(28, 28, 30, 0.95); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom));
-            border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000;
-        }
+        #timer-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(28, 28, 30, 0.95); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; }
         #timer-sheet.active { transform: translateY(0); }
         .timer-val { font-size: 38px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-main); letter-spacing: -1px; }
         .timer-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         .skip-btn { background: rgba(255,255,255,0.1); color: #FFF; border: none; padding: 14px 28px; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; }
-
-        /* Manual Builder */
-        .manual-zone { background: var(--surface); padding: 20px; border-radius: 24px; border: 1px dashed rgba(255,255,255,0.2); margin-bottom: 24px; }
-        .manual-select { width: 100%; background: rgba(0,0,0,0.5); color: #FFF; border: 1px solid var(--border); padding: 16px; border-radius: 12px; font-size: 16px; margin-bottom: 16px; font-weight: 600; }
-        .add-btn { width: 100%; background: rgba(255,255,255,0.1); color: #FFF; border: none; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; }
 
     </style>
 </head>
@@ -190,6 +123,7 @@
         <div style="width: 60px;"></div>
     </header>
 
+    <!-- SCREEN 1: PROFILES -->
     <div id="screen-users" class="screen active">
         <h1>Welcome.</h1>
         <p class="subtitle">Select your profile to initialize your dashboard.</p>
@@ -218,6 +152,7 @@
         </div>
     </div>
 
+    <!-- SCREEN 2: DASHBOARD -->
     <div id="screen-dash" class="screen">
         <h1 id="dash-title">Hi</h1>
         
@@ -232,34 +167,17 @@
         <div id="dash-content">
             <div class="section-header">Programmed Plans</div>
             <div class="menu-list" id="routine-list"></div>
-
-            <div class="section-header">Freestyle</div>
-            <div class="menu-list">
-                <div class="menu-card" onclick="startWorkout('Manual Builder', true, [])">
-                    <div>
-                        <div class="menu-title">Manual Builder</div>
-                        <div class="menu-meta">Track your own routine</div>
-                    </div>
-                    <div style="font-size: 24px; color: var(--text-muted); font-weight: 300;">+</div>
-                </div>
-            </div>
         </div>
     </div>
 
+    <!-- SCREEN 3: WORKOUT ENGINE -->
     <div id="screen-workout" class="screen">
         <h1 id="workout-title" style="margin-bottom: 24px;">Workout</h1>
-        
-        <div id="manual-zone" class="manual-zone" style="display: none;">
-            <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 1px;">LIBRARY</div>
-            <select id="exercise-select" class="manual-select"></select>
-            <button class="add-btn" onclick="addManualExercise()">+ Add to Session</button>
-        </div>
-
         <div id="workout-feed"></div>
-
         <button class="finish-btn" id="finish-btn" onclick="finishWorkout()">Complete Session</button>
     </div>
 
+    <!-- REST TIMER -->
     <div id="timer-sheet">
         <div>
             <div class="timer-label">Recovery Timer</div>
@@ -271,103 +189,102 @@
 
 <script>
     /* ========================================================================
-       1. DATABASE: 3D Hardware Mapping & Exercises
-       Track (1-8), Dial (1-11). Exact coordinates for your specific machine.
+       SVG ICON LIBRARY FOR VISUAL ATTACHMENTS
+       ======================================================================== */
+    const icons = {
+        d_handle: `<path d="M7 4v16M7 4c6 0 10 3.5 10 8s-4 8-10 8" />`,
+        v_bar: `<path d="M4 6l8 12 8-12" stroke-width="3" />`,
+        rope: `<path d="M12 4v12" stroke-dasharray="2 2" stroke-width="4"/><circle cx="12" cy="18" r="3" fill="var(--current-accent)"/><circle cx="12" cy="4" r="3" fill="var(--current-accent)"/>`,
+        straight_bar: `<path d="M3 12h18" stroke-width="4"/><rect x="5" y="10" width="3" height="4" fill="var(--current-accent)"/><rect x="16" y="10" width="3" height="4" fill="var(--current-accent)"/>`,
+        dumbbells: `<rect x="4" y="8" width="4" height="8"/><rect x="16" y="8" width="4" height="8"/><path d="M8 12h8" stroke-width="3"/>`,
+        ankle_strap: `<rect x="6" y="8" width="12" height="8" rx="2" stroke-width="2"/><circle cx="12" cy="12" r="1.5" fill="var(--current-accent)"/>`,
+        bosu: `<path d="M4 16h16" stroke-width="2"/><path d="M6 16c0-4 3-7 6-7s6 3 6 7" stroke-width="2"/>`,
+        machine: `<rect x="8" y="4" width="8" height="16" rx="1"/><circle cx="12" cy="10" r="2" fill="var(--current-accent)"/>`
+    };
+
+    /* ========================================================================
+       DATABASE: Exercises with Visual Keys
        ======================================================================== */
     const db = {
         cable_chest_press: {
             name: "Flat Bench Cable Press", target: "Chest & Triceps",
-            setup: { h: "8 (Lowest)", a: "4 (Mid-Wide)", att: "2x D-Handles", spc: "Bench Center" },
-            steps: ["Center the bench perfectly between the pulleys.", "Lie flat, pull handles to armpits before pressing.", "Press straight up and together over your chest."], tip: "Keep your shoulders pinned to the pad. Do not let the cables pull your shoulders forward."
+            setup: { 
+                icon: icons.d_handle, attName: "2x D-Handles", 
+                machineIcon: icons.machine, macName: "Track: 8 (Low)<br>Dial: 4 (Wide)",
+                spc: "Bench Centered" 
+            },
+            steps: ["Center the bench perfectly between the pulleys.", "Lie flat, pull handles to armpits before pressing.", "Press straight up and together over your chest."], tip: "Keep your shoulders pinned to the pad."
         },
         cable_row: {
             name: "Seated Cable Row", target: "Back & Biceps",
-            setup: { h: "6 (Low-Mid)", a: "1 (Narrowest)", att: "V-Bar", spc: "Floor (Remove Bench)" },
-            steps: ["Sit on floor facing machine, feet braced on the lower frame.", "Keep your back perfectly straight.", "Pull V-bar to your belly button, driving elbows back."], tip: "Squeeze your shoulder blades together BEFORE your arms start pulling."
+            setup: { 
+                icon: icons.v_bar, attName: "V-Bar", 
+                machineIcon: icons.machine, macName: "Track: 6 (Mid)<br>Dial: 1 (Narrow)",
+                spc: "Floor (Remove Bench)" 
+            },
+            steps: ["Sit on floor facing machine, feet braced.", "Keep your back perfectly straight.", "Pull V-bar to belly button."], tip: "Squeeze shoulder blades BEFORE pulling."
         },
         cable_squat: {
             name: "Cable Goblet Squat", target: "Quads & Glutes",
-            setup: { h: "8 (Lowest)", a: "1 (Narrowest)", att: "Short Straight Bar", spc: "Open Floor" },
-            steps: ["Attach bar to low pulley. Stand facing machine.", "Hold bar tight against collarbone.", "Squat down, pushing hips back and keeping chest tall."], tip: "Drive through your heels. Ensure the weight stack doesn't pull you onto your toes."
-        },
-        cable_rdl: {
-            name: "Cable Romanian Deadlift", target: "Hamstrings & Glutes",
-            setup: { h: "8 (Lowest)", a: "1 (Narrowest)", att: "Short Straight Bar", spc: "Open Floor" },
-            steps: ["Hold bar at waist height.", "Keep legs mostly straight (slight knee bend).", "Push hips straight back until you feel a stretch in hamstrings, then squeeze glutes to stand."], tip: "Keep the bar close to your shins."
+            setup: { 
+                icon: icons.straight_bar, attName: "Straight Bar", 
+                machineIcon: icons.machine, macName: "Track: 8 (Low)<br>Dial: 1 (Narrow)",
+                spc: "Open Floor" 
+            },
+            steps: ["Attach bar to low pulley.", "Hold bar tight against collarbone.", "Squat down, pushing hips back."], tip: "Drive through heels."
         },
         face_pull: {
             name: "Cable Face Pulls", target: "Upper Back & Posture",
-            setup: { h: "2 (High)", a: "1 (Narrowest)", att: "Tricep Rope", spc: "Open Floor" },
-            steps: ["Grab rope with thumbs pointing backward.", "Pull hands apart towards your ears, flaring elbows out and back."], tip: "This is a posture fixer, not a heavy lift. Focus intensely on the squeeze."
-        },
-        glute_kickback: {
-            name: "Cable Glute Kickbacks", target: "Glutes",
-            setup: { h: "8 (Lowest)", a: "3 (Mid-Narrow)", att: "Ankle Strap", spc: "Face Machine" },
-            steps: ["Strap ankle, face machine, hold frame for balance.", "Kick leg straight back, squeezing glute.", "Return slowly under control."], tip: "Lock your lower back in place. The movement must come 100% from the hip joint."
+            setup: { 
+                icon: icons.rope, attName: "Tricep Rope", 
+                machineIcon: icons.machine, macName: "Track: 2 (High)<br>Dial: 1 (Narrow)",
+                spc: "Open Floor" 
+            },
+            steps: ["Grab rope with thumbs pointing backward.", "Pull hands apart towards ears, flaring elbows."], tip: "Focus intensely on the squeeze."
         },
         db_lateral_raise: {
             name: "Dumbbell Lateral Raises", target: "Shoulders",
-            setup: { h: "N/A", a: "N/A", att: "Dumbbells (Light)", spc: "Open Floor" },
-            steps: ["Stand tall holding light dumbbells.", "Raise arms out to sides until parallel with floor.", "Lower slowly."], tip: "Lead with your elbows, like pouring water out of two pitchers."
-        },
-        bosu_plank: {
-            name: "BOSU Core Plank", target: "Abdominals",
-            setup: { h: "N/A", a: "N/A", att: "BOSU Ball (Dome Down)", spc: "Open Floor" },
-            steps: ["Place forearms on the flat side of the BOSU.", "Extend legs and hold a perfectly straight plank."], tip: "Squeeze your glutes to prevent your lower back from sagging."
-        },
-        inversion: {
-            name: "Teeter Spinal Decompression", target: "Recovery",
-            setup: { h: "N/A", a: "N/A", att: "Teeter Table", spc: "Recovery Zone" },
-            steps: ["Lock ankles securely into Teeter.", "Lean back slowly to desired angle.", "Relax arms overhead and breathe deeply."], tip: "Focus on relaxing your lower back muscles completely."
+            setup: { 
+                icon: icons.dumbbells, attName: "Light Dumbbells", 
+                machineIcon: icons.machine, macName: "Free Weights",
+                spc: "Open Floor" 
+            },
+            steps: ["Stand tall holding light dumbbells.", "Raise arms out to sides until parallel with floor."], tip: "Lead with elbows."
         }
     };
 
     /* ========================================================================
-       2. USER PROFILES & SMART PROGRAMMING
+       USER PROFILES & PLANS
        ======================================================================== */
     const users = {
         'ali': {
             name: 'Ali', color: 'var(--accent-ali)',
             plans: [
                 { title: 'Push Day (Chest & Tris)', time: '40 Min', reqs: [{id: 'cable_chest_press', s: 4, r: 10}, {id: 'db_lateral_raise', s: 3, r: 12}] },
-                { title: 'Pull Day (Back & Posture)', time: '40 Min', reqs: [{id: 'cable_row', s: 4, r: 10}, {id: 'face_pull', s: 4, r: 15}] },
-                { title: 'Lower Body Power', time: '35 Min', reqs: [{id: 'cable_squat', s: 4, r: 8}, {id: 'cable_rdl', s: 4, r: 8}] }
+                { title: 'Pull Day (Back & Posture)', time: '40 Min', reqs: [{id: 'cable_row', s: 4, r: 10}, {id: 'face_pull', s: 4, r: 15}] }
             ]
         },
         'kristen': {
             name: 'Kristen', color: 'var(--accent-kristen)',
             plans: [
-                { title: 'Pilates Upper Sculpt', time: '30 Min', reqs: [{id: 'face_pull', s: 3, r: 15}, {id: 'cable_row', s: 3, r: 15}] },
-                { title: 'Glute & Leg Focus', time: '35 Min', reqs: [{id: 'glute_kickback', s: 3, r: 15}, {id: 'cable_squat', s: 3, r: 12}] },
-                { title: 'Core & Decompression', time: '20 Min', reqs: [{id: 'bosu_plank', s: 3, r: 60}, {id: 'inversion', s: 1, r: 300}] }
+                { title: 'Pilates Upper Sculpt', time: '30 Min', reqs: [{id: 'face_pull', s: 3, r: 15}, {id: 'cable_row', s: 3, r: 15}] }
             ]
         },
         'kam': {
             name: 'Kam', color: 'var(--accent-kam)', youth: true,
             plans: [
-                { title: 'Foundations A', time: '30 Min', reqs: [{id: 'cable_squat', s: 3, r: 10}, {id: 'cable_chest_press', s: 3, r: 12}] },
-                { title: 'Foundations B', time: '30 Min', reqs: [{id: 'cable_row', s: 3, r: 12}, {id: 'db_lateral_raise', s: 3, r: 12}] }
+                { title: 'Foundations A', time: '30 Min', reqs: [{id: 'cable_squat', s: 3, r: 10}, {id: 'cable_chest_press', s: 3, r: 12}] }
             ]
         },
         'ashton': {
             name: 'Ashton', color: 'var(--accent-ashton)', youth: true,
             plans: [
-                { title: 'Ninja Agility', time: '15 Min', reqs: [{id: 'bosu_plank', s: 3, r: 30}, {id: 'cable_squat', s: 3, r: 8}] }
+                { title: 'Ninja Agility', time: '15 Min', reqs: [{id: 'cable_squat', s: 3, r: 8}] }
             ]
         }
     };
 
-    /* ========================================================================
-       3. APP ENGINE (State, Memory, and Logic)
-       ======================================================================== */
-    let curUserObj = null; let curUserId = "";
-    let timerInt; let timeLeft = 0; let manualCount = 0;
-    
-    // Auto-populate manual library
-    window.onload = () => {
-        const sel = document.getElementById('exercise-select');
-        for (const [k, v] of Object.entries(db)) { sel.innerHTML += `<option value="${k}">${v.name}</option>`; }
-    };
+    let curUserObj = null; let curUserId = ""; let timerInt; let timeLeft = 0;
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -383,99 +300,71 @@
 
     function openDash(displayName, color, id) {
         curUserObj = users[id]; curUserId = id;
-        
-        // Theme adjustments
         document.documentElement.style.setProperty('--current-accent', color);
         document.getElementById('dash-title').innerText = `Hi, ${displayName}`;
         document.getElementById('app-header-title').style.color = color;
 
-        // SMART ENGINE: Analyze LocalStorage Memory
         const today = new Date().toDateString();
         const lastLog = localStorage.getItem(`${id}_lastLog`);
         const streak = parseInt(localStorage.getItem(`${id}_streak`) || 0);
-        
         const banner = document.getElementById('smart-banner');
         const dashContent = document.getElementById('dash-content');
         
-        banner.style.display = 'flex';
-        dashContent.style.display = 'block';
+        banner.style.display = 'flex'; dashContent.style.display = 'block';
 
         if (curUserObj.youth && lastLog === today) {
-            // Lock Kam/Ashton if they already trained today (Youth safety)
             document.getElementById('smart-icon').innerText = "🛑";
             document.getElementById('smart-title').innerText = "Rest Enforced";
-            document.getElementById('smart-msg').innerText = "Muscles grow when you rest! You've completed your training for today. Go play!";
+            document.getElementById('smart-msg').innerText = "Muscles grow when you rest! You've trained today. Go play!";
             document.getElementById('smart-msg').style.color = 'var(--danger)';
-            dashContent.style.display = 'none'; // Hide routines
+            dashContent.style.display = 'none';
         } else if (streak >= 3 && !curUserObj.youth) {
-            // Ali/Kristen Fatigue Warning
             document.getElementById('smart-icon').innerText = "⚠️";
             document.getElementById('smart-title').innerText = "Fatigue Detected";
-            document.getElementById('smart-msg').innerText = `You've trained ${streak} days in a row. The app has auto-regulated your volume by dropping 1 set per exercise today to prevent CNS burnout.`;
+            document.getElementById('smart-msg').innerText = `You've trained ${streak} days in a row. Volume auto-reduced by 1 set.`;
             document.getElementById('smart-msg').style.color = 'var(--accent-kam)';
-            renderRoutines(true); // render with volume drop
+            renderRoutines(true);
         } else {
-            // Normal Status
             document.getElementById('smart-icon').innerText = "✅";
             document.getElementById('smart-title').innerText = "Ready to Train";
             document.getElementById('smart-msg').innerText = "Recovery optimal. Select your plan below.";
             document.getElementById('smart-msg').style.color = 'var(--text-muted)';
             renderRoutines(false);
         }
-        
         showScreen('screen-dash');
     }
 
     function renderRoutines(reduceVolume) {
-        const list = document.getElementById('routine-list');
-        list.innerHTML = "";
+        const list = document.getElementById('routine-list'); list.innerHTML = "";
         curUserObj.plans.forEach((plan, idx) => {
             list.innerHTML += `
-            <div class="menu-card" onclick="startWorkout('${idx}', false, ${reduceVolume})">
+            <div class="menu-card" onclick="startWorkout('${idx}', ${reduceVolume})">
                 <div><div class="menu-title">${plan.title}</div><div class="menu-meta"><span>⏱ ${plan.time}</span></div></div>
                 <div style="color: var(--current-accent); font-weight: 800; font-size: 18px;">❯</div>
             </div>`;
         });
     }
 
-    function startWorkout(planIdx, isManual, reduceVolume = false) {
+    function startWorkout(planIdx, reduceVolume) {
         document.getElementById('workout-feed').innerHTML = "";
-        manualCount = 0;
-        
         const fBtn = document.getElementById('finish-btn');
         fBtn.style.color = (curUserObj.name === 'Ashton' || curUserObj.name === 'Kam') ? '#000' : '#FFF';
 
-        if(isManual) {
-            document.getElementById('workout-title').innerText = "Manual Builder";
-            document.getElementById('manual-zone').style.display = 'block';
-        } else {
-            const plan = curUserObj.plans[planIdx];
-            document.getElementById('workout-title').innerText = plan.title;
-            document.getElementById('manual-zone').style.display = 'none';
-            plan.reqs.forEach((req, i) => {
-                let actualSets = reduceVolume ? Math.max(1, req.s - 1) : req.s;
-                buildCard(req.id, actualSets, req.r, i);
-            });
-        }
+        const plan = curUserObj.plans[planIdx];
+        document.getElementById('workout-title').innerText = plan.title;
+        plan.reqs.forEach((req, i) => {
+            let actualSets = reduceVolume ? Math.max(1, req.s - 1) : req.s;
+            buildCard(req.id, actualSets, req.r, i);
+        });
         showScreen('screen-workout');
-    }
-
-    function addManualExercise() {
-        const exId = document.getElementById('exercise-select').value;
-        buildCard(exId, 3, 10, `m${manualCount}`);
-        manualCount++;
     }
 
     function toggleCoach(id) { document.getElementById(id).classList.toggle('active'); }
 
-    /* The UI Builder for Exercises */
     function buildCard(exId, sets, reps, domIdx) {
         const ex = db[exId];
         let stepsHTML = ""; ex.steps.forEach(s => stepsHTML += `<li>${s}</li>`);
-        
-        // PRO FEATURE: Retrieve memory of last lifted weight for this specific exercise
-        const memoryKey = `${curUserId}_weight_${exId}`;
-        const lastWeight = localStorage.getItem(memoryKey) || "";
+        const lastWeight = localStorage.getItem(`${curUserId}_w_${exId}`) || "";
         
         let rows = "";
         for(let i=1; i<=sets; i++) {
@@ -484,22 +373,40 @@
                 <td><div class="set-pill">${i}</div></td>
                 <td><input type="number" class="val-input weight-val" placeholder="lbs" value="${lastWeight}"></td>
                 <td><input type="number" class="val-input" value="${reps}"></td>
-                <td><button class="check-btn" onclick="toggleSet('row-${domIdx}-${i}', '${exId}')"><svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg></button></td>
+                <td><button class="check-btn" onclick="toggleSet('row-${domIdx}-${i}', '${exId}')"><svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" fill="currentColor"/></svg></button></td>
             </tr>`;
         }
 
         const card = `
         <div class="exercise-card">
+            <div class="visual-hero">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span>[Placeholder: Tap to add form photo]</span>
+            </div>
             <div class="ex-header">
                 <div class="ex-title">${ex.name}</div>
                 <div class="ex-target">${ex.target}</div>
             </div>
             
-            <div class="setup-matrix">
-                <div class="setup-cell"><span class="setup-label">↕️ Track (1-8)</span><span class="setup-val">${ex.setup.h}</span></div>
-                <div class="setup-cell"><span class="setup-label">↔️ Dial (1-11)</span><span class="setup-val">${ex.setup.a}</span></div>
-                <div class="setup-cell"><span class="setup-label">🔗 Attach</span><span class="setup-val">${ex.setup.att}</span></div>
-                <div class="setup-cell"><span class="setup-label">🪑 Space</span><span class="setup-val">${ex.setup.spc}</span></div>
+            <div class="visual-setup-grid">
+                <div class="vs-cell">
+                    <div class="vs-header">ATTACHMENT</div>
+                    <div class="vs-body">
+                        <div class="vs-icon-box"><svg viewBox="0 0 24 24">${ex.setup.icon}</svg></div>
+                        <div class="vs-text">${ex.setup.attName}</div>
+                    </div>
+                </div>
+                <div class="vs-cell">
+                    <div class="vs-header">MACHINE SETTINGS</div>
+                    <div class="vs-body">
+                        <div class="vs-icon-box"><svg viewBox="0 0 24 24">${ex.setup.machineIcon}</svg></div>
+                        <div class="vs-text">${ex.setup.macName}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="padding: 12px 20px; background: var(--border); font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                🪑 SPACE: <span style="color: #fff;">${ex.setup.spc}</span>
             </div>
 
             <button class="coach-toggle" onclick="toggleCoach('coach-${domIdx}')">
@@ -526,38 +433,25 @@
         const weightInput = row.querySelector('.weight-val');
         
         if (row.classList.contains('row-done')) {
-            row.classList.remove('row-done');
-            inputs.forEach(inp => inp.disabled = false);
+            row.classList.remove('row-done'); inputs.forEach(inp => inp.disabled = false);
         } else {
-            row.classList.add('row-done');
-            inputs.forEach(inp => inp.disabled = true);
-            
-            // PRO FEATURE: Save the weight lifted to memory automatically
-            if(weightInput && weightInput.value) {
-                localStorage.setItem(`${curUserId}_weight_${exId}`, weightInput.value);
-            }
-            
+            row.classList.add('row-done'); inputs.forEach(inp => inp.disabled = true);
+            if(weightInput && weightInput.value) { localStorage.setItem(`${curUserId}_w_${exId}`, weightInput.value); }
             startTimer(60); 
         }
     }
 
-    /* Timer Logic */
     function startTimer(sec) {
         clearInterval(timerInt); timeLeft = sec;
-        document.getElementById('timer-sheet').classList.add('active');
-        updateTimer();
+        document.getElementById('timer-sheet').classList.add('active'); updateTimer();
         timerInt = setInterval(() => {
             timeLeft--; updateTimer();
             if(timeLeft <= 0) { stopTimer(); if(navigator.vibrate) navigator.vibrate([200,100,200]); }
         }, 1000);
     }
     function stopTimer() { clearInterval(timerInt); document.getElementById('timer-sheet').classList.remove('active'); }
-    function updateTimer() { 
-        let m = Math.floor(timeLeft/60); let s = timeLeft%60; 
-        document.getElementById('timer-display').innerText = `0${m}:${s<10?'0':''}${s}`; 
-    }
+    function updateTimer() { let m = Math.floor(timeLeft/60); let s = timeLeft%60; document.getElementById('timer-display').innerText = `0${m}:${s<10?'0':''}${s}`; }
 
-    /* Finishing Logic (Updating the Smart Engine) */
     function finishWorkout() {
         const today = new Date().toDateString();
         const yesterday = new Date(Date.now() - 86400000).toDateString();
