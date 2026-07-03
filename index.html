@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Apple PWA Meta Tags (Makes it look like a real app on iPhone) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Family Fit">
+    
+    <title>Family Fitness</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-ali: #38bdf8;
+            --accent-kristen: #c084fc;
+            --accent-kam: #fb923c;
+            --accent-ashton: #facc15;
+            --success: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            padding-bottom: 80px;
+            -webkit-font-smoothing: antialiased;
+            /* Prevents text highlighting when tapping */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* App Container */
+        #app { max-width: 500px; margin: 0 auto; }
+
+        /* Typography */
+        h1, h2, h3 { font-weight: 700; margin-bottom: 10px; }
+        h1 { font-size: 28px; text-align: center; margin-bottom: 30px; letter-spacing: -0.5px; }
+        p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+
+        /* Screens */
+        .screen { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Profile Selector */
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            border: 2px solid transparent;
+        }
+        .profile-card:active { transform: scale(0.95); }
+        .profile-card h3 { font-size: 20px; margin-bottom: 4px; }
+        .profile-card p { font-size: 12px; }
+        
+        #profile-ali { border-color: var(--accent-ali); }
+        #profile-kristen { border-color: var(--accent-kristen); }
+        #profile-kam { border-color: var(--accent-kam); }
+        #profile-ashton { border-color: var(--accent-ashton); }
+
+        #profile-ali h3 { color: var(--accent-ali); }
+        #profile-kristen h3 { color: var(--accent-kristen); }
+        #profile-kam h3 { color: var(--accent-kam); }
+        #profile-ashton h3 { color: var(--accent-ashton); }
+
+        /* Buttons & Inputs */
+        .btn {
+            display: block; width: 100%; padding: 16px;
+            background: #334155; color: white;
+            border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 600;
+            margin-bottom: 12px; cursor: pointer;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: #2563eb; }
+        .btn-focus { background: var(--card-bg); border: 2px solid var(--accent-kristen); color: white; }
+        .btn-back { background: transparent; border: 1px solid #334155; margin-bottom: 20px; }
+
+        /* Workout View */
+        .workout-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            padding-bottom: 15px; border-bottom: 1px solid #334155;
+        }
+        .exercise-card {
+            background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 16px;
+        }
+        .ex-title { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;}
+        .ex-title h3 { font-size: 18px; margin: 0; color: #e2e8f0; }
+        .ex-tag { font-size: 11px; padding: 4px 8px; border-radius: 6px; background: #334155; font-weight: 600;}
+        
+        .ex-details { margin-bottom: 12px; }
+        .ex-details span { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+        .ex-details strong { color: #cbd5e1; }
+
+        .expert-tip {
+            background: rgba(56, 189, 248, 0.1); border-left: 3px solid var(--accent-ali);
+            padding: 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; color: #bae6fd;
+        }
+
+        .sets-container { display: flex; gap: 8px; justify-content: space-between; }
+        .set-btn {
+            flex: 1; padding: 12px 0; background: #0f172a;
+            border: 1px solid #334155; border-radius: 8px;
+            color: #94a3b8; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .set-btn.completed { background: var(--success); color: white; border-color: var(--success); }
+
+        /* Rest Timer Floating Bar */
+        #timer-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #1e293b; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid #334155; transform: translateY(100%); transition: transform 0.3s;
+            padding-bottom: env(safe-area-inset-bottom, 15px); /* iPhone notch support */
+        }
+        #timer-bar.visible { transform: translateY(0); }
+        #timer-text { font-size: 24px; font-weight: 700; color: var(--accent-ali); font-variant-numeric: tabular-nums; }
+        
+        .header-status { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 20px;}
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- SCREEN 1: Profile Selection -->
+    <div id="screen-profiles" class="screen active">
+        <h1>Who is training today?</h1>
+        <p class="header-status" id="system-status">Smart Logic Engine Active</p>
+        
+        <div class="profile-grid">
+            <div class="profile-card" id="profile-ali" onclick="selectUser('Ali')">
+                <h3>Ali</h3>
+                <p>Advanced Strength</p>
+            </div>
+            <div class="profile-card" id="profile-kristen" onclick="selectUser('Kristen')">
+                <h3>Kristen</h3>
+                <p>Pilates Hybrid</p>
+            </div>
+            <div class="profile-card" id="profile-kam" onclick="selectUser('Kam')">
+                <h3>Kam</h3>
+                <p>Foundations (13yo)</p>
+            </div>
+            <div class="profile-card" id="profile-ashton" onclick="selectUser('Ashton')">
+                <h3>Ashton</h3>
+                <p>Active Play (8yo)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: Kristen's Focus Selector -->
+    <div id="screen-focus" class="screen">
+        <button class="btn btn-back" onclick="goHome()">← Back</button>
+        <h1>Select Your Focus</h1>
+        <p style="text-align: center; margin-bottom: 20px;">What area do you want to target today to complement your Pilates?</p>
+        
+        <button class="btn btn-focus" onclick="startWorkout('Kristen', 'Posture')">Posture & Upper Toning</button>
+        <button class="btn btn-focus" onclick="startWorkout('Kristen', 'Glutes')">Glutes & Hamstrings</button>
+        <button class="btn btn-focus" onclick="startWorkout('Kristen', 'Standard')">Full Body Balance</button>
+    </div>
+
+    <!-- SCREEN 3: Workout View -->
+    <div id="screen-workout" class="screen">
+        <button class="btn btn-back" onclick="goHome()">← Change User</button>
+        <div class="workout-header">
+            <h2 id="workout-title">Ali's Workout</h2>
+            <button class="btn btn-primary" style="width: auto; margin: 0; padding: 8px 16px; font-size: 14px;" onclick="finishWorkout()">Finish</button>
+        </div>
+        <p id="workout-subtitle" style="margin-bottom: 20px;">Smart auto-regulated session</p>
+        
+        <div id="exercise-list">
+            <!-- Exercises injected via JS -->
+        </div>
+    </div>
+    
+    <!-- SCREEN 4: Lock Screen (Youth Rest Day) -->
+    <div id="screen-lock" class="screen" style="text-align: center; padding-top: 50px;">
+        <h1 style="color: var(--accent-kam);">Rest Day Active 🛑</h1>
+        <p style="margin-bottom: 30px; font-size: 18px;">Muscles grow when you rest! You trained yesterday. Today is an active recovery day.</p>
+        <div class="exercise-card">
+            <h3>Suggested Today:</h3>
+            <p style="margin-top: 10px; color: #fff;">1. 10 Minutes on Inversion Table</p>
+            <p style="color: #fff;">2. Light stretching / Foam rolling</p>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 30px;" onclick="goHome()">Okay, got it!</button>
+    </div>
+</div>
+
+<!-- Floating Timer -->
+<div id="timer-bar">
+    <div>
+        <div style="font-size: 12px; color: #94a3b8; font-weight: bold;">REST TIMER</div>
+        <div id="timer-text">01:00</div>
+    </div>
+    <button onclick="skipTimer()" style="background: transparent; color: white; border: 1px solid #475569; padding: 8px 16px; border-radius: 8px; cursor: pointer;">Skip</button>
+</div>
+
+<script>
+    // --- DATABASE ---
+    const exercises = [
+        { id: "e1", name: "Cable Goblet Squat", cat: "Lower", target: ["Ali", "Kristen", "Kam"], eq: "Functional Trainer, Short Bar", tip: "Keep your chest proud and drive through your heels. Don't let the cable pull you forward.", rep_scheme: { Ali: "4 sets x 8-10 reps", Kristen: "3 sets x 12 reps", Kam: "3 sets x 10 reps (Focus on depth)" } },
+        { id: "e2", name: "Cable RDL", cat: "Lower", target: ["Ali", "Kristen"], eq: "Functional Trainer, Straight Bar", tip: "Imagine closing a car door with your glutes. Keep a slight bend in the knee.", rep_scheme: { Ali: "4 sets x 8 reps", Kristen: "3 sets x 12-15 reps" }, focus: "Glutes" },
+        { id: "e3", name: "Cable Glute Kickbacks", cat: "Lower", target: ["Kristen"], eq: "Low Pulley, Ankle Strap", tip: "Squeeze the glute at the top for a full second. Don't swing your lower back.", rep_scheme: { Kristen: "3 sets x 15 reps (each leg)" }, focus: "Glutes" },
+        { id: "e4", name: "BOSU Balance Squats", cat: "Lower", target: ["Kam", "Ashton"], eq: "BOSU Ball (Dome Up)", tip: "Arms out for balance. Go slow and steady.", rep_scheme: { Kam: "3 sets x 10 reps", Ashton: "3 sets x 8 reps (Make it a game!)" } },
+        { id: "e5", name: "Seated Cable Row", cat: "Pull", target: ["Ali", "Kristen", "Kam"], eq: "Mid Pulley, V-Bar, Bench", tip: "Pull your shoulder blades together BEFORE your elbows pull back.", rep_scheme: { Ali: "4 sets x 10 reps", Kristen: "3 sets x 15 reps", Kam: "3 sets x 12 reps" }, focus: "Posture" },
+        { id: "e6", name: "Cable Face Pulls", cat: "Pull", target: ["Ali", "Kristen"], eq: "High Pulley, Rope", tip: "Pull your hands apart as they approach your face. Excellent for posture.", rep_scheme: { Ali: "3 sets x 12 reps", Kristen: "3 sets x 15 reps" }, focus: "Posture" },
+        { id: "e7", name: "Flat Bench Cable Press", cat: "Push", target: ["Ali", "Kam"], eq: "Bench, D-Handles, Low Pulleys", tip: "Keep your shoulders pinned to the bench. Press up and slightly in.", rep_scheme: { Ali: "4 sets x 8-10 reps", Kam: "3 sets x 12 reps (Light weight)" } },
+        { id: "e8", name: "Dumbbell Lateral Raises", cat: "Push", target: ["Ali", "Kristen"], eq: "Light Dumbbells (3-7.5 lbs)", tip: "Raise arms like pouring water from a pitcher at the top.", rep_scheme: { Ali: "3 sets x 15 reps", Kristen: "3 sets x 15-20 reps" }, focus: "Posture" },
+        { id: "e9", name: "Anti-Rotation Pallof Press", cat: "Core", target: ["Ali", "Kristen"], eq: "Mid Pulley, Single D-Handle", tip: "Don't let the machine twist your torso. Hold for 2 seconds when pressed out.", rep_scheme: { Ali: "3 sets x 10 reps (each side)", Kristen: "3 sets x 10 reps (each side)" } },
+        { id: "e10", name: "BOSU Plank Hold", cat: "Core", target: ["Ali", "Kristen", "Kam", "Ashton"], eq: "BOSU Ball", tip: "Keep your back flat like a table. Squeeze your core tight.", rep_scheme: { Ali: "3 sets x 60 sec", Kristen: "3 sets x 45 sec", Kam: "3 sets x 30 sec", Ashton: "3 sets x 15 sec" } },
+        { id: "e11", name: "Shadow Boxing", cat: "Coordination", target: ["Ashton"], eq: "3 lb Dumbbells", tip: "Keep hands up by your face. Punch straight out! Super speed!", rep_scheme: { Ashton: "3 sets x 30 seconds" } }
+    ];
+
+    // --- SAFE STORAGE (Prevents crashes in previewers) ---
+    function getStoredItem(key) {
+        try { return localStorage.getItem(key); } 
+        catch (e) { console.warn("Storage blocked by previewer."); return null; }
+    }
+    
+    function setStoredItem(key, value) {
+        try { localStorage.setItem(key, value); } 
+        catch (e) { console.warn("Storage blocked by previewer."); }
+    }
+
+    // --- APP STATE ---
+    let currentUser = "";
+    let currentFocus = "";
+    let timerInterval;
+    let timeLeft = 0;
+
+    // --- LOGIC ---
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function goHome() {
+        showScreen('screen-profiles');
+        document.getElementById('timer-bar').classList.remove('visible');
+        clearInterval(timerInterval);
+    }
+
+    function selectUser(user) {
+        currentUser = user;
+        
+        // Smart Logic: Check for Kam's consecutive days
+        if (user === 'Kam') {
+            const lastWorkout = getStoredItem('kam_last_workout');
+            const today = new Date().toDateString();
+            if (lastWorkout === today) {
+                showScreen('screen-lock');
+                return;
+            }
+        }
+
+        if (user === 'Kristen') {
+            showScreen('screen-focus');
+        } else {
+            startWorkout(user, 'Standard');
+        }
+    }
+
+    function startWorkout(user, focus) {
+        currentFocus = focus;
+        document.getElementById('workout-title').innerText = `${user}'s Session`;
+        
+        // Auto-regulation text
+        let subtitle = "Smart auto-regulated session";
+        if (user === 'Ashton') subtitle = "Active Play & Coordination!";
+        if (user === 'Kam') subtitle = "Foundational Mechanics";
+        if (user === 'Kristen') subtitle = `Focus: ${focus === 'Standard' ? 'Full Body' : focus}`;
+        document.getElementById('workout-subtitle').innerText = subtitle;
+
+        renderExercises();
+        showScreen('screen-workout');
+    }
+
+    function renderExercises() {
+        const list = document.getElementById('exercise-list');
+        list.innerHTML = "";
+
+        // Filter based on target user
+        let userExercises = exercises.filter(ex => ex.target.includes(currentUser));
+
+        // Apply Kristen's Focus Sorting Logic
+        if (currentUser === 'Kristen' && currentFocus !== 'Standard') {
+            userExercises.sort((a, b) => {
+                if (a.focus === currentFocus && b.focus !== currentFocus) return -1;
+                if (b.focus === currentFocus && a.focus !== currentFocus) return 1;
+                return 0;
+            });
+        }
+
+        // Apply Ali's Fatigue Logic
+        let reduceSets = false;
+        if (currentUser === 'Ali') {
+             const streak = parseInt(getStoredItem('ali_streak') || 0);
+             if (streak >= 3) {
+                 reduceSets = true;
+                 document.getElementById('workout-subtitle').innerText = "High frequency detected: Volume reduced by 1 set.";
+             }
+        }
+
+        userExercises.forEach(ex => {
+            const numSetsMatch = ex.rep_scheme[currentUser].match(/^(\d+)/);
+            let numSets = numSetsMatch ? parseInt(numSetsMatch[1]) : 3;
+            
+            if (reduceSets && numSets > 2) numSets -= 1; // Auto-regulate volume
+
+            let setButtonsHtml = "";
+            for (let i = 1; i <= numSets; i++) {
+                setButtonsHtml += `<button class="set-btn" onclick="logSet(this)">Set ${i}</button>`;
+            }
+
+            const html = `
+                <div class="exercise-card">
+                    <div class="ex-title">
+                        <h3>${ex.name}</h3>
+                        <span class="ex-tag">${ex.cat}</span>
+                    </div>
+                    <div class="ex-details">
+                        <span><strong>Equipment:</strong> ${ex.eq}</span>
+                        <span><strong>Target:</strong> ${ex.rep_scheme[currentUser]}</span>
+                    </div>
+                    <div class="expert-tip">💡 <strong>Pro Tip:</strong> ${ex.tip}</div>
+                    <div class="sets-container">
+                        ${setButtonsHtml}
+                    </div>
+                </div>
+            `;
+            list.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    function logSet(btn) {
+        if (btn.classList.contains('completed')) {
+            btn.classList.remove('completed');
+        } else {
+            btn.classList.add('completed');
+            startRestTimer();
+        }
+    }
+
+    // --- REST TIMER ---
+    function startRestTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 60; // 60 seconds rest
+        document.getElementById('timer-bar').classList.add('visible');
+        updateTimerDisplay();
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer-bar').classList.remove('visible');
+                // Haptic feedback if supported
+                if("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        let m = Math.floor(timeLeft / 60);
+        let s = timeLeft % 60;
+        document.getElementById('timer-text').innerText = `0${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function skipTimer() {
+        clearInterval(timerInterval);
+        document.getElementById('timer-bar').classList.remove('visible');
+    }
+
+    // --- FINISH WORKOUT ---
+    function finishWorkout() {
+        const today = new Date().toDateString();
+        
+        if (currentUser === 'Kam') {
+            setStoredItem('kam_last_workout', today);
+        } else if (currentUser === 'Ali') {
+            let lastWorkout = getStoredItem('ali_last_workout');
+            let streak = parseInt(getStoredItem('ali_streak') || 0);
+            
+            if (lastWorkout === today) {
+                // already logged today
+            } else if (lastWorkout === new Date(Date.now() - 86400000).toDateString()) {
+                // logged yesterday
+                setStoredItem('ali_streak', streak + 1);
+            } else {
+                // skipped a day
+                setStoredItem('ali_streak', 1);
+            }
+            setStoredItem('ali_last_workout', today);
+        }
+
+        alert(`Great job ${currentUser}! Workout saved to device.`);
+        goHome();
+    }
+</script>
+</body>
+</html>
