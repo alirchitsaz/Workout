@@ -57,24 +57,26 @@
         .menu-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
         .menu-meta { font-size: 14px; color: var(--text-muted); font-weight: 500; }
 
-        /* EXERCISE CARDS WITH VISUALS */
+        /* EXERCISE CARDS WITH EMBEDDED VECTOR VISUALS */
         .exercise-card { background: var(--surface-solid); border-radius: 24px; margin-bottom: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-        .ex-header { padding: 20px; background: rgba(255,255,255,0.02); }
-        .ex-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
-        .ex-target { font-size: 12px; font-weight: 700; color: var(--current-accent); text-transform: uppercase; letter-spacing: 1px; }
+        .ex-header { padding: 20px 20px 16px 20px; background: rgba(255,255,255,0.02); }
+        .ex-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+        .ex-target { font-size: 12px; font-weight: 800; color: var(--current-accent); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Media Placeholder */
-        .visual-hero { width: 100%; height: 180px; background: #111; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--text-muted); font-size: 12px; border-bottom: 1px solid var(--border); }
-        .visual-hero svg { width: 40px; height: 40px; margin-bottom: 8px; opacity: 0.5; }
+        /* Custom Vector Diagram Module */
+        .vector-dashboard { display: grid; grid-template-columns: 1fr 1fr; background: var(--border); gap: 1px; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
+        .vector-cell { background: var(--surface-solid); padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+        .vector-icon-container { width: 64px; height: 64px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
+        .vector-icon-container svg { width: 40px; height: 40px; fill: none; stroke: var(--current-accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .vector-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .vector-value { font-size: 15px; font-weight: 800; color: #FFF; line-height: 1.3; }
 
-        /* Visual Setup Grid */
-        .visual-setup-grid { display: grid; grid-template-columns: 1fr 1fr; background: var(--border); gap: 1px; border-bottom: 1px solid var(--border); }
-        .vs-cell { background: var(--surface-solid); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .vs-header { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .vs-body { display: flex; align-items: center; gap: 12px; }
-        .vs-icon-box { width: 44px; height: 44px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
-        .vs-icon-box svg { width: 24px; height: 24px; fill: none; stroke: var(--current-accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .vs-text { font-size: 14px; font-weight: 700; color: #FFF; line-height: 1.2; }
+        /* Precise Matrix Row */
+        .matrix-row { display: flex; background: var(--surface-solid); border-bottom: 1px solid var(--border); }
+        .matrix-item { flex: 1; padding: 12px 16px; text-align: center; border-right: 1px solid var(--border); }
+        .matrix-item:last-child { border-right: none; }
+        .matrix-label { font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px; display: block; }
+        .matrix-val { font-size: 16px; font-weight: 800; color: #FFF; }
 
         /* Coach Toggle */
         .coach-toggle { width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; color: var(--text-main); cursor: pointer; }
@@ -189,66 +191,56 @@
 
 <script>
     /* ========================================================================
-       SVG ICON LIBRARY FOR VISUAL ATTACHMENTS
+       PREMIUM VECTOR ICON LIBRARY
        ======================================================================== */
-    const icons = {
+    const vectors = {
         d_handle: `<path d="M7 4v16M7 4c6 0 10 3.5 10 8s-4 8-10 8" />`,
         v_bar: `<path d="M4 6l8 12 8-12" stroke-width="3" />`,
         rope: `<path d="M12 4v12" stroke-dasharray="2 2" stroke-width="4"/><circle cx="12" cy="18" r="3" fill="var(--current-accent)"/><circle cx="12" cy="4" r="3" fill="var(--current-accent)"/>`,
         straight_bar: `<path d="M3 12h18" stroke-width="4"/><rect x="5" y="10" width="3" height="4" fill="var(--current-accent)"/><rect x="16" y="10" width="3" height="4" fill="var(--current-accent)"/>`,
         dumbbells: `<rect x="4" y="8" width="4" height="8"/><rect x="16" y="8" width="4" height="8"/><path d="M8 12h8" stroke-width="3"/>`,
         ankle_strap: `<rect x="6" y="8" width="12" height="8" rx="2" stroke-width="2"/><circle cx="12" cy="12" r="1.5" fill="var(--current-accent)"/>`,
-        bosu: `<path d="M4 16h16" stroke-width="2"/><path d="M6 16c0-4 3-7 6-7s6 3 6 7" stroke-width="2"/>`,
-        machine: `<rect x="8" y="4" width="8" height="16" rx="1"/><circle cx="12" cy="10" r="2" fill="var(--current-accent)"/>`
+        bench: `<path d="M4 10h16M6 10v10M18 10v10" stroke-width="3"/>`,
+        floor: `<path d="M2 18h20M7 14l5-4 5 4" stroke-width="2"/>`
     };
 
     /* ========================================================================
-       DATABASE: Exercises with Visual Keys
+       DATABASE: Exercises with Hardcoded Visuals & Coordinates
        ======================================================================== */
     const db = {
         cable_chest_press: {
             name: "Flat Bench Cable Press", target: "Chest & Triceps",
-            setup: { 
-                icon: icons.d_handle, attName: "2x D-Handles", 
-                machineIcon: icons.machine, macName: "Track: 8 (Low)<br>Dial: 4 (Wide)",
-                spc: "Bench Centered" 
-            },
+            icon: vectors.d_handle, attName: "2x D-Handles",
+            spaceIcon: vectors.bench, spcName: "Bench Centered",
+            h: "8", a: "4",
             steps: ["Center the bench perfectly between the pulleys.", "Lie flat, pull handles to armpits before pressing.", "Press straight up and together over your chest."], tip: "Keep your shoulders pinned to the pad."
         },
         cable_row: {
             name: "Seated Cable Row", target: "Back & Biceps",
-            setup: { 
-                icon: icons.v_bar, attName: "V-Bar", 
-                machineIcon: icons.machine, macName: "Track: 6 (Mid)<br>Dial: 1 (Narrow)",
-                spc: "Floor (Remove Bench)" 
-            },
+            icon: vectors.v_bar, attName: "V-Bar",
+            spaceIcon: vectors.floor, spcName: "Sit on Floor",
+            h: "6", a: "1",
             steps: ["Sit on floor facing machine, feet braced.", "Keep your back perfectly straight.", "Pull V-bar to belly button."], tip: "Squeeze shoulder blades BEFORE pulling."
         },
         cable_squat: {
             name: "Cable Goblet Squat", target: "Quads & Glutes",
-            setup: { 
-                icon: icons.straight_bar, attName: "Straight Bar", 
-                machineIcon: icons.machine, macName: "Track: 8 (Low)<br>Dial: 1 (Narrow)",
-                spc: "Open Floor" 
-            },
+            icon: vectors.straight_bar, attName: "Straight Bar",
+            spaceIcon: vectors.floor, spcName: "Open Floor",
+            h: "8", a: "1",
             steps: ["Attach bar to low pulley.", "Hold bar tight against collarbone.", "Squat down, pushing hips back."], tip: "Drive through heels."
         },
         face_pull: {
             name: "Cable Face Pulls", target: "Upper Back & Posture",
-            setup: { 
-                icon: icons.rope, attName: "Tricep Rope", 
-                machineIcon: icons.machine, macName: "Track: 2 (High)<br>Dial: 1 (Narrow)",
-                spc: "Open Floor" 
-            },
+            icon: vectors.rope, attName: "Tricep Rope",
+            spaceIcon: vectors.floor, spcName: "Open Floor",
+            h: "2", a: "1",
             steps: ["Grab rope with thumbs pointing backward.", "Pull hands apart towards ears, flaring elbows."], tip: "Focus intensely on the squeeze."
         },
         db_lateral_raise: {
             name: "Dumbbell Lateral Raises", target: "Shoulders",
-            setup: { 
-                icon: icons.dumbbells, attName: "Light Dumbbells", 
-                machineIcon: icons.machine, macName: "Free Weights",
-                spc: "Open Floor" 
-            },
+            icon: vectors.dumbbells, attName: "Light Dumbbells",
+            spaceIcon: vectors.floor, spcName: "Open Floor",
+            h: "-", a: "-",
             steps: ["Stand tall holding light dumbbells.", "Raise arms out to sides until parallel with floor."], tip: "Lead with elbows."
         }
     };
@@ -379,34 +371,33 @@
 
         const card = `
         <div class="exercise-card">
-            <div class="visual-hero">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <span>[Placeholder: Tap to add form photo]</span>
-            </div>
             <div class="ex-header">
                 <div class="ex-title">${ex.name}</div>
                 <div class="ex-target">${ex.target}</div>
             </div>
             
-            <div class="visual-setup-grid">
-                <div class="vs-cell">
-                    <div class="vs-header">ATTACHMENT</div>
-                    <div class="vs-body">
-                        <div class="vs-icon-box"><svg viewBox="0 0 24 24">${ex.setup.icon}</svg></div>
-                        <div class="vs-text">${ex.setup.attName}</div>
-                    </div>
+            <div class="vector-dashboard">
+                <div class="vector-cell">
+                    <div class="vector-label">ATTACHMENT</div>
+                    <div class="vector-icon-container"><svg viewBox="0 0 24 24">${ex.icon}</svg></div>
+                    <div class="vector-value">${ex.attName}</div>
                 </div>
-                <div class="vs-cell">
-                    <div class="vs-header">MACHINE SETTINGS</div>
-                    <div class="vs-body">
-                        <div class="vs-icon-box"><svg viewBox="0 0 24 24">${ex.setup.machineIcon}</svg></div>
-                        <div class="vs-text">${ex.setup.macName}</div>
-                    </div>
+                <div class="vector-cell">
+                    <div class="vector-label">SPACE / BENCH</div>
+                    <div class="vector-icon-container"><svg viewBox="0 0 24 24">${ex.spaceIcon}</svg></div>
+                    <div class="vector-value">${ex.spcName}</div>
                 </div>
             </div>
-            
-            <div style="padding: 12px 20px; background: var(--border); font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                🪑 SPACE: <span style="color: #fff;">${ex.setup.spc}</span>
+
+            <div class="matrix-row">
+                <div class="matrix-item">
+                    <span class="matrix-label">TRACK HOLE</span>
+                    <span class="matrix-val">${ex.h}</span>
+                </div>
+                <div class="matrix-item">
+                    <span class="matrix-label">ARM DIAL</span>
+                    <span class="matrix-val">${ex.a}</span>
+                </div>
             </div>
 
             <button class="coach-toggle" onclick="toggleCoach('coach-${domIdx}')">
