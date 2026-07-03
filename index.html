@@ -5,432 +5,408 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Family Fit Coach</title>
+    <title>Family Fit Pro</title>
     <style>
         :root {
-            --bg-base: #09090b;
-            --bg-card: #18181b;
-            --bg-hover: #27272a;
-            --text-main: #fafa;
+            --bg-base: #000000;
+            --bg-surface: #151517;
+            --bg-elevated: #222225;
+            --text-main: #ffffff;
             --text-sub: #a1a1aa;
-            --accent-brand: #3b82f6;
-            --accent-coach: #f59e0b;
-            --success: #10b981;
-            --border: #3f3f46;
+            --ali: #3b82f6;
+            --kristen: #c084fc;
+            --kam: #fb923c;
+            --ashton: #10b981;
+            --border: #333336;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
         body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            display: flex; justify-content: center;
-            -webkit-user-select: none; user-select: none;
+            background-color: var(--bg-base); color: var(--text-main);
+            display: flex; justify-content: center; -webkit-user-select: none; user-select: none;
         }
 
-        #app-container {
-            width: 100%; max-width: 480px; min-height: 100vh;
-            background-color: var(--bg-base); position: relative;
-            padding-bottom: 120px;
-        }
+        #app { width: 100%; max-width: 500px; min-height: 100vh; position: relative; padding-bottom: 120px; }
 
-        /* Nav */
+        /* Navigation */
         header {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 20px; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(12px);
+            padding: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border);
         }
-        .header-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px;}
-        .back-btn { background: none; border: none; color: var(--accent-brand); font-size: 16px; font-weight: 600; cursor: pointer; display: none; }
+        .header-title { font-size: 20px; font-weight: 800; }
+        .back-btn { background: none; border: none; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; display: none; }
 
         /* Screens */
-        .screen { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .screen { display: none; padding: 20px; animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Titles */
-        .page-title { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
-        .page-sub { color: var(--text-sub); font-size: 16px; margin-bottom: 30px; line-height: 1.4; }
+        /* Typography */
+        h1 { font-size: 32px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .subtitle { color: var(--text-sub); font-size: 15px; margin-bottom: 30px; }
 
-        /* Menu */
-        .menu-grid { display: grid; gap: 12px; }
-        .menu-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 20px; cursor: pointer;
+        /* Profile Grid */
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .profile-card {
+            background: var(--bg-surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 24px 16px; text-align: center; cursor: pointer; transition: 0.1s;
+        }
+        .profile-card:active { transform: scale(0.96); }
+        .avatar { 
+            width: 70px; height: 70px; border-radius: 35px; margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 30px;
+            background: var(--bg-elevated);
+        }
+        .profile-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .profile-desc { font-size: 12px; color: var(--text-sub); }
+
+        /* Routine Menu */
+        .routine-list { display: flex; flex-direction: column; gap: 12px; }
+        .routine-card {
+            background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+        }
+        .routine-card:active { background: var(--bg-elevated); }
+        .routine-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .routine-meta { font-size: 13px; color: var(--text-sub); }
+
+        /* --- VISUAL SETUP DIAGRAM --- */
+        .visual-diagram {
             display: flex; justify-content: space-between; align-items: center;
-            transition: 0.2s;
+            background: #111; border-radius: 12px; padding: 20px; margin-bottom: 16px;
+            border: 1px solid #222; position: relative;
         }
-        .menu-card:active { transform: scale(0.97); background: var(--bg-hover); }
-        .menu-card .title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-        .menu-card .desc { font-size: 14px; color: var(--text-sub); }
-
-        /* ---- THE MEAT: EXERCISE CARDS ---- */
-        .exercise-card {
-            background: var(--bg-card); border-radius: 20px;
-            margin-bottom: 24px; border: 1px solid var(--border);
-            overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        .pulley-column { width: 12px; height: 100px; background: #333; border-radius: 6px; position: relative; }
+        .pulley-knob {
+            width: 24px; height: 24px; background: #fff; border-radius: 12px;
+            position: absolute; left: -6px; border: 4px solid var(--ali);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
-
-        .ex-header { padding: 16px 20px; border-bottom: 1px solid var(--border); background: #1f1f22; }
-        .ex-name { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
-        .ex-target { font-size: 13px; color: var(--accent-brand); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* 1. Trainer Setup Area */
-        .setup-zone {
-            padding: 16px 20px; background: rgba(245, 158, 11, 0.05);
-            border-bottom: 1px solid var(--border);
+        .bench-icon {
+            width: 80px; height: 30px; background: #222; border: 2px dashed #444;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: #666;
         }
-        .setup-title { font-size: 12px; color: var(--accent-coach); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-        .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .setup-item { display: flex; flex-direction: column; gap: 4px; }
-        .setup-label { font-size: 11px; color: var(--text-sub); text-transform: uppercase; }
-        .setup-value { font-size: 14px; font-weight: 600; color: #fff; }
+        .bench-icon.active { background: #333; border: 2px solid #555; color: #fff; }
 
-        /* 2. Coaching Guide (Expandable) */
+        /* Exercise Cards */
+        .exercise-card { background: var(--bg-surface); border-radius: 20px; margin-bottom: 24px; border: 1px solid var(--border); overflow: hidden; }
+        .ex-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .ex-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .ex-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { background: var(--bg-elevated); color: #ddd; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+
+        /* Coaching Drops */
         .coach-toggle {
-            width: 100%; background: none; border: none; padding: 16px 20px;
-            text-align: left; font-size: 15px; font-weight: 600; color: var(--text-main);
-            display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+            width: 100%; background: none; border: none; padding: 16px 20px; text-align: left;
+            font-size: 14px; font-weight: 700; color: #fff; display: flex; justify-content: space-between; cursor: pointer;
         }
-        .coach-toggle:active { background: var(--bg-hover); }
-        .coach-content {
-            display: none; padding: 0 20px 20px 20px; border-bottom: 1px solid var(--border);
-        }
-        .coach-content.active { display: block; animation: fadeIn 0.2s; }
-        
-        /* Media Placeholder */
-        .media-box {
-            width: 100%; height: 160px; background: #27272a; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 16px; color: var(--text-sub); font-size: 14px; font-weight: 500;
-            border: 1px dashed var(--border);
-        }
-        
-        .step-list { padding-left: 20px; color: #e4e4e7; font-size: 14px; line-height: 1.6; margin-bottom: 16px; }
-        .step-list li { margin-bottom: 8px; }
-        .pro-tip { background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--accent-brand); padding: 12px; border-radius: 0 8px 8px 0; font-size: 13px; color: #93c5fd; line-height: 1.5; }
+        .coach-content { display: none; padding: 0 20px 20px 20px; font-size: 14px; line-height: 1.5; color: #ccc; }
+        .coach-content.active { display: block; }
+        .coach-content ul { padding-left: 20px; margin-bottom: 12px; }
+        .coach-content li { margin-bottom: 8px; }
 
-        /* 3. Tracking Table */
-        .tracker-zone { padding: 12px 20px 20px 20px; }
-        .log-table { width: 100%; border-collapse: collapse; }
-        .log-table th { text-align: center; color: var(--text-sub); font-size: 11px; font-weight: 700; padding: 10px 0; text-transform: uppercase; }
-        .log-table td { padding: 6px 0; text-align: center; vertical-align: middle; }
+        /* Tracker Table */
+        .tracker-zone { padding: 0 20px 20px 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: center; color: var(--text-sub); font-size: 11px; padding: 10px 0; text-transform: uppercase; }
+        td { padding: 6px 0; text-align: center; }
+        .set-num { background: var(--bg-elevated); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-weight: 700; font-size: 13px;}
+        .log-input { background: var(--bg-elevated); border: 1px solid var(--border); color: #fff; width: 60px; padding: 8px; border-radius: 8px; text-align: center; font-size: 15px; font-weight: 700; }
+        .check-btn { background: var(--bg-elevated); border: none; width: 44px; height: 36px; border-radius: 8px; margin: 0 auto; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         
-        .set-badge {
-            background: var(--bg-hover); color: var(--text-sub);
-            width: 30px; height: 30px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto; font-size: 14px; font-weight: 700;
-        }
+        .row-done .check-btn { background: var(--ali); }
+        .row-done .log-input { background: transparent; border-color: transparent; color: var(--ali); }
         
-        .log-input {
-            background: var(--bg-hover); border: 1px solid var(--border); color: var(--text-main);
-            width: 65px; padding: 10px 4px; border-radius: 8px; text-align: center;
-            font-size: 16px; font-weight: 700;
-        }
-        .log-input:focus { outline: 2px solid var(--accent-brand); border-color: transparent; }
-        
-        .check-btn {
-            background: var(--bg-hover); border: none; border-radius: 10px;
-            width: 48px; height: 40px; display: flex; align-items: center; justify-content: center;
-            margin: 0 auto; cursor: pointer; transition: 0.2s;
-        }
-        .check-btn svg { fill: var(--text-sub); width: 20px; height: 20px; }
-        
-        .row-done .check-btn { background: var(--success); }
-        .row-done .check-btn svg { fill: #000; }
-        .row-done .log-input { background: transparent; border-color: transparent; color: var(--success); }
-        .row-done .set-badge { background: var(--success); color: #000; }
+        .finish-btn { width: 100%; background: #fff; color: #000; border: none; padding: 18px; border-radius: 16px; font-size: 17px; font-weight: 800; cursor: pointer; margin-top: 10px; }
 
-        /* Timer Bar */
+        /* Timer */
         #timer-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(24, 24, 27, 0.95); backdrop-filter: blur(15px);
-            padding: 16px 20px; padding-bottom: env(safe-area-inset-bottom, 20px);
-            border-top: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            z-index: 1000;
+            position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,22,0.95); backdrop-filter: blur(10px);
+            padding: 16px 20px; padding-bottom: env(safe-area-inset-bottom, 20px); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; transform: translateY(100%); transition: 0.3s; z-index: 1000;
         }
         #timer-bar.active { transform: translateY(0); }
-        .timer-info span { display: block; color: var(--text-sub); font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;}
-        .timer-info div { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent-brand); }
-        .skip-btn { background: var(--bg-hover); color: var(--text-main); border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
-
-        .finish-btn {
-            width: 100%; background: var(--accent-brand); color: white; border: none;
-            padding: 18px; border-radius: 16px; font-size: 18px; font-weight: 800; margin-top: 10px; cursor: pointer;
-        }
+        .timer-val { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
     </style>
 </head>
 <body>
 
-<div id="app-container">
-    
+<div id="app">
     <header>
-        <button class="back-btn" id="btn-back" onclick="navigateBack()">❮ Back</button>
-        <div class="header-title">Family Fit Coach</div>
+        <button class="back-btn" id="btn-back" onclick="navBack()">❮ Back</button>
+        <div class="header-title">Family Fit</div>
         <div style="width: 50px;"></div>
     </header>
 
-    <!-- SCREEN 1: User Select -->
+    <!-- SCREEN 1: THE WHOLE FAMILY -->
     <div id="screen-users" class="screen active">
-        <h1 class="page-title">Who's lifting?</h1>
-        <p class="page-sub">Select your profile to load personalized coaching and routines.</p>
+        <h1>Who's lifting?</h1>
+        <p class="subtitle">Select your profile to load your specific programs.</p>
         
-        <div class="menu-grid">
-            <div class="menu-card" onclick="openDashboard('Ali')">
-                <div><div class="title">Ali</div><div class="desc">Strength & Body Recomp</div></div>
-                <div style="font-size: 28px;">💪</div>
+        <div class="profile-grid">
+            <div class="profile-card" onclick="openUser('Ali', 'var(--ali)')">
+                <div class="avatar" style="color: var(--ali);">💪</div>
+                <div class="profile-name">Ali</div>
+                <div class="profile-desc">Strength & Recomp</div>
             </div>
-            <div class="menu-card" onclick="openDashboard('Kristen')">
-                <div><div class="title">Kristen</div><div class="desc">Pilates Hybrid Target</div></div>
-                <div style="font-size: 28px;">🧘‍♀️</div>
+            <div class="profile-card" onclick="openUser('Kristen', 'var(--kristen)')">
+                <div class="avatar" style="color: var(--kristen);">🧘‍♀️</div>
+                <div class="profile-name">Kristen</div>
+                <div class="profile-desc">Pilates & Toning</div>
             </div>
-            <div class="menu-card" onclick="openDashboard('Kam')">
-                <div><div class="title">Kam (13)</div><div class="desc">Foundational Mechanics</div></div>
-                <div style="font-size: 28px;">⚡️</div>
+            <div class="profile-card" onclick="openUser('Kam', 'var(--kam)')">
+                <div class="avatar" style="color: var(--kam);">⚡️</div>
+                <div class="profile-name">Kam</div>
+                <div class="profile-desc">Foundations (13)</div>
             </div>
-        </div>
-    </div>
-
-    <!-- SCREEN 2: Dashboard -->
-    <div id="screen-dashboard" class="screen">
-        <h1 class="page-title" id="dash-name">Hi Ali</h1>
-        <p class="page-sub">Select a guided session for today.</p>
-
-        <div class="menu-grid">
-            <div class="menu-card" onclick="startWorkout('Full Body Essentials')">
-                <div><div class="title">Full Body Essentials</div><div class="desc">The Master Routine • ~35 mins</div></div>
-                <div style="color: var(--accent-brand);">❯</div>
-            </div>
-            <div class="menu-card" onclick="startWorkout('Upper Body Pump')">
-                <div><div class="title">Upper Body Pump</div><div class="desc">Chest & Back Focus • ~30 mins</div></div>
-                <div style="color: var(--accent-brand);">❯</div>
+            <div class="profile-card" onclick="openUser('Ashton', 'var(--ashton)')">
+                <div class="avatar" style="color: var(--ashton);">🏃‍♂️</div>
+                <div class="profile-name">Ashton</div>
+                <div class="profile-desc">Active Play (8)</div>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN 3: Active Workout -->
+    <!-- SCREEN 2: DYNAMIC DASHBOARD -->
+    <div id="screen-dash" class="screen">
+        <h1 id="dash-title">Hi</h1>
+        <p class="subtitle">Select your session for today.</p>
+        <div class="routine-list" id="routine-list">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- SCREEN 3: WORKOUT ENGINE -->
     <div id="screen-workout" class="screen">
-        <h2 style="font-size: 26px; font-weight: 800; margin-bottom: 24px;" id="workout-title">Workout</h2>
-        
+        <h1 id="workout-title" style="font-size: 24px; margin-bottom: 24px;">Workout</h1>
         <div id="workout-feed">
-            <!-- JavaScript Injects Guided Cards Here -->
+            <!-- Injected via JS -->
         </div>
-
         <button class="finish-btn" onclick="finishWorkout()">Complete Session</button>
     </div>
 
-    <!-- Rest Timer -->
+    <!-- REST TIMER -->
     <div id="timer-bar">
-        <div class="timer-info">
-            <span>Rest & Recover</span>
-            <div id="timer-display">01:00</div>
+        <div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase;">Rest Timer</div>
+            <div class="timer-val" id="timer-display">01:00</div>
         </div>
-        <button class="skip-btn" onclick="stopTimer()">Skip</button>
+        <button onclick="stopTimer()" style="background: var(--bg-elevated); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700;">Skip</button>
     </div>
-
 </div>
 
 <script>
-    // --- THE COMPREHENSIVE COACHING DATABASE ---
-    const db = [
-        { 
-            name: "Cable Goblet Squat", target: "Lower Body • Quads & Glutes",
-            setup: {
-                pulley: "Lowest Setting (Level 1-3)",
-                attach: "Short Straight Bar",
-                bench: "Move completely out of the way"
-            },
-            coach: {
-                media: "📷 [Placeholder: Video of Squat Form]",
-                steps: [
-                    "Attach the short straight bar to both low pulleys (or single if preferred).",
-                    "Hold the bar tight against your collarbone with elbows tucked in.",
-                    "Set feet shoulder-width apart, toes pointed slightly out.",
-                    "Push your hips back and down like sitting in a chair, keeping your chest tall."
-                ],
-                tip: "Do NOT let the weight stack pull you forward on your toes. Drive up through your heels."
-            },
-            sets: 3, reps: 10
+    // --- THE MASTER EXERCISE DATABASE ---
+    const exerciseDB = {
+        cable_chest_press: {
+            name: "Flat Bench Cable Press", target: "Chest & Triceps",
+            attach: "D-Handles", pulleyPos: "10%", benchActive: true, benchText: "Flat Bench Center",
+            steps: ["Center the bench perfectly between the pulleys.", "Lie flat, grab handles with overhand grip.", "Press straight up and together over your chest."],
+            tip: "Keep your shoulders pinned to the bench to isolate the pecs."
         },
-        { 
-            name: "Flat Bench Cable Press", target: "Upper Push • Chest",
-            setup: {
-                pulley: "Bench Height (Level 6-8)",
-                attach: "2x D-Handles",
-                bench: "Dead center, completely flat"
-            },
-            coach: {
-                media: "📷 [Placeholder: Video of Bench Setup]",
-                steps: [
-                    "Ensure the flat bench is perfectly centered between the arms.",
-                    "Lie back and grab the D-handles with an overhand grip.",
-                    "Pinch your shoulder blades firmly against the pad.",
-                    "Press the cables straight up and together over your chest."
-                ],
-                tip: "Keep a slight arch in your lower back. Your shoulders should never leave the bench during the press."
-            },
-            sets: 3, reps: 12
+        cable_row: {
+            name: "Seated Cable Row", target: "Back & Biceps",
+            attach: "V-Bar", pulleyPos: "40%", benchActive: false, benchText: "Bench Away (Sit Floor)",
+            steps: ["Sit on the floor facing the machine, feet braced.", "Keep your back perfectly straight.", "Pull the V-bar to your belly button, driving elbows back."],
+            tip: "Squeeze your shoulder blades together BEFORE your arms pull."
         },
-        { 
-            name: "Seated Cable Row", target: "Upper Pull • Back",
-            setup: {
-                pulley: "Low-Mid (Level 4-5)",
-                attach: "V-Bar / Triangle Handle",
-                bench: "Pull bench back to use as a seat, or sit on floor"
-            },
-            coach: {
-                media: "📷 [Placeholder: Video of Row Form]",
-                steps: [
-                    "Sit facing the machine with knees slightly bent and feet braced.",
-                    "Lean forward slightly to stretch the lats, then sit up perfectly straight.",
-                    "Pull the V-bar to your belly button, driving your elbows straight back behind you."
-                ],
-                tip: "Think about crushing an orange between your shoulder blades at the end of the pull."
-            },
-            sets: 3, reps: 12
+        goblet_squat: {
+            name: "Cable Goblet Squat", target: "Quads & Glutes",
+            attach: "Short Straight Bar", pulleyPos: "90%", benchActive: false, benchText: "Bench Away",
+            steps: ["Attach bar to low pulley. Stand facing machine.", "Hold bar at chest level.", "Squat down, pushing hips back and keeping chest tall."],
+            tip: "Don't let the cable pull you onto your toes. Drive through heels."
+        },
+        glute_kickback: {
+            name: "Cable Glute Kickbacks", target: "Glutes & Hamstrings",
+            attach: "Ankle Strap", pulleyPos: "90%", benchActive: false, benchText: "Bench Away",
+            steps: ["Attach strap to ankle. Face machine and hold frame.", "Kick leg straight back, squeezing glute at the top.", "Return slowly to start position."],
+            tip: "Do not swing your lower back. The movement comes entirely from the hip."
+        },
+        face_pull: {
+            name: "Cable Face Pulls", target: "Upper Back & Posture",
+            attach: "Tricep Rope", pulleyPos: "15%", benchActive: false, benchText: "Bench Away",
+            steps: ["Set pulleys to upper chest height.", "Grab rope with thumbs pointing back.", "Pull hands apart towards your ears."],
+            tip: "Imagine trying to win a tug-of-war using only your upper back muscles."
+        },
+        bosu_squat: {
+            name: "BOSU Balance Squats", target: "Legs & Core (Agility)",
+            attach: "BOSU Ball", pulleyPos: "50%", benchActive: false, benchText: "Use BOSU Ball",
+            steps: ["Place BOSU dome-side up.", "Carefully step onto the dome, feet wide.", "Perform slow, controlled squats."],
+            tip: "Keep your arms out in front of you for balance. Go slow!"
+        },
+        shadow_box: {
+            name: "Light Dumbbell Boxing", target: "Coordination & Cardio",
+            attach: "3lb Dumbbells", pulleyPos: "50%", benchActive: false, benchText: "Open Space",
+            steps: ["Hold light dumbbells at jaw level.", "Throw straight punches (1-2s).", "Keep core tight and feet bouncing."],
+            tip: "Focus on speed and snapping the punch back, not power."
         }
-    ];
+    };
 
-    let timerInt; let timeLeft = 0;
+    // --- USER ROUTINES (Dynamic Engine) ---
+    const users = {
+        'Ali': [
+            { title: 'Push Day (Chest/Triceps)', time: '40 Min', color: 'var(--ali)', exercises: [{id: 'cable_chest_press', sets: 4, reps: 10}] },
+            { title: 'Pull Day (Back/Biceps)', time: '40 Min', color: 'var(--ali)', exercises: [{id: 'cable_row', sets: 4, reps: 10}, {id: 'face_pull', sets: 3, reps: 15}] },
+            { title: 'Legs & Core', time: '35 Min', color: 'var(--ali)', exercises: [{id: 'goblet_squat', sets: 4, reps: 8}] }
+        ],
+        'Kristen': [
+            { title: 'Pilates Upper Body Sculpt', time: '30 Min', color: 'var(--kristen)', exercises: [{id: 'face_pull', sets: 3, reps: 15}, {id: 'cable_row', sets: 3, reps: 15}] },
+            { title: 'Lower Body & Glute Focus', time: '30 Min', color: 'var(--kristen)', exercises: [{id: 'glute_kickback', sets: 3, reps: 15}, {id: 'goblet_squat', sets: 3, reps: 12}] }
+        ],
+        'Kam': [
+            { title: 'Teen Foundations A', time: '25 Min', color: 'var(--kam)', exercises: [{id: 'goblet_squat', sets: 3, reps: 10}, {id: 'cable_chest_press', sets: 3, reps: 12}] },
+            { title: 'Teen Foundations B', time: '25 Min', color: 'var(--kam)', exercises: [{id: 'cable_row', sets: 3, reps: 12}, {id: 'face_pull', sets: 3, reps: 12}] }
+        ],
+        'Ashton': [
+            { title: 'Super Agility Games!', time: '15 Min', color: 'var(--ashton)', exercises: [{id: 'bosu_squat', sets: 3, reps: 8}, {id: 'shadow_box', sets: 3, reps: 20}] }
+        ]
+    };
 
-    function navigateBack() {
-        if (document.getElementById('screen-workout').classList.contains('active')) { showScreen('screen-dashboard'); } 
-        else { showScreen('screen-users'); document.getElementById('btn-back').style.display = 'none'; }
-        stopTimer();
-    }
+    let currentUser = ""; let timerInt; let timeLeft = 0; let activeColor = "";
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id !== 'screen-users') document.getElementById('btn-back').style.display = 'block';
+        document.getElementById('btn-back').style.display = (id === 'screen-users') ? 'none' : 'block';
     }
 
-    function openDashboard(name) {
-        document.getElementById('dash-name').innerText = `Hi, ${name}`;
-        showScreen('screen-dashboard');
+    function navBack() {
+        if (document.getElementById('screen-workout').classList.contains('active')) { showScreen('screen-dash'); } 
+        else { showScreen('screen-users'); }
+        stopTimer();
     }
 
-    function startWorkout(title) {
-        document.getElementById('workout-title').innerText = title;
-        renderWorkout();
-        showScreen('screen-workout');
+    function openUser(name, color) {
+        currentUser = name; activeColor = color;
+        document.getElementById('dash-title').innerText = `Hi ${name}`;
+        document.getElementById('dash-title').style.color = color;
+        
+        const list = document.getElementById('routine-list');
+        list.innerHTML = "";
+        
+        users[name].forEach((routine, index) => {
+            list.innerHTML += `
+            <div class="routine-card" onclick="startWorkout(${index})">
+                <div>
+                    <div class="routine-title">${routine.title}</div>
+                    <div class="routine-meta">Est. Time: ${routine.time}</div>
+                </div>
+                <div style="color: ${color}; font-weight: 800;">❯</div>
+            </div>`;
+        });
+        showScreen('screen-dash');
     }
 
-    function toggleCoach(id) {
-        const content = document.getElementById(id);
-        const icon = document.getElementById(id + '-icon');
-        if (content.classList.contains('active')) {
-            content.classList.remove('active');
-            icon.innerText = '+';
-        } else {
-            content.classList.add('active');
-            icon.innerText = '−';
-        }
-    }
+    function toggleCoach(id) { document.getElementById(id).classList.toggle('active'); }
 
-    function renderWorkout() {
+    function startWorkout(routineIndex) {
+        const routine = users[currentUser][routineIndex];
+        document.getElementById('workout-title').innerText = routine.title;
         const feed = document.getElementById('workout-feed');
-        feed.innerHTML = '';
+        feed.innerHTML = "";
 
-        db.forEach((ex, exIndex) => {
+        routine.exercises.forEach((exReq, i) => {
+            const exData = exerciseDB[exReq.id];
             
-            // Build Setup Grid
-            let setupHTML = `
-                <div class="setup-grid">
-                    <div class="setup-item"><span class="setup-label">↕️ Pulley Level</span><span class="setup-value">${ex.setup.pulley}</span></div>
-                    <div class="setup-item"><span class="setup-label">🔗 Attachment</span><span class="setup-value">${ex.setup.attach}</span></div>
-                    <div class="setup-item" style="grid-column: span 2;"><span class="setup-label">🪑 Bench Placement</span><span class="setup-value">${ex.setup.bench}</span></div>
+            // Build Visual CSS Diagram
+            const benchClass = exData.benchActive ? 'bench-icon active' : 'bench-icon';
+            const diagramHTML = `
+                <div class="visual-diagram">
+                    <div class="pulley-column"><div class="pulley-knob" style="top: ${exData.pulleyPos}; border-color: ${activeColor};"></div></div>
+                    <div class="${benchClass}">${exData.benchText}</div>
+                    <div class="pulley-column"><div class="pulley-knob" style="top: ${exData.pulleyPos}; border-color: ${activeColor};"></div></div>
                 </div>
             `;
 
-            // Build Coach Steps
-            let stepsHTML = '';
-            ex.coach.steps.forEach(step => stepsHTML += `<li>${step}</li>`);
+            // Build Coach
+            let steps = ""; exData.steps.forEach(s => steps += `<li>${s}</li>`);
 
-            // Build Tracker Rows
-            let rows = '';
-            for(let i=1; i<=ex.sets; i++) {
+            // Build Tracker
+            let rows = "";
+            for(let set=1; set<=exReq.sets; set++) {
                 rows += `
-                <tr id="row-${exIndex}-${i}">
-                    <td><div class="set-badge">${i}</div></td>
-                    <td><input type="number" class="log-input" placeholder="lbs" inputmode="numeric"></td>
-                    <td><input type="number" class="log-input" value="${ex.reps}" inputmode="numeric"></td>
+                <tr id="row-${i}-${set}">
+                    <td><div class="set-num">${set}</div></td>
+                    <td><input type="number" class="log-input" placeholder="lbs"></td>
+                    <td><input type="number" class="log-input" value="${exReq.reps}"></td>
                     <td>
-                        <button class="check-btn" onclick="toggleSet('row-${exIndex}-${i}')">
-                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <button class="check-btn" onclick="toggleSet('row-${i}-${set}')">
+                            <svg fill="#aaa" width="20" height="20" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
                         </button>
                     </td>
                 </tr>`;
             }
 
-            const card = `
+            feed.innerHTML += `
             <div class="exercise-card">
                 <div class="ex-header">
-                    <div class="ex-name">${ex.name}</div>
-                    <div class="ex-target">${ex.target}</div>
+                    <div class="ex-title">${exData.name}</div>
+                    <div style="font-size: 13px; color: var(--text-sub);">${exData.target}</div>
+                    <div class="ex-tags">
+                        <span class="tag">🔗 ${exData.attach}</span>
+                    </div>
+                </div>
+                
+                <div style="padding: 20px 20px 0 20px;">
+                    <div style="font-size: 11px; color: ${activeColor}; font-weight: 700; text-transform: uppercase; margin-bottom: 10px;">Setup Diagram</div>
+                    ${diagramHTML}
                 </div>
 
-                <!-- 1. The Setup -->
-                <div class="setup-zone">
-                    <div class="setup-title">⚙️ Machine Setup</div>
-                    ${setupHTML}
-                </div>
-
-                <!-- 2. The Coach (Expandable) -->
-                <button class="coach-toggle" onclick="toggleCoach('coach-${exIndex}')">
-                    <span>📖 View Form Guide & Tips</span>
-                    <span id="coach-${exIndex}-icon" style="font-size: 20px; color: var(--accent-brand);">+</span>
+                <button class="coach-toggle" onclick="toggleCoach('coach-${i}')">
+                    <span>📖 Show Form & Tips</span> <span>▼</span>
                 </button>
-                <div class="coach-content" id="coach-${exIndex}">
-                    <div class="media-box">${ex.coach.media}</div>
-                    <ol class="step-list">${stepsHTML}</ol>
-                    <div class="pro-tip">💡 <strong>Pro Tip:</strong> ${ex.coach.tip}</div>
+                <div class="coach-content" id="coach-${i}">
+                    <ul>${steps}</ul>
+                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border-left: 3px solid ${activeColor};">
+                        💡 <strong>Expert Tip:</strong> ${exData.tip}
+                    </div>
                 </div>
 
-                <!-- 3. The Tracker -->
                 <div class="tracker-zone">
-                    <table class="log-table">
-                        <thead><tr><th>Set</th><th>lbs (Each Arm)</th><th>Reps</th><th>Done</th></tr></thead>
+                    <table>
+                        <thead><tr><th>Set</th><th>Lbs</th><th>Reps</th><th>Done</th></tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
             </div>`;
-            
-            feed.innerHTML += card;
         });
+        
+        // Dynamic finish button color
+        document.querySelector('.finish-btn').style.background = activeColor;
+        document.querySelector('.finish-btn').style.color = (currentUser === 'Ashton' || currentUser === 'Kam') ? '#000' : '#fff';
+        
+        showScreen('screen-workout');
     }
 
     function toggleSet(rowId) {
         const row = document.getElementById(rowId);
-        const inputs = row.querySelectorAll('input');
-        
         if (row.classList.contains('row-done')) {
             row.classList.remove('row-done');
-            inputs.forEach(input => input.disabled = false);
         } else {
             row.classList.add('row-done');
-            inputs.forEach(input => input.disabled = true);
             startTimer(60); 
         }
     }
 
-    function startTimer(seconds) {
-        clearInterval(timerInt); timeLeft = seconds;
+    function startTimer(sec) {
+        clearInterval(timerInt); timeLeft = sec;
         document.getElementById('timer-bar').classList.add('active');
-        updateTimerUI();
+        updateTimer();
         timerInt = setInterval(() => {
-            timeLeft--; updateTimerUI();
-            if(timeLeft <= 0) { stopTimer(); if("vibrate" in navigator) navigator.vibrate([200,100,200]); }
+            timeLeft--; updateTimer();
+            if(timeLeft <= 0) { stopTimer(); if(navigator.vibrate) navigator.vibrate([200,100,200]); }
         }, 1000);
     }
 
     function stopTimer() { clearInterval(timerInt); document.getElementById('timer-bar').classList.remove('active'); }
-    function updateTimerUI() { let m = Math.floor(timeLeft/60); let s = timeLeft%60; document.getElementById('timer-display').innerText = `0${m}:${s<10?'0':''}${s}`; }
-    function finishWorkout() { alert("Session Complete! Great work today."); navigateBack(); }
+    function updateTimer() { 
+        let m = Math.floor(timeLeft/60); let s = timeLeft%60; 
+        document.getElementById('timer-display').innerText = `0${m}:${s<10?'0':''}${s}`; 
+    }
+    function finishWorkout() { alert("Workout Logged!"); navBack(); }
 </script>
-
 </body>
 </html>
