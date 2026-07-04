@@ -67,7 +67,8 @@
         .pcard.ashton .pcard-bg { background-image: url('https://images.unsplash.com/photo-1515523110800-9415d13b84a8?q=80&w=800&auto=format&fit=crop'); }
 
         .banner { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 16px; backdrop-filter: var(--blur); }
-        .b-icon { font-size: 28px; }
+        .b-icon { display: flex; align-items: center; justify-content: center; color: var(--accent); }
+        .b-icon svg { width: 32px; height: 32px; stroke-width: 1.5; }
         .b-txt h4 { font-size: 16px; margin-bottom: 6px; font-weight: 800; color: #fff; }
         .b-txt p { font-size: 14px; color: var(--muted); line-height: 1.5; }
 
@@ -86,9 +87,12 @@
         .mlist { display: flex; flex-direction: column; gap: 12px; }
         .mcard { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; backdrop-filter: var(--blur); }
         .mcard:active { background: var(--elev); transform: scale(0.98); }
-        .mtitle { font-size: 16px; font-weight: 800; margin-bottom: 4px; color: #fff; }
-        .mmeta { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .mtitle { font-size: 16px; font-weight: 800; margin-bottom: 4px; color: #fff; display: flex; align-items: center; gap: 8px;}
+        .mmeta { font-size: 13px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .mchev { color: var(--accent); font-weight: 800; font-size: 20px; }
+
+        .vector-icon { display: inline-flex; align-items: center; justify-content: center; }
+        .vector-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
         .excard { background: var(--surface-card); border-radius: 28px; margin-bottom: 28px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
         .ex-h { padding: 24px 24px 20px; background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); }
@@ -106,8 +110,9 @@
         .dot { width: 8px; height: 8px; border-radius: 50%; }
 
         .setup-chips { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 24px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
-        .s-chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+        .s-chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
         .s-lbl { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+        .s-lbl .vector-icon svg { width: 14px; height: 14px; }
         .s-val { font-size: 15px; font-weight: 800; color: #fff; }
 
         .coach-t { width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 800; color: #fff; cursor: pointer; transition: background 0.2s; }
@@ -131,11 +136,11 @@
         .val-in { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px 4px; border-radius: 12px; text-align: center; font-size: 18px; font-weight: 800; -moz-appearance: textfield; transition: 0.2s; min-width: 0; }
         .val-in:focus { outline: none; border-color: var(--accent); background: #000; box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.2); }
         .chk { flex: 0.8; background: rgba(255,255,255,0.1); border: none; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
-        .chk svg { fill: var(--muted); width: 22px; height: 22px; transition: 0.3s; }
+        .chk svg { fill: none; stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; width: 22px; height: 22px; transition: 0.3s; }
         
         .trk-row.done { background: rgba(50, 215, 75, 0.05); border-color: rgba(50, 215, 75, 0.2); }
         .trk-row.done .chk { background: var(--success); box-shadow: 0 4px 15px rgba(50, 215, 75, 0.4); }
-        .trk-row.done .chk svg { fill: #000; }
+        .trk-row.done .chk svg { stroke: #000; }
         .trk-row.done .val-in { background: transparent; border-color: transparent; color: var(--success); pointer-events: none; }
         .trk-row.done .setpill { background: var(--success); color: #000; }
         .trk-row.done .setpill.warm { background: var(--warn); color: #000; }
@@ -145,8 +150,8 @@
         .finish { width: 100%; background: var(--accent); color: #fff; border: none; padding: 22px; border-radius: 22px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); transition: 0.2s; }
         .finish:active { transform: scale(0.97); }
 
+        /* Hidden visually completely to fix safe area bleeding */
         #tsheet { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,24,0.95); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); padding: 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; 
-            /* Hidden State */
             transform: translateY(120%); 
             opacity: 0; 
             pointer-events: none; 
@@ -154,7 +159,6 @@
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
         }
         #tsheet.on { 
-            /* Visible State */
             transform: translateY(0); 
             opacity: 1; 
             pointer-events: auto;
@@ -205,6 +209,7 @@
 
   <!-- USERS -->
   <div id="scr-users" class="screen active">
+    <div class="sec" id="dateHeaderHome" style="margin-top:0;">DATE</div>
     <h1>Welcome.</h1>
     <p class="sub">Choose your profile to initialize.</p>
     <div class="pgrid">
@@ -241,13 +246,16 @@
     <h1 id="dTitle">Hi</h1>
     
     <div id="banner" class="banner" style="display:none">
-      <div class="b-icon" id="bIcon">🧠</div>
+      <div class="b-icon" id="bIcon"></div>
       <div class="b-txt"><h4 id="bTitle">Status</h4><p id="bMsg">...</p></div>
     </div>
 
-    <div class="mcard" onclick="showGlossary()" style="background:rgba(255,255,255,0.03); border-color:var(--border); margin-bottom:24px;">
-      <div><div class="mtitle">🏋️ Equipment Glossary</div><div class="mmeta">Identify handles & pins</div></div>
-      <div class="mchev">›</div>
+    <!-- SESSION LENGTH MOVED ABOVE AUTO BUILDER -->
+    <div class="sec">Session Length</div>
+    <div class="dur-row">
+      <div class="dur-pill active" data-dur="quick" onclick="pickDur('quick')"><div>Quick</div><div class="dur-time">~20 min</div></div>
+      <div class="dur-pill" data-dur="standard" onclick="pickDur('standard')"><div>Standard</div><div class="dur-time">~40 min</div></div>
+      <div class="dur-pill" data-dur="extended" onclick="pickDur('extended')"><div>Extended</div><div class="dur-time">~55 min</div></div>
     </div>
 
     <div class="sec">Custom Auto-Builder</div>
@@ -261,23 +269,20 @@
          <div class="m-chip" onclick="toggleMuscle('Arms', this)">Arms</div>
          <div class="m-chip" onclick="toggleMuscle('Core', this)">Core</div>
       </div>
-      <button class="generate-btn" onclick="generateWorkout()">⚡ Build Custom Workout</button>
-    </div>
-
-    <div class="sec">Session Length</div>
-    <div class="dur-row">
-      <div class="dur-pill active" data-dur="quick" onclick="pickDur('quick')"><div>Quick</div><div class="dur-time">~20 min</div></div>
-      <div class="dur-pill" data-dur="standard" onclick="pickDur('standard')"><div>Standard</div><div class="dur-time">~40 min</div></div>
-      <div class="dur-pill" data-dur="extended" onclick="pickDur('extended')"><div>Extended</div><div class="dur-time">~55 min</div></div>
+      <button class="generate-btn" id="generateBtn" onclick="generateWorkout()">Build Custom Workout</button>
     </div>
 
     <div class="sec">Today's Programmed Plan</div>
     <div class="mlist" id="planList"></div>
 
-    <div class="sec">Freestyle</div>
+    <div class="sec">Resources</div>
     <div class="mlist">
+      <div class="mcard" onclick="showGlossary()" style="background:rgba(255,255,255,0.03); border-color:var(--border);">
+        <div><div class="mtitle" id="glossaryTitle">Equipment Glossary</div><div class="mmeta">Identify handles & pins</div></div>
+        <div class="mchev">›</div>
+      </div>
       <div class="mcard" onclick="showHistory()">
-        <div><div class="mtitle">📊 History & PRs</div><div class="mmeta">Volume, trends, records</div></div>
+        <div><div class="mtitle" id="historyTitle">History & PRs</div><div class="mmeta">Volume, trends, records</div></div>
         <div class="mchev">›</div>
       </div>
     </div>
@@ -313,6 +318,23 @@
 </div>
 
 <script>
+// Centralized Vector Icon Library (Replaces Emojis)
+const APP_ICONS = {
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+    warn: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+    stop: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+    time: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+    build: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+    history: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`,
+    guide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`,
+    space: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`,
+    attach: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
+    height: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 15 12 19 16 15"></polyline><polyline points="8 9 12 5 16 9"></polyline><line x1="12" y1="5" x2="12" y2="19"></line></svg>`,
+    tilt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="2"></circle><line x1="12" y1="12" x2="16" y2="8"></line></svg>`,
+    width: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 8 19 12 15 16"></polyline><polyline points="9 8 5 12 9 16"></polyline><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+    check_btn: `<polyline points="20 6 9 17 4 12"></polyline>`
+};
+
 const ICONS = {
     d_handle: `<path d="M7 6v12c0 3.3 2.7 6 6 6s6-2.7 6-6V6M7 6h12"/>`,
     v_bar: `<path d="M4 4l8 12 8-12M12 16v4" stroke-linecap="round"/>`,
@@ -476,7 +498,6 @@ function generateGymSVG(exSetup, color) {
     let width = parseInt(exSetup.w) || 3; // 1=Narrow, 3=Mid, 5=Wide
 
     // ----- FRONT ELEVATION (HEIGHT & TILT) -----
-    // Track 1 = y:20. Track 8 = y:160.
     let trackY = 20 + ((track - 1) * (140 / 7));
     
     // Tilt 1 (pointing down) = 90 deg. Tilt 6 (flat) = 0 deg. Tilt 11 (up) = -90 deg.
@@ -560,7 +581,13 @@ function generateGymSVG(exSetup, color) {
 
 window.onload=()=>{
     const options = { weekday: 'long', month: 'long', day: 'numeric' };
+    document.getElementById('dateHeaderHome').innerText = new Date().toLocaleDateString('en-US', options).toUpperCase();
     document.getElementById('dateHeader').innerText = new Date().toLocaleDateString('en-US', options).toUpperCase();
+    
+    // Injecting SVGs into static elements
+    document.getElementById('generateBtn').innerHTML = `<span class="vector-icon">${APP_ICONS.build}</span> Build Custom Workout`;
+    document.getElementById('glossaryTitle').innerHTML = `<span class="vector-icon" style="color: var(--accent); margin-right: 8px;">${APP_ICONS.guide}</span> Equipment Glossary`;
+    document.getElementById('historyTitle').innerHTML = `<span class="vector-icon" style="color: var(--accent); margin-right: 8px;">${APP_ICONS.history}</span> History & PRs`;
 };
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('btnBack').classList.toggle('hidden',id==='scr-users');window.scrollTo(0,0)}
@@ -580,13 +607,13 @@ function pickUser(uid){
 
   if(S.user.youth && lastLog === today){
       S.readiness = 3;
-      bi.innerText="🛑";bt.innerText="Rest Enforced";bm.innerText="Muscles grow when you rest. You've already trained today. Go play outside!";
+      bi.innerHTML=APP_ICONS.stop; bi.style.color = 'var(--danger)'; bt.innerText="Rest Enforced";bm.innerText="Muscles grow when you rest. You've already trained today. Go play outside!";
   } else if(streak >= 3 && !S.user.youth){
       S.readiness = 5;
-      bi.innerText="⚠️";bt.innerText="Fatigue Detected";bm.innerText=`${streak} day streak. Volume automatically reduced by 1 set to protect your CNS.`;
+      bi.innerHTML=APP_ICONS.warn; bi.style.color = 'var(--warn)'; bt.innerText="Fatigue Detected";bm.innerText=`${streak} day streak. Volume automatically reduced by 1 set to protect your CNS.`;
   } else {
       S.readiness = 7;
-      bi.innerText="✅";bt.innerText=`Ready · ${streak} day streak`;bm.innerText="Recovery optimal. Let's hit it.";
+      bi.innerHTML=APP_ICONS.check; bi.style.color = 'var(--success)'; bt.innerText=`Ready · ${streak} day streak`;bm.innerText="Recovery optimal. Let's hit it.";
   }
 
   S.selectedMuscles = [];
@@ -602,7 +629,7 @@ function renderDash(){
   const plans=(TEMPLATES[S.uid]||{})[S.dur]||[];
   plans.forEach((p,i)=>{
     list.innerHTML+=`<div class="mcard" onclick="startWorkout(${i},false)">
-      <div><div class="mtitle">${p.title}</div><div class="mmeta"><span>⏱ ${S.dur==='quick'?'~20 min':S.dur==='standard'?'~40 min':'~55 min'}</span></div></div>
+      <div><div class="mtitle">${p.title}</div><div class="mmeta"><span class="vector-icon">${APP_ICONS.time}</span> <span>${S.dur==='quick'?'~20 min':S.dur==='standard'?'~40 min':'~55 min'}</span></div></div>
       <div class="mchev">›</div></div>`;
   });
 }
@@ -657,7 +684,7 @@ function generateWorkout() {
 function showGlossary() {
     const modal = document.getElementById('modal'); const mbox = document.getElementById('mbox');
     mbox.innerHTML = `
-        <h3 style="color:var(--accent)"><span style="font-size:24px; margin-right:8px;">🏋️</span> Equipment Guide</h3>
+        <h3 style="color:var(--accent)"><span class="vector-icon">${APP_ICONS.guide}</span> Equipment Guide</h3>
         <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Identify the handles and attachments.</p>
         <div class="gloss-item"><div class="gloss-icon"><svg viewBox="0 0 24 24">${ICONS.d_handle}</svg></div><div class="gloss-text"><h4>D-Handle</h4><p>Single-hand loop grip. Presses, single arm rows, flys.</p></div></div>
         <div class="gloss-item"><div class="gloss-icon"><svg viewBox="0 0 24 24">${ICONS.v_bar}</svg></div><div class="gloss-text"><h4>V-Bar</h4><p>Solid metal triangle. Heavy, close-grip seated rows.</p></div></div>
@@ -708,19 +735,19 @@ function buildCard(exId,sets,reps,idx,addWarmup){
         <div class="setpill ${isWarm?'warm':''}">${isWarm?'W':i-warmups}</div>
         ${ex.eq==='bw'?'<div style="flex:1; text-align:center; color:var(--muted); font-size:12px; font-weight:800;">BODYWEIGHT</div>':`<input type="number" class="val-in wv" placeholder="lbs" value="${targetW}">`}
         <input type="number" class="val-in rv" placeholder="${targetR}" value="">
-        <button class="chk" onclick="toggleSet('r-${idx}-${i}','${exId}',${isWarm?1:0})"><svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" fill="currentColor"/></svg></button>
+        <button class="chk" onclick="toggleSet('r-${idx}-${i}','${exId}',${isWarm?1:0})">${APP_ICONS.check_btn}</button>
       </div>`;
   }
 
   const svgVisuals = generateGymSVG(ex.setup, S.user.color);
   
   const setupChips = ex.eq === 'bw' || ex.eq === 'db' ? 
-      `<div class="s-chip"><span class="s-lbl">🪑 Space</span><span class="s-val">${ex.setup.spc}</span></div>
-       <div class="s-chip"><span class="s-lbl">🔗 Equip</span><span class="s-val">${ex.setup.att}</span></div>` :
-      `<div class="s-chip"><span class="s-lbl">↕️ Height</span><span class="s-val">Track ${ex.setup.h}</span></div>
-       <div class="s-chip"><span class="s-lbl">📐 Tilt</span><span class="s-val">Dial ${ex.setup.t}</span></div>
-       <div class="s-chip"><span class="s-lbl">↔️ Width</span><span class="s-val">Pin ${ex.setup.w}</span></div>
-       <div class="s-chip"><span class="s-lbl">🔗 Attach</span><span class="s-val">${ex.setup.att}</span></div>`;
+      `<div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.space}</span> Space</span><span class="s-val">${ex.setup.spc}</span></div>
+       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.attach}</span> Equip</span><span class="s-val">${ex.setup.att}</span></div>` :
+      `<div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.height}</span> Height</span><span class="s-val">Track ${ex.setup.h}</span></div>
+       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.tilt}</span> Tilt</span><span class="s-val">Dial ${ex.setup.t}</span></div>
+       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.width}</span> Width</span><span class="s-val">Pin ${ex.setup.w}</span></div>
+       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.attach}</span> Attach</span><span class="s-val">${ex.setup.att}</span></div>`;
 
   const card=`<div class="excard" id="ec-${idx}" data-exid="${exId}">
     <div class="ex-h">
