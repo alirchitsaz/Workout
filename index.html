@@ -39,13 +39,11 @@
         
         #app { width: 100%; max-width: 480px; min-height: 100vh; position: relative; padding-bottom: 140px; display: flex; flex-direction: column; }
 
-        /* Header */
         header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 14px; padding-top: max(20px, env(safe-area-inset-top)); background: rgba(5,5,7,0.7); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
         .h-title { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); transition: color 0.3s; }
         .btn-nav { background: none; border: none; color: var(--text); font-size: 15px; font-weight: 600; cursor: pointer; padding: 8px 4px; min-width: 60px; text-align: left; }
         .btn-nav.hidden { visibility: hidden; }
 
-        /* Screens */
         .screen { display: none; padding: 24px; animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); flex: 1; }
         .screen.active { display: block; }
         @keyframes fadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -54,7 +52,6 @@
         .sub { color: var(--muted); font-size: 16px; font-weight: 500; margin-bottom: 32px; line-height: 1.4; }
         .sec { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin: 32px 0 16px; }
 
-        /* Premium Profile Cards (Unsplash integration) */
         .pgrid { display: flex; flex-direction: column; gap: 16px; }
         .pcard { position: relative; height: 130px; border-radius: 24px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--border); }
         .pcard:active { transform: scale(0.96); }
@@ -69,13 +66,11 @@
         .pcard.kam .pcard-bg { background-image: url('https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=800&auto=format&fit=crop'); }
         .pcard.ashton .pcard-bg { background-image: url('https://images.unsplash.com/photo-1515523110800-9415d13b84a8?q=80&w=800&auto=format&fit=crop'); }
 
-        /* Banner */
         .banner { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 16px; backdrop-filter: var(--blur); }
         .b-icon { font-size: 28px; }
         .b-txt h4 { font-size: 16px; margin-bottom: 6px; font-weight: 800; color: #fff; }
         .b-txt p { font-size: 14px; color: var(--muted); line-height: 1.5; }
 
-        /* Auto-Builder Engine */
         .builder-box { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 24px; backdrop-filter: var(--blur); }
         .muscle-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .m-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; flex-grow: 1; text-align: center; color: var(--muted); }
@@ -83,13 +78,11 @@
         .generate-btn { width: 100%; background: var(--surface-card); color: var(--accent); border: 1px solid var(--border); padding: 18px; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
         .generate-btn:active { transform: scale(0.97); }
 
-        /* Duration pills */
         .dur-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .dur-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 8px; text-align: center; cursor: pointer; font-weight: 800; transition: 0.2s; color: var(--muted); }
         .dur-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
         .dur-time { font-size: 11px; margin-top: 4px; font-weight: 600; opacity: 0.7; }
 
-        /* Menu cards */
         .mlist { display: flex; flex-direction: column; gap: 12px; }
         .mcard { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; backdrop-filter: var(--blur); }
         .mcard:active { background: var(--elev); transform: scale(0.98); }
@@ -112,13 +105,11 @@
         .gym-legend div { display: flex; align-items: center; gap: 6px; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-        /* Floating Setup Chips (Replacing Tables) */
         .setup-chips { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 24px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
         .s-chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
         .s-lbl { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
         .s-val { font-size: 15px; font-weight: 800; color: #fff; }
 
-        /* Coach Guide */
         .coach-t { width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 800; color: #fff; cursor: pointer; transition: background 0.2s; }
         .coach-t:active { background: rgba(255,255,255,0.05); }
         .coach-c { display: none; padding: 24px; font-size: 15px; line-height: 1.6; color: #D1D1D6; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); }
@@ -142,7 +133,6 @@
         .chk { flex: 0.8; background: rgba(255,255,255,0.1); border: none; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
         .chk svg { fill: var(--muted); width: 22px; height: 22px; transition: 0.3s; }
         
-        /* Completed Set State */
         .trk-row.done { background: rgba(50, 215, 75, 0.05); border-color: rgba(50, 215, 75, 0.2); }
         .trk-row.done .chk { background: var(--success); box-shadow: 0 4px 15px rgba(50, 215, 75, 0.4); }
         .trk-row.done .chk svg { fill: #000; }
@@ -155,15 +145,26 @@
         .finish { width: 100%; background: var(--accent); color: #fff; border: none; padding: 22px; border-radius: 22px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); transition: 0.2s; }
         .finish:active { transform: scale(0.97); }
 
-        /* Timer sheet */
-        #tsheet { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,24,0.95); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); padding: 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
-        #tsheet.on { transform: translateY(0); }
+        #tsheet { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,24,0.95); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); padding: 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; 
+            /* Hidden State */
+            transform: translateY(120%); 
+            opacity: 0; 
+            pointer-events: none; 
+            box-shadow: 0 0 0 transparent;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        #tsheet.on { 
+            /* Visible State */
+            transform: translateY(0); 
+            opacity: 1; 
+            pointer-events: auto;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5); 
+        }
         .tval { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -1px; }
         .tlbl { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
         .skip { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 16px 24px; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .skip:active { background: rgba(255,255,255,0.2); }
 
-        /* Modals & Toasts */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(15px); }
         .modal.on { display: flex; animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .mbox { background: var(--surface-card); border: 1px solid var(--border); border-radius: 28px; width: 100%; max-width: 420px; max-height: 85vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
@@ -174,7 +175,6 @@
         .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--success); color: #000; padding: 16px 24px; border-radius: 20px; font-weight: 800; font-size: 16px; z-index: 3000; box-shadow: 0 10px 30px rgba(50, 215, 75, 0.4); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* Visual Glossary Items */
         .gloss-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
         .gloss-item:last-child { border-bottom: none; }
         .gloss-icon { width: 60px; height: 60px; background: rgba(255,255,255,0.03); border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
@@ -182,7 +182,6 @@
         .gloss-text h4 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
         .gloss-text p { font-size: 14px; color: var(--muted); line-height: 1.4; }
 
-        /* History */
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
         .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px 8px; text-align: center; }
         .stat-v { font-size: 26px; font-weight: 800; color: var(--accent); }
@@ -241,13 +240,11 @@
     <div class="sec" id="dateHeader" style="margin-top:0;">DATE</div>
     <h1 id="dTitle">Hi</h1>
     
-    <!-- Invisible Smart Coach Status Banner -->
     <div id="banner" class="banner" style="display:none">
       <div class="b-icon" id="bIcon">🧠</div>
       <div class="b-txt"><h4 id="bTitle">Status</h4><p id="bMsg">...</p></div>
     </div>
 
-    <!-- EQUIPMENT GUIDE BUTTON -->
     <div class="mcard" onclick="showGlossary()" style="background:rgba(255,255,255,0.03); border-color:var(--border); margin-bottom:24px;">
       <div><div class="mtitle">🏋️ Equipment Glossary</div><div class="mmeta">Identify handles & pins</div></div>
       <div class="mchev">›</div>
@@ -316,9 +313,6 @@
 </div>
 
 <script>
-/* ==============================================================
-   SVG ICON LIBRARY FOR ATTACHMENTS
-   ============================================================== */
 const ICONS = {
     d_handle: `<path d="M7 6v12c0 3.3 2.7 6 6 6s6-2.7 6-6V6M7 6h12"/>`,
     v_bar: `<path d="M4 4l8 12 8-12M12 16v4" stroke-linecap="round"/>`,
@@ -330,9 +324,6 @@ const ICONS = {
     recovery: `<path d="M4 12c0-4 4-8 8-8s8 4 8 8" stroke-dasharray="4 4"/>`
 };
 
-/* ==============================================================
-   WEIGHT STACK (15 lb top + 10 lb increments)
-   ============================================================== */
 const STACK = [15,25,35,45,55,65,75,85,95,105,115,125,135,145,155,165,175,185,195,205];
 function nearestStack(w){let b=STACK[0],d=Math.abs(w-b);for(const v of STACK){const dd=Math.abs(v-w);if(dd<d){d=dd;b=v}}return b}
 
@@ -342,12 +333,12 @@ function showToast(msg) {
     setTimeout(()=>t.classList.remove('show'), 3000);
 }
 
-/* ==============================================================
-   FULL EXERCISE DB (3-AXIS: Track, Tilt, Width)
+/* 
+   DB SETUP LEGEND (3-AXIS):
    h = Track/Height (1-8)
-   t = Tilt/Dial (1-11)
-   w = Width/Pin (1=Narrow, 3=Mid, 5=Wide)
-   ============================================================== */
+   t = Tilt/Dial (1-11) -- Controls Vertical Pitch of arm
+   w = Width/Pin (1=Narrow, 3=Mid, 5=Wide) -- Controls Horizontal Swing 
+*/
 const DB = {
   // CHEST
   cbl_flat_press:{
@@ -432,9 +423,6 @@ const DB = {
   }
 };
 
-/* ==============================================================
-   TEMPLATES
-   ============================================================== */
 const TEMPLATES = {
   ali:{
     quick:[{title:"Full Body Push-Emphasis",exs:[{id:"cbl_flat_press",s:3,r:"8-10"},{id:"cbl_row_seated",s:3,r:"8-10"},{id:"cbl_goblet_squat",s:3,r:"10-12"}]}],
@@ -447,14 +435,14 @@ const TEMPLATES = {
     extended:[{title:"Full Body Tone",exs:[{id:"cbl_rdl",s:4,r:"10-12"},{id:"cbl_row_seated",s:4,r:"10-12"},{id:"cbl_kickback",s:3,r:"15/side"},{id:"cbl_tri_pushdown",s:3,r:"10-12"},{id:"cbl_face_pull",s:3,r:"12-15"}]}]
   },
   kam:{
-    quick:[{title:"Athletic Circuit A",exs:[{id:"bw_squat",s:3,r:"12-15"},{id:"cbl_flat_press",s:3,r:"10"},{id:"bosu_plank",s:3,r:"30s"}]}],
+    quick:[{title:"Athletic Circuit A",exs:[{id:"cbl_goblet_squat",s:3,r:"12-15"},{id:"cbl_flat_press",s:3,r:"10"},{id:"bosu_plank",s:3,r:"30s"}]}],
     standard:[{title:"Strength Foundations",exs:[{id:"cbl_goblet_squat",s:4,r:"10"},{id:"cbl_flat_press",s:3,r:"10"},{id:"cbl_row_seated",s:3,r:"10"},{id:"bosu_plank",s:3,r:"30s"}]}],
     extended:[{title:"Full Athletic Dev",exs:[{id:"cbl_goblet_squat",s:4,r:"10"},{id:"cbl_flat_press",s:3,r:"10"},{id:"cbl_row_seated",s:3,r:"10"},{id:"cbl_rdl",s:3,r:"10"},{id:"cbl_pallof",s:3,r:"8/side"}]}]
   },
   ashton:{
-    quick:[{title:"Superhero Circuit",exs:[{id:"bw_squat",s:2,r:"10"},{id:"bosu_plank",s:2,r:"20s"}]}],
-    standard:[{title:"Ninja Training",exs:[{id:"bw_squat",s:3,r:"10"},{id:"db_lateral",s:3,r:"10 (light)"},{id:"bosu_plank",s:2,r:"20s"}]}],
-    extended:[{title:"Big Play Session",exs:[{id:"bw_squat",s:3,r:"10"},{id:"db_lateral",s:3,r:"10 (light)"},{id:"bosu_plank",s:2,r:"20s"}]}]
+    quick:[{title:"Superhero Circuit",exs:[{id:"bosu_plank",s:2,r:"20s"}]}],
+    standard:[{title:"Ninja Training",exs:[{id:"db_lateral",s:3,r:"10 (light)"},{id:"bosu_plank",s:2,r:"20s"}]}],
+    extended:[{title:"Big Play Session",exs:[{id:"db_lateral",s:3,r:"10 (light)"},{id:"bosu_plank",s:2,r:"20s"}]}]
   }
 };
 
@@ -465,9 +453,6 @@ const USERS = {
   ashton:{name:"Ashton",color:"var(--ashton)",youth:1,maxLoad:20}
 };
 
-/* ==============================================================
-   STATE & LOCAL STORAGE
-   ============================================================== */
 let S={uid:"",user:null,dur:"quick",readiness:7,session:null,timerInt:null,timeLeft:0,selectedMuscles:[]};
 
 const LS={
@@ -481,12 +466,6 @@ const LS={
   setPr(uid,exId,v){this.set(`pr_${uid}_${exId}`,v)}
 };
 
-/* ==============================================================
-   DYNAMIC SVG DUAL-RENDERER (3-AXIS)
-   Track (h) = Height
-   Dial (t) = Tilt (Up/Down)
-   Pin (w) = Width (Swing out)
-   ============================================================== */
 function generateGymSVG(exSetup, color) {
     if (exSetup.h === "-" || exSetup.a === "-") {
         return `<div style="padding:24px; text-align:center; color:var(--muted); font-size:12px; font-weight:800; letter-spacing:1.5px; border-bottom:1px solid var(--border);">FREE WEIGHTS · NO MACHINE REQ</div>`;
@@ -503,28 +482,24 @@ function generateGymSVG(exSetup, color) {
     // Tilt 1 (pointing down) = 90 deg. Tilt 6 (flat) = 0 deg. Tilt 11 (up) = -90 deg.
     let tiltAngle = (90 - ((tilt - 1) * 18)) * Math.PI / 180;
     
-    let fLx = 80 - 50 * Math.cos(tiltAngle); // Left arm points left
+    let fLx = 80 - 50 * Math.cos(tiltAngle); 
     let fLy = trackY + 50 * Math.sin(tiltAngle); 
-    let fRx = 120 + 50 * Math.cos(tiltAngle); // Right arm points right
+    let fRx = 120 + 50 * Math.cos(tiltAngle); 
     let fRy = trackY + 50 * Math.sin(tiltAngle);
 
     const frontSVG = `
         <div class="svg-box">
             <div class="svg-label">FRONT (HEIGHT & TILT)</div>
             <svg viewBox="0 0 200 200">
-                <!-- Machine Uprights -->
                 <rect x="76" y="10" width="8" height="180" fill="#374151" rx="2"/>
                 <rect x="116" y="10" width="8" height="180" fill="#374151" rx="2"/>
                 
-                <!-- Arms -->
                 <line x1="80" y1="${trackY}" x2="${fLx}" y2="${fLy}" stroke="#06B6D4" stroke-width="6" stroke-linecap="round"/>
                 <line x1="120" y1="${trackY}" x2="${fRx}" y2="${fRy}" stroke="#06B6D4" stroke-width="6" stroke-linecap="round"/>
                 
-                <!-- Pulleys -->
                 <circle cx="${fLx}" cy="${fLy}" r="5" fill="#FFD60A"/>
                 <circle cx="${fRx}" cy="${fRy}" r="5" fill="#FFD60A"/>
                 
-                <!-- Carriage Connectors -->
                 <rect x="70" y="${trackY - 6}" width="20" height="12" fill="${color}" rx="3"/>
                 <rect x="110" y="${trackY - 6}" width="20" height="12" fill="${color}" rx="3"/>
             </svg>
@@ -533,8 +508,8 @@ function generateGymSVG(exSetup, color) {
 
     // ----- TOP-DOWN (FLOOR PLAN & WIDTH) -----
     // Width 1 (narrow) = pointing forward (90 deg). Width 5 (wide) = pointing outward (180/0 deg).
-    let wAngle = (90 + ((width - 1) * 22.5)) * Math.PI / 180; // Left arm
-    let wAngleR = (90 - ((width - 1) * 22.5)) * Math.PI / 180; // Right arm
+    let wAngle = (90 + ((width - 1) * 22.5)) * Math.PI / 180; 
+    let wAngleR = (90 - ((width - 1) * 22.5)) * Math.PI / 180; 
 
     let tLx = 80 + 60 * Math.cos(wAngle);
     let tLy = 40 + 60 * Math.sin(wAngle);
@@ -583,11 +558,7 @@ function generateGymSVG(exSetup, color) {
     </div>`;
 }
 
-/* ==============================================================
-   INIT & NAV
-   ============================================================== */
 window.onload=()=>{
-    // Set dynamic date
     const options = { weekday: 'long', month: 'long', day: 'numeric' };
     document.getElementById('dateHeader').innerText = new Date().toLocaleDateString('en-US', options).toUpperCase();
 };
@@ -595,7 +566,6 @@ window.onload=()=>{
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('btnBack').classList.toggle('hidden',id==='scr-users');window.scrollTo(0,0)}
 function navBack(){const cur=document.querySelector('.screen.active').id;if(cur==='scr-workout' || cur==='scr-history')show('scr-dash');else show('scr-users');stopTimer()}
 
-/* Invisible Smart Coach Logic */
 function pickUser(uid){
   S.uid=uid;S.user=USERS[uid];
   document.documentElement.style.setProperty('--accent',S.user.color);
@@ -619,7 +589,6 @@ function pickUser(uid){
       bi.innerText="✅";bt.innerText=`Ready · ${streak} day streak`;bm.innerText="Recovery optimal. Let's hit it.";
   }
 
-  // Reset custom builder
   S.selectedMuscles = [];
   document.querySelectorAll('.m-chip').forEach(c => c.classList.remove('active'));
 
@@ -638,9 +607,6 @@ function renderDash(){
   });
 }
 
-/* ==============================================================
-   CUSTOM AUTO-BUILDER ENGINE
-   ============================================================== */
 function toggleMuscle(m, el) {
     if(S.selectedMuscles.includes(m)) {
         S.selectedMuscles = S.selectedMuscles.filter(x => x !== m);
@@ -656,7 +622,7 @@ function generateWorkout() {
     
     let pool = [];
     Object.entries(DB).forEach(([id, ex]) => {
-        if(S.user.youth && !ex.youth) return; // Enforce youth safety
+        if(S.user.youth && !ex.youth) return; 
         let targetStr = ex.t.toLowerCase(); let matches = false;
         
         if(S.selectedMuscles.includes('Chest') && targetStr.includes('chest')) matches = true;
@@ -670,7 +636,7 @@ function generateWorkout() {
     });
 
     if(pool.length === 0) { showToast("No exercises found"); return; }
-    pool = pool.sort(() => 0.5 - Math.random()); // Shuffle
+    pool = pool.sort(() => 0.5 - Math.random());
     
     let count = S.dur === 'quick' ? 3 : S.dur === 'standard' ? 5 : 7;
     let selectedExs = pool.slice(0, count);
@@ -682,15 +648,12 @@ function generateWorkout() {
     selectedExs.forEach((exId, i) => {
         let sets = S.dur === 'quick' ? 2 : 3;
         if(S.user.youth) sets = 2;
-        if(S.readiness <= 5) sets = Math.max(1, sets - 1); // Fatigue drop
+        if(S.readiness <= 5) sets = Math.max(1, sets - 1);
         buildCard(exId, sets, "8-12", i, true);
     });
     show('scr-workout');
 }
 
-/* ==============================================================
-   VISUAL EQUIPMENT GLOSSARY
-   ============================================================== */
 function showGlossary() {
     const modal = document.getElementById('modal'); const mbox = document.getElementById('mbox');
     mbox.innerHTML = `
@@ -706,9 +669,6 @@ function showGlossary() {
     modal.classList.add('on');
 }
 
-/* ==============================================================
-   WORKOUT ENGINE & CARDS
-   ============================================================== */
 function startWorkout(planIdx,isManual){
   document.getElementById('wFeed').innerHTML="";
   const plan=TEMPLATES[S.uid][S.dur][planIdx];
@@ -757,7 +717,7 @@ function buildCard(exId,sets,reps,idx,addWarmup){
   const setupChips = ex.eq === 'bw' || ex.eq === 'db' ? 
       `<div class="s-chip"><span class="s-lbl">🪑 Space</span><span class="s-val">${ex.setup.spc}</span></div>
        <div class="s-chip"><span class="s-lbl">🔗 Equip</span><span class="s-val">${ex.setup.att}</span></div>` :
-      `<div class="s-chip"><span class="s-lbl">↕️ Track</span><span class="s-val">Hole ${ex.setup.h}</span></div>
+      `<div class="s-chip"><span class="s-lbl">↕️ Height</span><span class="s-val">Track ${ex.setup.h}</span></div>
        <div class="s-chip"><span class="s-lbl">📐 Tilt</span><span class="s-val">Dial ${ex.setup.t}</span></div>
        <div class="s-chip"><span class="s-lbl">↔️ Width</span><span class="s-val">Pin ${ex.setup.w}</span></div>
        <div class="s-chip"><span class="s-lbl">🔗 Attach</span><span class="s-val">${ex.setup.att}</span></div>`;
@@ -769,7 +729,6 @@ function buildCard(exId,sets,reps,idx,addWarmup){
     
     ${svgVisuals}
     
-    <!-- Floating Setup Chips -->
     <div class="setup-chips">${setupChips}</div>
     
     <button class="coach-t" onclick="document.getElementById('c-${idx}').classList.toggle('active')">
@@ -802,7 +761,7 @@ function toggleSet(rowId, exId, isWarm){
         if(!wv || !wv.value){ wv.focus(); return; }
         if(S.user.maxLoad && +wv.value > S.user.maxLoad){ showToast(`Safety limit: Max ${S.user.maxLoad} lb.`); return; }
     }
-    if(!rv.value) rv.value = rv.placeholder.split('-')[0]; // auto fill reps
+    if(!rv.value) rv.value = rv.placeholder.split('-')[0]; 
     
     row.classList.add('done'); row.querySelectorAll('.val-in').forEach(i=>i.disabled=true);
     let restTime = isWarm ? 45 : 60; if(ex.comp && !isWarm) restTime = 90; 
@@ -835,23 +794,23 @@ function showHistory() {
   show('scr-history');
 }
 
-/* ==============================================================
-   TIMER LOGIC
-   ============================================================== */
 function startTimer(sec){
-  clearInterval(S.timerInt); S.timeLeft=sec; document.getElementById('tsheet').classList.add('on'); updateTimerUI();
+  clearInterval(S.timerInt); S.timeLeft=sec; 
+  const tsheet = document.getElementById('tsheet');
+  tsheet.classList.add('on'); 
+  updateTimerUI();
   S.timerInt=setInterval(()=>{
     S.timeLeft--; updateTimerUI();
     if(S.timeLeft<=0){ stopTimer(); if(navigator.vibrate) navigator.vibrate([200,100,200]); }
   }, 1000);
 }
 function addTime(sec) { S.timeLeft += sec; updateTimerUI(); }
-function stopTimer(){ clearInterval(S.timerInt); document.getElementById('tsheet').classList.remove('on'); }
+function stopTimer(){ 
+    clearInterval(S.timerInt); 
+    document.getElementById('tsheet').classList.remove('on'); 
+}
 function updateTimerUI(){ let m=Math.floor(S.timeLeft/60), s=S.timeLeft%60; document.getElementById('tDisp').innerText=`0${m}:${s<10?'0':''}${s}`; }
 
-/* ==============================================================
-   FINISH WORKOUT LOGIC
-   ============================================================== */
 function finishWorkout() {
   const cards = document.querySelectorAll('.excard');
   let totalVol = 0; let totalSets = 0;
