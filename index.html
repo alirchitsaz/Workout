@@ -1,882 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#000000">
-    <title>Chitsaz Family Fit</title>
-    <style>
-        :root {
-            --bg: #050507;
-            --surface: rgba(28, 28, 32, 0.75);
-            --surface-solid: #15171E;
-            --surface-card: #1C1F2B;
-            --elev: rgba(45, 50, 65, 0.85);
-            --text: #ffffff;
-            --muted: #8E8E93;
-            --border: rgba(255, 255, 255, 0.08);
-            
-            --ali: #0A84FF;
-            --kristen: #BF5AF2;
-            --kam: #FF9F0A;
-            --ashton: #32D74B;
-            --accent: #0A84FF;
-            --success: #32D74B;
-            --danger: #FF453A;
-            --warn: #FFD60A;
-            
-            --blur: blur(30px) saturate(150%);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; -webkit-user-select: none; user-select: none; overflow-x: hidden; min-height: 100vh; }
-
-        /* Ambient Background */
-        .glow { position: fixed; top: -20vh; left: -20vw; width: 140vw; height: 70vh; background: radial-gradient(ellipse, var(--accent) 0%, transparent 60%); opacity: 0.12; z-index: -1; transition: background 0.8s ease; pointer-events: none; filter: blur(60px); }
-        
-        #app { width: 100%; max-width: 480px; min-height: 100vh; position: relative; padding-bottom: 140px; display: flex; flex-direction: column; }
-
-        header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 14px; padding-top: max(20px, env(safe-area-inset-top)); background: rgba(5,5,7,0.7); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-        .h-title { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); transition: color 0.3s; }
-        .btn-nav { background: none; border: none; color: var(--text); font-size: 15px; font-weight: 600; cursor: pointer; padding: 8px 4px; min-width: 60px; text-align: left; }
-        .btn-nav.hidden { visibility: hidden; }
-
-        .screen { display: none; padding: 24px; animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); flex: 1; }
-        .screen.active { display: block; }
-        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
-        
-        h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; line-height: 1.1; }
-        .sub { color: var(--muted); font-size: 16px; font-weight: 500; margin-bottom: 32px; line-height: 1.4; }
-        .sec { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin: 32px 0 16px; }
-
-        .pgrid { display: flex; flex-direction: column; gap: 16px; }
-        .pcard { position: relative; height: 130px; border-radius: 24px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--border); }
-        .pcard:active { transform: scale(0.96); }
-        .pcard-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: grayscale(50%) brightness(0.6); transition: 0.3s; }
-        .pcard-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0.2) 100%); display: flex; flex-direction: column; justify-content: center; padding: 24px; }
-        .pname { font-size: 24px; font-weight: 800; margin-bottom: 4px; z-index: 2; }
-        .pdesc { font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 600; z-index: 2; }
-
-        /* Specific User Backgrounds */
-        .pcard.ali .pcard-bg { background-image: url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop'); }
-        .pcard.kristen .pcard-bg { background-image: url('https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop'); }
-        .pcard.kam .pcard-bg { background-image: url('https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=800&auto=format&fit=crop'); }
-        .pcard.ashton .pcard-bg { background-image: url('https://images.unsplash.com/photo-1515523110800-9415d13b84a8?q=80&w=800&auto=format&fit=crop'); }
-
-        .banner { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 16px; backdrop-filter: var(--blur); }
-        .b-icon { display: flex; align-items: center; justify-content: center; color: var(--accent); }
-        .b-icon svg { width: 32px; height: 32px; stroke-width: 1.5; }
-        .b-txt h4 { font-size: 16px; margin-bottom: 6px; font-weight: 800; color: #fff; }
-        .b-txt p { font-size: 14px; color: var(--muted); line-height: 1.5; }
-
-        .builder-box { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 24px; backdrop-filter: var(--blur); }
-        .muscle-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .m-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; flex-grow: 1; text-align: center; color: var(--muted); }
-        .m-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .generate-btn { width: 100%; background: var(--surface-card); color: var(--accent); border: 1px solid var(--border); padding: 18px; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
-        .generate-btn:active { transform: scale(0.97); }
-
-        .dur-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .dur-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 8px; text-align: center; cursor: pointer; font-weight: 800; transition: 0.2s; color: var(--muted); }
-        .dur-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-        .dur-time { font-size: 11px; margin-top: 4px; font-weight: 600; opacity: 0.7; }
-
-        .mlist { display: flex; flex-direction: column; gap: 12px; }
-        .mcard { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; backdrop-filter: var(--blur); }
-        .mcard:active { background: var(--elev); transform: scale(0.98); }
-        .mtitle { font-size: 16px; font-weight: 800; margin-bottom: 4px; color: #fff; display: flex; align-items: center; gap: 8px;}
-        .mmeta { font-size: 13px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
-        .mchev { color: var(--accent); font-weight: 800; font-size: 20px; }
-
-        .vector-icon { display: inline-flex; align-items: center; justify-content: center; }
-        .vector-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-
-        .excard { background: var(--surface-card); border-radius: 28px; margin-bottom: 28px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
-        .ex-h { padding: 24px 24px 20px; background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .ex-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; color: #fff; }
-        .ex-target { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Interactive SVG Gym View (3-Axis) */
-        .gym-view { background: linear-gradient(180deg, #11141A, #050507); border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-        .setup-visuals { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 24px 24px 0 24px; }
-        .svg-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 4px 20px rgba(0,0,0,0.2); }
-        .svg-label { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; text-align: center; }
-        .svg-box svg { width: 100%; height: auto; max-height: 150px; }
-        .gym-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; font-size: 10px; color: rgba(255,255,255,0.5); justify-content: center; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .gym-legend div { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
-
-        .setup-chips { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 24px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
-        .s-chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
-        .s-lbl { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-        .s-lbl .vector-icon svg { width: 14px; height: 14px; }
-        .s-val { font-size: 15px; font-weight: 800; color: #fff; }
-
-        .coach-t { width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 800; color: #fff; cursor: pointer; transition: background 0.2s; }
-        .coach-t:active { background: rgba(255,255,255,0.05); }
-        .coach-c { display: none; padding: 24px; font-size: 15px; line-height: 1.6; color: #D1D1D6; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); }
-        .coach-c.active { display: block; animation: slideDown 0.3s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .coach-c ul { padding-left: 20px; margin-bottom: 20px; }
-        .coach-c li { margin-bottom: 12px; }
-        .tipbox { background: rgba(255,255,255,0.05); padding: 16px; border-radius: 16px; border-left: 4px solid var(--accent); color: #fff; font-size: 14px; }
-
-        .trk { padding: 24px; }
-        .trk-header { display: flex; margin-bottom: 12px; padding: 0 10px; }
-        .trk-header span { flex: 1; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; text-align: center; }
-        .trk-header span:first-child { flex: 0.5; text-align: left; }
-        .trk-header span:last-child { flex: 0.8; text-align: right; }
-        
-        .trk-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .setpill { background: rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #fff; flex-shrink: 0; }
-        .setpill.warm { background: rgba(255,214,10,0.2); color: var(--warn); }
-        .val-in { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px 4px; border-radius: 12px; text-align: center; font-size: 18px; font-weight: 800; -moz-appearance: textfield; transition: 0.2s; min-width: 0; }
-        .val-in:focus { outline: none; border-color: var(--accent); background: #000; box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.2); }
-        .chk { flex: 0.8; background: rgba(255,255,255,0.1); border: none; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
-        .chk svg { fill: none; stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; width: 22px; height: 22px; transition: 0.3s; }
-        
-        .trk-row.done { background: rgba(50, 215, 75, 0.05); border-color: rgba(50, 215, 75, 0.2); }
-        .trk-row.done .chk { background: var(--success); box-shadow: 0 4px 15px rgba(50, 215, 75, 0.4); }
-        .trk-row.done .chk svg { stroke: #000; }
-        .trk-row.done .val-in { background: transparent; border-color: transparent; color: var(--success); pointer-events: none; }
-        .trk-row.done .setpill { background: var(--success); color: #000; }
-        .trk-row.done .setpill.warm { background: var(--warn); color: #000; }
-
-        .last-hint { font-size: 12px; color: var(--muted); text-align: center; padding-bottom: 16px; font-weight: 600; }
-
-        .finish { width: 100%; background: var(--accent); color: #fff; border: none; padding: 22px; border-radius: 22px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); transition: 0.2s; }
-        .finish:active { transform: scale(0.97); }
-
-        /* Hidden visually completely to fix safe area bleeding */
-        #tsheet { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,24,0.95); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); padding: 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; 
-            transform: translateY(120%); 
-            opacity: 0; 
-            pointer-events: none; 
-            box-shadow: 0 0 0 transparent;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-        }
-        #tsheet.on { 
-            transform: translateY(0); 
-            opacity: 1; 
-            pointer-events: auto;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5); 
-        }
-        .tval { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -1px; }
-        .tlbl { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
-        .skip { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 16px 24px; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .skip:active { background: rgba(255,255,255,0.2); }
-
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(15px); }
-        .modal.on { display: flex; animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .mbox { background: var(--surface-card); border: 1px solid var(--border); border-radius: 28px; width: 100%; max-width: 420px; max-height: 85vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .mbox h3 { font-size: 24px; margin-bottom: 16px; font-weight: 800; display: flex; align-items: center; gap: 12px; }
-        .mclose { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 100%; padding: 18px; border-radius: 16px; font-weight: 800; font-size: 16px; margin-top: 20px; cursor: pointer; transition: 0.2s; }
-        .mclose:active { background: rgba(255,255,255,0.2); }
-        
-        .toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--success); color: #000; padding: 16px 24px; border-radius: 20px; font-weight: 800; font-size: 16px; z-index: 3000; box-shadow: 0 10px 30px rgba(50, 215, 75, 0.4); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        .gloss-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
-        .gloss-item:last-child { border-bottom: none; }
-        .gloss-icon { width: 60px; height: 60px; background: rgba(255,255,255,0.03); border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
-        .gloss-icon svg { width: 34px; height: 34px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .gloss-text h4 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
-        .gloss-text p { font-size: 14px; color: var(--muted); line-height: 1.4; }
-
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-        .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px 8px; text-align: center; }
-        .stat-v { font-size: 26px; font-weight: 800; color: var(--accent); }
-        .stat-l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-top: 6px; }
-        .hitem { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .hi-title { font-size: 16px; font-weight: 800; }
-        .hi-meta { font-size: 13px; color: var(--muted); margin-top: 6px; font-weight: 600; }
-        .hi-vol { font-size: 20px; font-weight: 800; color: var(--accent); }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07080d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Family Fit Coach V2</title>
+<style>
+:root{--bg:#07080d;--panel:#111522;--panel2:#171c2c;--panel3:#22283b;--text:#f7f8fb;--muted:#9aa3b8;--soft:#6e768c;--line:rgba(255,255,255,.09);--accent:#35a3ff;--accent2:#7c5cff;--good:#38d67a;--warn:#ffd166;--bad:#ff5c7a;--shadow:0 22px 70px rgba(0,0,0,.42);--radius:24px;--blur:blur(22px) saturate(170%)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif}body{min-height:100vh;background:radial-gradient(circle at 18% -8%,color-mix(in srgb,var(--accent) 34%,transparent),transparent 34%),radial-gradient(circle at 100% 18%,color-mix(in srgb,var(--accent2) 25%,transparent),transparent 26%),linear-gradient(180deg,#07080d 0%,#090b12 45%,#07080d 100%);overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer;color:inherit;border:0;background:none}#app{width:100%;max-width:540px;margin:0 auto;min-height:100vh;padding-bottom:114px;position:relative}.topbar{position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:max(14px,env(safe-area-inset-top)) 16px 12px;background:rgba(7,8,13,.72);backdrop-filter:var(--blur);border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.4px}.brand-mark{width:34px;height:34px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 14px 34px color-mix(in srgb,var(--accent) 30%,transparent)}.ghost{padding:10px 11px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-weight:850;font-size:13px}.ghost.hidden{visibility:hidden}.screen{display:none;padding:18px;animation:rise .28s cubic-bezier(.2,.8,.2,1)}.screen.active{display:block}@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}h1{font-size:36px;line-height:.98;letter-spacing:-1.5px;margin:6px 0 8px}h2{font-size:24px;letter-spacing:-.8px;margin:0 0 6px}.sub{color:var(--muted);font-size:15px;line-height:1.45;margin-bottom:18px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);font-weight:950;margin:24px 0 10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stack{display:grid;gap:12px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.chiprow{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:999px;padding:8px 11px;font-size:12px;color:var(--muted);font-weight:850}.chip.hot{color:#061018;background:var(--accent);border-color:transparent}.chip.good{color:#061018;background:var(--good);border-color:transparent}.chip.warn{color:#151005;background:var(--warn);border-color:transparent}.chip.bad{color:white;background:var(--bad);border-color:transparent}.card{background:rgba(24,27,39,.78);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:var(--blur);overflow:hidden}.pad{padding:18px}.soft{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:20px;padding:16px}.mini{font-size:12px;color:var(--muted);line-height:1.35}.big{font-size:22px;font-weight:950;letter-spacing:-.7px}.btn{width:100%;padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-weight:950;box-shadow:0 14px 36px color-mix(in srgb,var(--accent) 25%,transparent)}.btn.secondary{background:rgba(255,255,255,.08);border:1px solid var(--line);box-shadow:none}.btn.danger{background:linear-gradient(135deg,var(--bad),#ff8b5c)}.btn.small{padding:11px 12px;border-radius:14px;font-size:12px}.profile-card{position:relative;padding:18px;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.045));border:1px solid var(--line);min-height:154px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transition:.15s}.profile-card:before{content:"";position:absolute;inset:auto -40px -55px auto;width:130px;height:130px;border-radius:60px;background:color-mix(in srgb,var(--pcolor,var(--accent)) 25%,transparent);filter:blur(10px)}.avatar{width:58px;height:58px;border-radius:22px;display:grid;place-items:center;font-size:24px;font-weight:950;background:color-mix(in srgb,var(--pcolor,var(--accent)) 18%,rgba(255,255,255,.05));border:1px solid color-mix(in srgb,var(--pcolor,var(--accent)) 45%,var(--line))}.pname{font-size:20px;font-weight:950;letter-spacing:-.5px}.pmeta{font-size:12px;color:var(--muted);font-weight:760;margin-top:3px;line-height:1.25}.plus-card{display:grid;place-items:center;text-align:center;min-height:154px;border:1px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.035);border-radius:24px;color:var(--muted);font-weight:900}.toolbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.pillbtn{padding:13px 8px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-weight:900;font-size:13px;color:var(--muted);text-align:center}.pillbtn.active{background:var(--accent);border-color:transparent;color:white}.metric{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:18px;padding:14px 8px;text-align:center}.metric .v{font-size:22px;font-weight:950;color:var(--accent)}.metric .l{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.8px;margin-top:4px}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:7px;border-radius:8px;background:linear-gradient(90deg,var(--bad),var(--warn),var(--good));outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:5px solid var(--accent);box-shadow:0 8px 18px rgba(0,0,0,.45)}.plan-card{padding:17px;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.045));border:1px solid var(--line);transition:.15s}.plan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.plan-title{font-size:19px;font-weight:950;letter-spacing:-.55px}.plan-why{font-size:13px;color:var(--muted);line-height:1.35;margin:7px 0 12px}.ex-preview{display:flex;flex-wrap:wrap;gap:7px}.ex-pill{font-size:11px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--muted);font-weight:850}.score{min-width:58px;text-align:center;border-radius:18px;padding:8px 6px;background:rgba(255,255,255,.07);border:1px solid var(--line)}.score b{display:block;font-size:18px;color:var(--accent)}.score span{display:block;font-size:9px;text-transform:uppercase;color:var(--muted);font-weight:900;letter-spacing:.8px}.recovery-list{display:grid;gap:10px}.rec-row{display:grid;grid-template-columns:76px 1fr 38px;align-items:center;gap:9px;font-size:12px;color:var(--muted);font-weight:850}.bar{height:10px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--bad),var(--warn),var(--good));width:50%}.sore-grid{display:flex;gap:8px;flex-wrap:wrap}.sore-grid .chip.on{background:var(--accent);border-color:transparent;color:white}.exercise{margin-bottom:16px}.ex-top{padding:16px 16px 12px}.ex-name{font-size:22px;font-weight:980;letter-spacing:-.8px;line-height:1.08}.ex-target{margin-top:4px;font-size:11px;text-transform:uppercase;color:var(--accent);font-weight:950;letter-spacing:1px}.ex-actions{display:flex;gap:8px}.iconbtn{width:39px;height:39px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid var(--line);font-weight:900}.setup-viz{background:linear-gradient(180deg,#0f1523,#090d16);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px}.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.vizbox{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:18px;padding:10px;text-align:center}.vizlabel{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:950;margin-bottom:5px}.vizbox svg{width:100%;max-height:130px}.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}.setup-cell{padding:13px 14px;background:rgba(17,20,30,.9)}.setup-cell small{display:block;color:var(--muted);text-transform:uppercase;font-size:9px;letter-spacing:1px;font-weight:950;margin-bottom:4px}.setup-cell b{font-size:13px;line-height:1.2}.coach{padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.025)}.coach details summary{font-weight:950;list-style:none;display:flex;justify-content:space-between}.coach ul{margin:12px 0 0 18px;color:#d7dcea;font-size:13px;line-height:1.45}.coach li{margin-bottom:7px}.tip{margin-top:11px;background:rgba(255,209,102,.11);border-left:4px solid var(--warn);padding:12px;border-radius:12px;font-size:13px;color:#fff;line-height:1.35}.tracker{padding:14px 12px 16px}.setrow{display:grid;grid-template-columns:42px 1fr 1fr 66px 48px;gap:7px;align-items:center;margin-bottom:8px}.setlab{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;font-weight:950;color:var(--muted);background:rgba(255,255,255,.08);font-size:12px}.field{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:white;border-radius:13px;padding:12px 4px;text-align:center;font-size:16px;font-weight:950;outline:0}.done .field{border-color:transparent;background:transparent;color:var(--good)}.done .setlab{background:var(--good);color:#061018}.check{height:45px;border-radius:14px;background:rgba(255,255,255,.09);border:1px solid var(--line);font-size:18px}.done .check{background:var(--good);color:#061018;border-color:transparent}.labels{display:grid;grid-template-columns:42px 1fr 1fr 66px 48px;gap:7px;margin-bottom:6px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:950;text-align:center}.loadhint{padding:0 16px 13px;color:var(--muted);font-size:12px;line-height:1.35}.loadhint b{color:var(--accent)}.timer{position:fixed;left:0;right:0;bottom:0;z-index:90;background:rgba(12,15,24,.92);backdrop-filter:var(--blur);border-top:1px solid var(--line);padding:14px 16px max(14px,env(safe-area-inset-bottom));transform:translateY(120%);transition:.28s cubic-bezier(.2,.8,.2,1)}.timer.on{transform:translateY(0)}.timer-inner{max-width:540px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}.timer .label{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);font-weight:950}.timer .time{font-variant-numeric:tabular-nums;font-size:38px;font-weight:980;letter-spacing:-1px}.timer button{padding:13px 16px;border-radius:15px;background:rgba(255,255,255,.09);border:1px solid var(--line);font-weight:950}.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(12px)}.modal.on{display:flex}.sheet{width:100%;max-width:540px;max-height:88vh;overflow:auto;background:var(--panel2);border:1px solid var(--line);border-radius:28px 28px 0 0;padding:20px;box-shadow:var(--shadow)}.sheet h3{font-size:25px;letter-spacing:-.7px;margin-bottom:8px}.form{display:grid;gap:10px}.form label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:950;margin-bottom:-4px}.form input,.form select,.form textarea{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:15px;color:white;padding:14px;outline:0}.form select option{background:#151925}.library-list{display:grid;gap:8px}.lib-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:13px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--line)}.lib-item h4{font-size:14px}.lib-item p{font-size:12px;color:var(--muted);margin-top:3px}.tag{font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:950;letter-spacing:.8px}.empty{text-align:center;color:var(--muted);padding:28px 14px}.warnbox{border:1px solid rgba(255,209,102,.35);background:rgba(255,209,102,.10);padding:14px;border-radius:18px;color:#fff;font-size:13px;line-height:1.4}.successbox{border:1px solid rgba(56,214,122,.32);background:rgba(56,214,122,.11);padding:14px;border-radius:18px;font-size:13px;line-height:1.4}.history-item{padding:15px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid var(--line);margin-bottom:10px}.history-item h4{font-size:16px}.history-item p{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.35}.smallpr{display:flex;justify-content:space-between;gap:10px;padding:11px 12px;border-radius:15px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:13px;color:var(--muted)}.smallpr b{color:#fff}.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:70;padding:10px 14px max(10px,env(safe-area-inset-bottom));background:rgba(7,8,13,.72);backdrop-filter:var(--blur);border-top:1px solid var(--line)}.tabs{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.tab{border-radius:17px;padding:10px 4px;text-align:center;color:var(--muted);font-size:11px;font-weight:950}.tab b{display:block;font-size:18px;margin-bottom:2px}.tab.active{background:rgba(255,255,255,.08);color:white}.tab.hide{display:none}@media(min-width:820px){#app{max-width:980px}.screen{padding:24px}.topbar{max-width:980px;margin:0 auto}.dash-layout{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:start}.workout-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.tabbar .tabs{max-width:980px}.timer-inner{max-width:980px}.sheet{max-width:640px}}@media(max-width:370px){.grid2,.viz-grid{grid-template-columns:1fr}.setrow,.labels{grid-template-columns:36px 1fr 1fr 52px 42px;gap:5px}.field{font-size:14px}}
+</style>
 </head>
 <body>
-<div class="glow" id="glow"></div>
-<div class="toast" id="toast">Message</div>
-
 <div id="app">
-  <header>
-    <button class="btn-nav hidden" id="btnBack" onclick="navBack()">‹ Back</button>
-    <div class="h-title" id="hTitle">FAMILY FIT</div>
-    <div style="width:60px"></div>
-  </header>
-
-  <!-- USERS -->
-  <div id="scr-users" class="screen active">
-    <div class="sec" id="dateHeaderHome" style="margin-top:0;">DATE</div>
-    <h1>Welcome.</h1>
-    <p class="sub">Choose your profile to initialize.</p>
-    <div class="pgrid">
-      <div class="pcard ali" onclick="pickUser('ali')">
-          <div class="pcard-bg"></div>
-          <div class="pcard-overlay">
-              <div class="pname">Ali</div><div class="pdesc">Strength & Recomp</div>
-          </div>
-      </div>
-      <div class="pcard kristen" onclick="pickUser('kristen')">
-          <div class="pcard-bg"></div>
-          <div class="pcard-overlay">
-              <div class="pname">Kristen</div><div class="pdesc">Pilates & Sculpt</div>
-          </div>
-      </div>
-      <div class="pcard kam" onclick="pickUser('kam')">
-          <div class="pcard-bg"></div>
-          <div class="pcard-overlay">
-              <div class="pname">Kam (13)</div><div class="pdesc">Athletic Dev</div>
-          </div>
-      </div>
-      <div class="pcard ashton" onclick="pickUser('ashton')">
-          <div class="pcard-bg"></div>
-          <div class="pcard-overlay">
-              <div class="pname">Ashton (8)</div><div class="pdesc">Movement Play</div>
-          </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DASH -->
-  <div id="scr-dash" class="screen">
-    <div class="sec" id="dateHeader" style="margin-top:0;">DATE</div>
-    <h1 id="dTitle">Hi</h1>
-    
-    <div id="banner" class="banner" style="display:none">
-      <div class="b-icon" id="bIcon"></div>
-      <div class="b-txt"><h4 id="bTitle">Status</h4><p id="bMsg">...</p></div>
-    </div>
-
-    <!-- SESSION LENGTH MOVED ABOVE AUTO BUILDER -->
-    <div class="sec">Session Length</div>
-    <div class="dur-row">
-      <div class="dur-pill active" data-dur="quick" onclick="pickDur('quick')"><div>Quick</div><div class="dur-time">~20 min</div></div>
-      <div class="dur-pill" data-dur="standard" onclick="pickDur('standard')"><div>Standard</div><div class="dur-time">~40 min</div></div>
-      <div class="dur-pill" data-dur="extended" onclick="pickDur('extended')"><div>Extended</div><div class="dur-time">~55 min</div></div>
-    </div>
-
-    <div class="sec">Custom Auto-Builder</div>
-    <div class="builder-box">
-      <div style="font-size:13px; color:var(--muted); margin-bottom:14px; font-weight:600;">Tap up to 3 focus areas to generate a routine:</div>
-      <div class="muscle-grid" id="muscleGrid">
-         <div class="m-chip" onclick="toggleMuscle('Chest', this)">Chest</div>
-         <div class="m-chip" onclick="toggleMuscle('Back', this)">Back</div>
-         <div class="m-chip" onclick="toggleMuscle('Legs', this)">Legs</div>
-         <div class="m-chip" onclick="toggleMuscle('Shoulders', this)">Shoulders</div>
-         <div class="m-chip" onclick="toggleMuscle('Arms', this)">Arms</div>
-         <div class="m-chip" onclick="toggleMuscle('Core', this)">Core</div>
-      </div>
-      <button class="generate-btn" id="generateBtn" onclick="generateWorkout()">Build Custom Workout</button>
-    </div>
-
-    <div class="sec">Today's Programmed Plan</div>
-    <div class="mlist" id="planList"></div>
-
-    <div class="sec">Resources</div>
-    <div class="mlist">
-      <div class="mcard" onclick="showGlossary()" style="background:rgba(255,255,255,0.03); border-color:var(--border);">
-        <div><div class="mtitle" id="glossaryTitle">Equipment Glossary</div><div class="mmeta">Identify handles & pins</div></div>
-        <div class="mchev">›</div>
-      </div>
-      <div class="mcard" onclick="showHistory()">
-        <div><div class="mtitle" id="historyTitle">History & PRs</div><div class="mmeta">Volume, trends, records</div></div>
-        <div class="mchev">›</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- WORKOUT -->
-  <div id="scr-workout" class="screen">
-    <h1 id="wTitle" style="margin-bottom:24px">Workout</h1>
-    <div id="wFeed"></div>
-    <button class="finish" onclick="finishWorkout()">Complete Session</button>
-  </div>
-
-  <!-- HISTORY -->
-  <div id="scr-history" class="screen">
-    <h1>History</h1>
-    <p class="sub" id="hSub">Recent sessions & personal records</p>
-    <div class="stats" id="hStats"></div>
-    <div class="sec">Recent Sessions</div>
-    <div id="hList"></div>
-  </div>
-
-  <!-- TIMER -->
-  <div id="tsheet">
-    <div><div class="tlbl">Recovery Timer</div><div class="tval" id="tDisp">01:00</div></div>
-    <div style="display:flex;gap:10px">
-      <button class="skip" onclick="addTime(15)">+15s</button>
-      <button class="skip" onclick="stopTimer()" style="background:var(--elev)">Skip</button>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+  <div class="topbar"><button id="backBtn" class="ghost hidden" onclick="goBack()">Back</button><div class="brand"><div class="brand-mark">FT</div><span>Family Fit Coach</span></div><button class="ghost" onclick="openSettings()">Menu</button></div>
+  <section id="screen-profiles" class="screen active"></section>
+  <section id="screen-dashboard" class="screen"></section>
+  <section id="screen-workout" class="screen"></section>
+  <section id="screen-library" class="screen"></section>
+  <section id="screen-history" class="screen"></section>
+  <section id="screen-ai" class="screen"></section>
 </div>
-
+<div id="timer" class="timer"><div class="timer-inner"><div><div class="label">Rest timer</div><div id="timerValue" class="time">01:00</div></div><div class="row"><button onclick="addRest(15)">+15s</button><button onclick="stopRest()">Skip</button></div></div></div>
+<div id="modal" class="modal"><div class="sheet" id="sheet"></div></div>
+<div id="tabbar" class="tabbar"><div class="tabs"><button class="tab" onclick="showScreen('dashboard')"><b>T</b>Today</button><button class="tab" onclick="showScreen('workout')"><b>W</b>Workout</button><button class="tab" onclick="showScreen('library')"><b>L</b>Library</button><button class="tab" onclick="showScreen('history')"><b>H</b>History</button><button class="tab" onclick="showScreen('ai')"><b>AI</b>Coach</button></div></div>
 <script>
-// Centralized Vector Icon Library (Replaces Emojis)
-const APP_ICONS = {
-    check: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
-    warn: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
-    stop: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
-    time: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
-    build: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
-    history: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`,
-    guide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`,
-    space: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`,
-    attach: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
-    height: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 15 12 19 16 15"></polyline><polyline points="8 9 12 5 16 9"></polyline><line x1="12" y1="5" x2="12" y2="19"></line></svg>`,
-    tilt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="2"></circle><line x1="12" y1="12" x2="16" y2="8"></line></svg>`,
-    width: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 8 19 12 15 16"></polyline><polyline points="9 8 5 12 9 16"></polyline><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    check_btn: `<polyline points="20 6 9 17 4 12"></polyline>`
-};
-
-const ICONS = {
-    d_handle: `<path d="M7 6v12c0 3.3 2.7 6 6 6s6-2.7 6-6V6M7 6h12"/>`,
-    v_bar: `<path d="M4 4l8 12 8-12M12 16v4" stroke-linecap="round"/>`,
-    rope: `<path d="M12 4v12" stroke-width="4" stroke-dasharray="2 2"/><circle cx="12" cy="18" r="3" fill="currentColor" stroke="none"/><circle cx="12" cy="4" r="3" fill="currentColor" stroke="none"/>`,
-    straight_bar: `<path d="M4 12h16" stroke-width="4" stroke-linecap="round"/><rect x="6" y="9" width="2" height="6" fill="currentColor" stroke="none"/><rect x="16" y="9" width="2" height="6" fill="currentColor" stroke="none"/>`,
-    dumbbells: `<rect x="4" y="8" width="4" height="8"/><rect x="16" y="8" width="4" height="8"/><path d="M8 12h8" stroke-width="3"/>`,
-    ankle_strap: `<rect x="4" y="8" width="16" height="8" rx="2" stroke-width="2"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>`,
-    bw: `<circle cx="12" cy="6" r="2" fill="currentColor" stroke="none"/><path d="M12 9v6M9 11h6M10 20l2-5 2 5"/>`,
-    recovery: `<path d="M4 12c0-4 4-8 8-8s8 4 8 8" stroke-dasharray="4 4"/>`
-};
-
-const STACK = [15,25,35,45,55,65,75,85,95,105,115,125,135,145,155,165,175,185,195,205];
-function nearestStack(w){let b=STACK[0],d=Math.abs(w-b);for(const v of STACK){const dd=Math.abs(v-w);if(dd<d){d=dd;b=v}}return b}
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.innerText = msg; t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'), 3000);
-}
-
-/* 
-   DB SETUP LEGEND (3-AXIS):
-   h = Track/Height (1-8)
-   t = Tilt/Dial (1-11) -- Controls Vertical Pitch of arm
-   w = Width/Pin (1=Narrow, 3=Mid, 5=Wide) -- Controls Horizontal Swing 
-*/
-const DB = {
-  // CHEST
-  cbl_flat_press:{
-    n:"Flat Cable Bench Press", t:"Chest", eq:"cable", cat:"push", comp:1,
-    setup:{h:8, t:5, w:4, att:"D-Handles", spc:"Bench Center (Longways)", icon:ICONS.d_handle},
-    steps:["Slide bench directly between pulleys, perpendicular to machine.","Lie flat, handles at armpits.","Press up and slightly together."], tip:"Keep shoulder blades pinned to bench."
-  },
-  cbl_incline_press:{
-    n:"Low-to-High Cable Press", t:"Upper Chest", eq:"cable", cat:"push", comp:1,
-    setup:{h:8, t:6, w:3, att:"D-Handles", spc:"Stand Centered", icon:ICONS.d_handle},
-    steps:["Staggered stance between pulleys.","Press hands up and inward, meet at eye level."], tip:"Think 'scoop upward'."
-  },
-  cbl_fly:{
-    n:"Cable Chest Fly", t:"Chest", eq:"cable", comp:0, cat:"push",
-    setup:{h:4, t:5, w:5, att:"D-Handles", spc:"Stand Centered", icon:ICONS.d_handle},
-    steps:["Arms wide, slight elbow bend.","Hug wide arc to meet in front of chest."], tip:"Elbows lead — arms stay long but not locked."
-  },
-  // BACK
-  cbl_row_seated:{
-    n:"Seated Cable Row", t:"Back · Biceps", eq:"cable", comp:1, cat:"pull",
-    setup:{h:7, t:6, w:1, att:"V-Bar", spc:"Floor", icon:ICONS.v_bar},
-    steps:["Sit on floor, feet on frame.","Straight back, pull to belly."], tip:"Squeeze shoulder blades BEFORE arms pull."
-  },
-  cbl_lat_pull:{
-    n:"Cable Lat Pulldown", t:"Lats", eq:"cable", comp:1, cat:"pull",
-    setup:{h:1, t:2, w:3, att:"Straight Bar", spc:"Kneel or Sit", icon:ICONS.straight_bar},
-    steps:["Kneel facing machine.","Pull bar to collarbone, elbows down."], tip:"Lead with elbows down and back."
-  },
-  cbl_face_pull:{
-    n:"Cable Face Pull", t:"Rear Delts", eq:"cable", comp:0, cat:"pull",
-    setup:{h:2, t:3, w:1, att:"Tricep Rope", spc:"Standing", icon:ICONS.rope},
-    steps:["Thumbs backward on rope.","Pull to ears, elbows wide + high."], tip:"Posture fixer — go light, squeeze hard."
-  },
-  // SHOULDERS
-  cbl_ohp:{
-    n:"Cable Overhead Press", t:"Shoulders", eq:"cable", comp:1, cat:"push",
-    setup:{h:8, t:3, w:3, att:"D-Handles", spc:"Stand Centered", icon:ICONS.d_handle},
-    steps:["Handles at shoulders.","Press straight up, lock out."], tip:"Ribs down — don't arch low back."
-  },
-  db_lateral:{
-    n:"DB Lateral Raise", t:"Side Delts", eq:"db", comp:0, cat:"push",
-    setup:{h:"-", t:"-", w:"-", att:"Light DBs", spc:"Open Floor", icon:ICONS.dumbbells},
-    steps:["Raise to parallel, pinky slightly up.","Lower slow (3 sec)."], tip:"Lead with elbows."
-  },
-  // ARMS
-  cbl_curl:{
-    n:"Cable Bicep Curl", t:"Biceps", eq:"cable", comp:0, cat:"pull",
-    setup:{h:8, t:4, w:2, att:"Straight Bar", spc:"Standing", icon:ICONS.straight_bar},
-    steps:["Elbows pinned to sides.","Curl up, squeeze at top."], tip:"No elbow drift forward."
-  },
-  cbl_tri_pushdown:{
-    n:"Cable Tricep Pushdown", t:"Triceps", eq:"cable", comp:0, cat:"push",
-    setup:{h:2, t:2, w:1, att:"Tricep Rope", spc:"Standing", icon:ICONS.rope},
-    steps:["Elbows glued to sides.","Push down, spread rope at bottom."], tip:"Only forearms move."
-  },
-  // LEGS
-  cbl_goblet_squat:{
-    n:"Cable Goblet Squat", t:"Quads · Glutes", eq:"cable", comp:1, cat:"legs",
-    setup:{h:8, t:8, w:1, att:"Straight Bar", spc:"Face Machine", icon:ICONS.straight_bar},
-    steps:["Bar at collarbone.","Sit back and down, chest tall.","Drive through heels."], tip:"Resist forward pull by keeping heels down."
-  },
-  cbl_rdl:{
-    n:"Cable RDL", t:"Hamstrings · Glutes", eq:"cable", comp:1, cat:"legs",
-    setup:{h:8, t:8, w:1, att:"Straight Bar", spc:"Face Machine", icon:ICONS.straight_bar},
-    steps:["Soft knees, hinge hips back.","Bar close to shins.","Squeeze glutes to stand."], tip:"Feel hamstring stretch — don't turn into a squat."
-  },
-  cbl_kickback:{
-    n:"Cable Glute Kickback", t:"Glutes", eq:"cable", comp:0, cat:"legs",
-    setup:{h:8, t:5, w:3, att:"Ankle Strap", spc:"Face Machine", icon:ICONS.ankle_strap},
-    steps:["Strap ankle, hold frame for balance.","Kick straight back.","Slow return."], tip:"Movement is 100% at the hip."
-  },
-  // CORE
-  cbl_pallof:{
-    n:"Cable Pallof Press", t:"Core", eq:"cable", comp:0, cat:"core",
-    setup:{h:5, t:5, w:1, att:"D-Handle", spc:"Side to Machine", icon:ICONS.d_handle},
-    steps:["Both hands on handle at chest.","Press straight out, hold 2s."], tip:"Machine wants to rotate you — you resist."
-  },
-  bosu_plank:{
-    n:"BOSU Plank", t:"Core", eq:"bw", comp:0, cat:"core",
-    setup:{h:"-", t:"-", w:"-", att:"BOSU", spc:"Floor", icon:ICONS.bw},
-    steps:["Forearms on flat side.","Straight line head to heels."], tip:"Squeeze glutes — no sag."
-  }
-};
-
-const TEMPLATES = {
-  ali:{
-    quick:[{title:"Full Body Push-Emphasis",exs:[{id:"cbl_flat_press",s:3,r:"8-10"},{id:"cbl_row_seated",s:3,r:"8-10"},{id:"cbl_goblet_squat",s:3,r:"10-12"}]}],
-    standard:[{title:"Strength & Recomp",exs:[{id:"cbl_goblet_squat",s:4,r:"6-8"},{id:"cbl_flat_press",s:4,r:"6-8"},{id:"cbl_row_seated",s:4,r:"8-10"},{id:"cbl_pallof",s:3,r:"8/side"}]}],
-    extended:[{title:"Total Body Overload",exs:[{id:"cbl_goblet_squat",s:4,r:"6-8"},{id:"cbl_flat_press",s:4,r:"6-8"},{id:"cbl_row_seated",s:4,r:"8-10"},{id:"cbl_rdl",s:3,r:"8-10"},{id:"cbl_ohp",s:3,r:"8-10"},{id:"cbl_curl",s:3,r:"10-12"}]}]
-  },
-  kristen:{
-    quick:[{title:"Arms & Back Focus",exs:[{id:"cbl_lat_pull",s:3,r:"10-12"},{id:"cbl_curl",s:3,r:"10-12"},{id:"cbl_face_pull",s:2,r:"12-15"}]}],
-    standard:[{title:"Pilates Hybrid Sculpt",exs:[{id:"cbl_row_seated",s:3,r:"10-12"},{id:"cbl_ohp",s:3,r:"10-12"},{id:"cbl_rdl",s:3,r:"10-12"},{id:"cbl_kickback",s:3,r:"15/side"}]}],
-    extended:[{title:"Full Body Tone",exs:[{id:"cbl_rdl",s:4,r:"10-12"},{id:"cbl_row_seated",s:4,r:"10-12"},{id:"cbl_kickback",s:3,r:"15/side"},{id:"cbl_tri_pushdown",s:3,r:"10-12"},{id:"cbl_face_pull",s:3,r:"12-15"}]}]
-  },
-  kam:{
-    quick:[{title:"Athletic Circuit A",exs:[{id:"cbl_goblet_squat",s:3,r:"12-15"},{id:"cbl_flat_press",s:3,r:"10"},{id:"bosu_plank",s:3,r:"30s"}]}],
-    standard:[{title:"Strength Foundations",exs:[{id:"cbl_goblet_squat",s:4,r:"10"},{id:"cbl_flat_press",s:3,r:"10"},{id:"cbl_row_seated",s:3,r:"10"},{id:"bosu_plank",s:3,r:"30s"}]}],
-    extended:[{title:"Full Athletic Dev",exs:[{id:"cbl_goblet_squat",s:4,r:"10"},{id:"cbl_flat_press",s:3,r:"10"},{id:"cbl_row_seated",s:3,r:"10"},{id:"cbl_rdl",s:3,r:"10"},{id:"cbl_pallof",s:3,r:"8/side"}]}]
-  },
-  ashton:{
-    quick:[{title:"Superhero Circuit",exs:[{id:"bosu_plank",s:2,r:"20s"}]}],
-    standard:[{title:"Ninja Training",exs:[{id:"db_lateral",s:3,r:"10 (light)"},{id:"bosu_plank",s:2,r:"20s"}]}],
-    extended:[{title:"Big Play Session",exs:[{id:"db_lateral",s:3,r:"10 (light)"},{id:"bosu_plank",s:2,r:"20s"}]}]
-  }
-};
-
-const USERS = {
-  ali:{name:"Ali",color:"var(--ali)"},
-  kristen:{name:"Kristen",color:"var(--kristen)"},
-  kam:{name:"Kam",color:"var(--kam)",youth:1,maxLoad:75},
-  ashton:{name:"Ashton",color:"var(--ashton)",youth:1,maxLoad:20}
-};
-
-let S={uid:"",user:null,dur:"quick",readiness:7,session:null,timerInt:null,timeLeft:0,selectedMuscles:[]};
-
-const LS={
-  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
-  set(k,v){localStorage.setItem(k,JSON.stringify(v))},
-  hist(uid){return this.get(`hist_${uid}`,[])},
-  addHist(uid,s){const h=this.hist(uid);h.unshift(s);this.set(`hist_${uid}`,h.slice(0,50))},
-  last(uid,exId){return this.get(`last_${uid}_${exId}`,null)},
-  setLast(uid,exId,data){this.set(`last_${uid}_${exId}`,data)},
-  pr(uid,exId){return this.get(`pr_${uid}_${exId}`,null)},
-  setPr(uid,exId,v){this.set(`pr_${uid}_${exId}`,v)}
-};
-
-function generateGymSVG(exSetup, color) {
-    if (exSetup.h === "-" || exSetup.a === "-") {
-        return `<div style="padding:24px; text-align:center; color:var(--muted); font-size:12px; font-weight:800; letter-spacing:1.5px; border-bottom:1px solid var(--border);">FREE WEIGHTS · NO MACHINE REQ</div>`;
-    }
-
-    let track = parseInt(exSetup.h) || 8; // 1=High, 8=Low
-    let tilt = parseInt(exSetup.t) || 5;  // 1=Down, 6=Flat, 11=Up
-    let width = parseInt(exSetup.w) || 3; // 1=Narrow, 3=Mid, 5=Wide
-
-    // ----- FRONT ELEVATION (HEIGHT & TILT) -----
-    let trackY = 20 + ((track - 1) * (140 / 7));
-    
-    // Tilt 1 (pointing down) = 90 deg. Tilt 6 (flat) = 0 deg. Tilt 11 (up) = -90 deg.
-    let tiltAngle = (90 - ((tilt - 1) * 18)) * Math.PI / 180;
-    
-    let fLx = 80 - 50 * Math.cos(tiltAngle); 
-    let fLy = trackY + 50 * Math.sin(tiltAngle); 
-    let fRx = 120 + 50 * Math.cos(tiltAngle); 
-    let fRy = trackY + 50 * Math.sin(tiltAngle);
-
-    const frontSVG = `
-        <div class="svg-box">
-            <div class="svg-label">FRONT (HEIGHT & TILT)</div>
-            <svg viewBox="0 0 200 200">
-                <rect x="76" y="10" width="8" height="180" fill="#374151" rx="2"/>
-                <rect x="116" y="10" width="8" height="180" fill="#374151" rx="2"/>
-                
-                <line x1="80" y1="${trackY}" x2="${fLx}" y2="${fLy}" stroke="#06B6D4" stroke-width="6" stroke-linecap="round"/>
-                <line x1="120" y1="${trackY}" x2="${fRx}" y2="${fRy}" stroke="#06B6D4" stroke-width="6" stroke-linecap="round"/>
-                
-                <circle cx="${fLx}" cy="${fLy}" r="5" fill="#FFD60A"/>
-                <circle cx="${fRx}" cy="${fRy}" r="5" fill="#FFD60A"/>
-                
-                <rect x="70" y="${trackY - 6}" width="20" height="12" fill="${color}" rx="3"/>
-                <rect x="110" y="${trackY - 6}" width="20" height="12" fill="${color}" rx="3"/>
-            </svg>
-        </div>
-    `;
-
-    // ----- TOP-DOWN (FLOOR PLAN & WIDTH) -----
-    // Width 1 (narrow) = pointing forward (90 deg). Width 5 (wide) = pointing outward (180/0 deg).
-    let wAngle = (90 + ((width - 1) * 22.5)) * Math.PI / 180; 
-    let wAngleR = (90 - ((width - 1) * 22.5)) * Math.PI / 180; 
-
-    let tLx = 80 + 60 * Math.cos(wAngle);
-    let tLy = 40 + 60 * Math.sin(wAngle);
-    let tRx = 120 + 60 * Math.cos(wAngleR);
-    let tRy = 40 + 60 * Math.sin(wAngleR);
-
-    let benchSVG = ""; let userSVG = ""; let cablesSVG = "";
-
-    if(exSetup.spc.includes("Bench Center")) {
-        benchSVG = `<rect x="90" y="80" width="20" height="90" fill="#0A84FF" rx="4"/>
-                    <text x="100" y="155" fill="#fff" font-size="8" text-anchor="middle" font-weight="800">BENCH</text>`;
-        userSVG = `<circle cx="100" cy="100" r="10" fill="#32D74B"/>`;
-        cablesSVG = `<line x1="${tLx}" y1="${tLy}" x2="95" y2="110" stroke="#FFD60A" stroke-width="2" stroke-dasharray="3 3"/>
-                     <line x1="${tRx}" y1="${tRy}" x2="105" y2="110" stroke="#FFD60A" stroke-width="2" stroke-dasharray="3 3"/>`;
-    } else {
-        let userY = 120;
-        if(exSetup.spc.includes("Open Floor") || exSetup.spc.includes("Stand")) userY = 150;
-        userSVG = `<circle cx="100" cy="${userY}" r="10" fill="#32D74B"/>`;
-        cablesSVG = `<line x1="${tLx}" y1="${tLy}" x2="95" y2="${userY}" stroke="#FFD60A" stroke-width="2" stroke-dasharray="3 3"/>
-                     <line x1="${tRx}" y1="${tRy}" x2="105" y2="${userY}" stroke="#FFD60A" stroke-width="2" stroke-dasharray="3 3"/>`;
-    }
-
-    const topSVG = `
-        <div class="svg-box">
-            <div class="svg-label">TOP (WIDTH)</div>
-            <svg viewBox="0 0 200 200">
-                <rect x="60" y="20" width="80" height="20" fill="#374151" rx="4"/>
-                <line x1="80" y1="40" x2="${tLx}" y2="${tLy}" stroke="#06B6D4" stroke-width="6" stroke-linecap="round"/>
-                <line x1="120" y1="40" x2="${tRx}" y2="${tRy}" stroke="#06B6D4" stroke-width="6" stroke-linecap="round"/>
-                ${benchSVG} ${cablesSVG} ${userSVG}
-                <circle cx="${tLx}" cy="${tLy}" r="4" fill="#FFD60A"/>
-                <circle cx="${tRx}" cy="${tRy}" r="4" fill="#FFD60A"/>
-            </svg>
-        </div>
-    `;
-
-    return `
-    <div class="gym-view">
-        <div class="setup-visuals">${topSVG}${frontSVG}</div>
-        <div class="gym-legend">
-            <div><span class="dot" style="background:#06B6D4"></span>Arms</div>
-            <div><span class="dot" style="background:#0A84FF"></span>Bench</div>
-            <div><span class="dot" style="background:#32D74B"></span>You</div>
-            <div><span class="dot" style="background:#FFD60A"></span>Cables</div>
-        </div>
-    </div>`;
-}
-
-window.onload=()=>{
-    const options = { weekday: 'long', month: 'long', day: 'numeric' };
-    document.getElementById('dateHeaderHome').innerText = new Date().toLocaleDateString('en-US', options).toUpperCase();
-    document.getElementById('dateHeader').innerText = new Date().toLocaleDateString('en-US', options).toUpperCase();
-    
-    // Injecting SVGs into static elements
-    document.getElementById('generateBtn').innerHTML = `<span class="vector-icon">${APP_ICONS.build}</span> Build Custom Workout`;
-    document.getElementById('glossaryTitle').innerHTML = `<span class="vector-icon" style="color: var(--accent); margin-right: 8px;">${APP_ICONS.guide}</span> Equipment Glossary`;
-    document.getElementById('historyTitle').innerHTML = `<span class="vector-icon" style="color: var(--accent); margin-right: 8px;">${APP_ICONS.history}</span> History & PRs`;
-};
-
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('btnBack').classList.toggle('hidden',id==='scr-users');window.scrollTo(0,0)}
-function navBack(){const cur=document.querySelector('.screen.active').id;if(cur==='scr-workout' || cur==='scr-history')show('scr-dash');else show('scr-users');stopTimer()}
-
-function pickUser(uid){
-  S.uid=uid;S.user=USERS[uid];
-  document.documentElement.style.setProperty('--accent',S.user.color);
-  document.getElementById('dTitle').innerText=`Hi, ${S.user.name}`;
-  document.getElementById('hTitle').style.color=S.user.color;
-  
-  const b=document.getElementById('banner'), bi=document.getElementById('bIcon'), bt=document.getElementById('bTitle'), bm=document.getElementById('bMsg');
-  b.style.display='flex';
-  const streak=LS.get(`streak_${S.uid}`,0);
-  const today = new Date().toDateString();
-  const lastLog = LS.get(`lastLog_${S.uid}`);
-
-  if(S.user.youth && lastLog === today){
-      S.readiness = 3;
-      bi.innerHTML=APP_ICONS.stop; bi.style.color = 'var(--danger)'; bt.innerText="Rest Enforced";bm.innerText="Muscles grow when you rest. You've already trained today. Go play outside!";
-  } else if(streak >= 3 && !S.user.youth){
-      S.readiness = 5;
-      bi.innerHTML=APP_ICONS.warn; bi.style.color = 'var(--warn)'; bt.innerText="Fatigue Detected";bm.innerText=`${streak} day streak. Volume automatically reduced by 1 set to protect your CNS.`;
-  } else {
-      S.readiness = 7;
-      bi.innerHTML=APP_ICONS.check; bi.style.color = 'var(--success)'; bt.innerText=`Ready · ${streak} day streak`;bm.innerText="Recovery optimal. Let's hit it.";
-  }
-
-  S.selectedMuscles = [];
-  document.querySelectorAll('.m-chip').forEach(c => c.classList.remove('active'));
-
-  renderDash();show('scr-dash');
-}
-
-function pickDur(d){S.dur=d;document.querySelectorAll('.dur-pill').forEach(p=>p.classList.toggle('active',p.dataset.dur===d));renderDash()}
-
-function renderDash(){
-  const list=document.getElementById('planList');list.innerHTML="";
-  const plans=(TEMPLATES[S.uid]||{})[S.dur]||[];
-  plans.forEach((p,i)=>{
-    list.innerHTML+=`<div class="mcard" onclick="startWorkout(${i},false)">
-      <div><div class="mtitle">${p.title}</div><div class="mmeta"><span class="vector-icon">${APP_ICONS.time}</span> <span>${S.dur==='quick'?'~20 min':S.dur==='standard'?'~40 min':'~55 min'}</span></div></div>
-      <div class="mchev">›</div></div>`;
-  });
-}
-
-function toggleMuscle(m, el) {
-    if(S.selectedMuscles.includes(m)) {
-        S.selectedMuscles = S.selectedMuscles.filter(x => x !== m);
-        el.classList.remove('active');
-    } else {
-        if(S.selectedMuscles.length >= 3) { showToast("Max 3 areas allowed"); return; }
-        S.selectedMuscles.push(m); el.classList.add('active');
-    }
-}
-
-function generateWorkout() {
-    if(S.selectedMuscles.length === 0) { showToast("Select a focus area"); return; }
-    
-    let pool = [];
-    Object.entries(DB).forEach(([id, ex]) => {
-        if(S.user.youth && !ex.youth) return; 
-        let targetStr = ex.t.toLowerCase(); let matches = false;
-        
-        if(S.selectedMuscles.includes('Chest') && targetStr.includes('chest')) matches = true;
-        if(S.selectedMuscles.includes('Back') && (targetStr.includes('back') || targetStr.includes('lat'))) matches = true;
-        if(S.selectedMuscles.includes('Legs') && (targetStr.includes('quad') || targetStr.includes('glute') || targetStr.includes('hamstring') || targetStr.includes('leg'))) matches = true;
-        if(S.selectedMuscles.includes('Shoulders') && (targetStr.includes('shoulder') || targetStr.includes('delt'))) matches = true;
-        if(S.selectedMuscles.includes('Arms') && (targetStr.includes('bicep') || targetStr.includes('tricep'))) matches = true;
-        if(S.selectedMuscles.includes('Core') && (targetStr.includes('core') || targetStr.includes('oblique'))) matches = true;
-        
-        if(matches) pool.push(id);
-    });
-
-    if(pool.length === 0) { showToast("No exercises found"); return; }
-    pool = pool.sort(() => 0.5 - Math.random());
-    
-    let count = S.dur === 'quick' ? 3 : S.dur === 'standard' ? 5 : 7;
-    let selectedExs = pool.slice(0, count);
-
-    document.getElementById('wFeed').innerHTML = "";
-    S.session = { startedAt: Date.now(), exs: [], title: "Custom: " + S.selectedMuscles.join(" & ") };
-    document.getElementById('wTitle').innerText = S.session.title;
-    
-    selectedExs.forEach((exId, i) => {
-        let sets = S.dur === 'quick' ? 2 : 3;
-        if(S.user.youth) sets = 2;
-        if(S.readiness <= 5) sets = Math.max(1, sets - 1);
-        buildCard(exId, sets, "8-12", i, true);
-    });
-    show('scr-workout');
-}
-
-function showGlossary() {
-    const modal = document.getElementById('modal'); const mbox = document.getElementById('mbox');
-    mbox.innerHTML = `
-        <h3 style="color:var(--accent)"><span class="vector-icon">${APP_ICONS.guide}</span> Equipment Guide</h3>
-        <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Identify the handles and attachments.</p>
-        <div class="gloss-item"><div class="gloss-icon"><svg viewBox="0 0 24 24">${ICONS.d_handle}</svg></div><div class="gloss-text"><h4>D-Handle</h4><p>Single-hand loop grip. Presses, single arm rows, flys.</p></div></div>
-        <div class="gloss-item"><div class="gloss-icon"><svg viewBox="0 0 24 24">${ICONS.v_bar}</svg></div><div class="gloss-text"><h4>V-Bar</h4><p>Solid metal triangle. Heavy, close-grip seated rows.</p></div></div>
-        <div class="gloss-item"><div class="gloss-icon"><svg viewBox="0 0 24 24">${ICONS.rope}</svg></div><div class="gloss-text"><h4>Tricep Rope</h4><p>Thick black rope. Tricep pushdowns and face pulls.</p></div></div>
-        <div class="gloss-item"><div class="gloss-icon"><svg viewBox="0 0 24 24">${ICONS.straight_bar}</svg></div><div class="gloss-text"><h4>Straight Bar</h4><p>Short metal bar. Goblet squats, curls, RDLs.</p></div></div>
-        <div class="gloss-item"><div class="gloss-icon"><svg viewBox="0 0 24 24">${ICONS.ankle_strap}</svg></div><div class="gloss-text"><h4>Ankle Strap</h4><p>Velcro cuff. Straps around ankle for glutes.</p></div></div>
-        <button class="mclose" onclick="closeModal()">Close Guide</button>
-    `;
-    modal.classList.add('on');
-}
-
-function startWorkout(planIdx,isManual){
-  document.getElementById('wFeed').innerHTML="";
-  const plan=TEMPLATES[S.uid][S.dur][planIdx];
-  document.getElementById('wTitle').innerText=plan.title;
-  S.session = {startedAt:Date.now(), title:plan.title};
-  plan.exs.forEach((req,i)=>{
-    let sets=req.s; if(S.readiness<=5)sets=Math.max(2,sets-1);
-    buildCard(req.id,sets,req.r,i,true);
-  });
-  show('scr-workout');
-}
-
-function buildCard(exId,sets,reps,idx,addWarmup){
-  const ex=DB[exId];
-  const last=LS.last(S.uid,exId);
-  
-  let suggestion="";
-  if(last){
-    const maxReps=parseInt(reps.toString().split('-').pop()) || 10;
-    if(last.topReps>=maxReps && ex.eq!=='bw' && ex.eq!=='db'){
-      const next=nearestStack(last.weight+10);
-      suggestion=`⬆ Last: ${last.weight}×${last.topReps} · Try ${next} today`;
-    }else{ suggestion=`Last time: ${last.weight}${ex.eq==='bw'?'':'lb'} × ${last.topReps} reps`; }
-  }else{ suggestion=ex.eq==='bw'?"Bodyweight — track reps only":"First time — start light, feel it out"; }
-  
-  const stepsHTML=ex.steps.map(s=>`<li>${s}</li>`).join("");
-  const warmups=(addWarmup && ex.comp && ex.eq!=='bw' && !S.user.youth && last)?2:0;
-  const totalSets=sets+warmups;
-  
-  let rows="";
-  for(let i=1;i<=totalSets;i++){
-    const isWarm=i<=warmups;
-    const targetW=isWarm?(last?nearestStack(Math.round(last.weight*(i===1?.5:.75))):15):(last?last.weight:"");
-    const targetR=isWarm?"5":reps;
-    rows+=`
-      <div class="trk-row" id="r-${idx}-${i}">
-        <div class="setpill ${isWarm?'warm':''}">${isWarm?'W':i-warmups}</div>
-        ${ex.eq==='bw'?'<div style="flex:1; text-align:center; color:var(--muted); font-size:12px; font-weight:800;">BODYWEIGHT</div>':`<input type="number" class="val-in wv" placeholder="lbs" value="${targetW}">`}
-        <input type="number" class="val-in rv" placeholder="${targetR}" value="">
-        <button class="chk" onclick="toggleSet('r-${idx}-${i}','${exId}',${isWarm?1:0})">${APP_ICONS.check_btn}</button>
-      </div>`;
-  }
-
-  const svgVisuals = generateGymSVG(ex.setup, S.user.color);
-  
-  const setupChips = ex.eq === 'bw' || ex.eq === 'db' ? 
-      `<div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.space}</span> Space</span><span class="s-val">${ex.setup.spc}</span></div>
-       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.attach}</span> Equip</span><span class="s-val">${ex.setup.att}</span></div>` :
-      `<div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.height}</span> Height</span><span class="s-val">Track ${ex.setup.h}</span></div>
-       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.tilt}</span> Tilt</span><span class="s-val">Dial ${ex.setup.t}</span></div>
-       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.width}</span> Width</span><span class="s-val">Pin ${ex.setup.w}</span></div>
-       <div class="s-chip"><span class="s-lbl"><span class="vector-icon">${APP_ICONS.attach}</span> Attach</span><span class="s-val">${ex.setup.att}</span></div>`;
-
-  const card=`<div class="excard" id="ec-${idx}" data-exid="${exId}">
-    <div class="ex-h">
-      <div><div class="ex-title">${ex.n}</div><div class="ex-target">${ex.t}${ex.comp?' · Compound':''}</div></div>
-    </div>
-    
-    ${svgVisuals}
-    
-    <div class="setup-chips">${setupChips}</div>
-    
-    <button class="coach-t" onclick="document.getElementById('c-${idx}').classList.toggle('active')">
-        <span>📖 Coach Guide & Tips</span><span style="color:var(--accent)">▼</span>
-    </button>
-    <div class="coach-c" id="c-${idx}">
-      <ul>${stepsHTML}</ul>
-      <div class="tipbox">💡 <strong>Pro Tip:</strong> ${ex.tip}</div>
-    </div>
-    
-    <div class="trk">
-      <div class="trk-header"><span>Set</span><span>${ex.eq==='bw'?'Type':'Lbs (Each)'}</span><span>Reps</span><span>Done</span></div>
-      ${rows}
-      <div class="last-hint" style="margin-top:10px;">${suggestion}</div>
-    </div>
-  </div>`;
-  
-  document.getElementById('wFeed').insertAdjacentHTML('beforeend',card);
-}
-
-function toggleSet(rowId, exId, isWarm){
-  const row=document.getElementById(rowId);
-  const ex=DB[exId];
-  if(row.classList.contains('done')){
-    row.classList.remove('done');
-    row.querySelectorAll('.val-in').forEach(i=>i.disabled=false);
-  }else{
-    const wv=row.querySelector('.wv'); const rv=row.querySelector('.rv');
-    if(ex.eq!=='bw'){
-        if(!wv || !wv.value){ wv.focus(); return; }
-        if(S.user.maxLoad && +wv.value > S.user.maxLoad){ showToast(`Safety limit: Max ${S.user.maxLoad} lb.`); return; }
-    }
-    if(!rv.value) rv.value = rv.placeholder.split('-')[0]; 
-    
-    row.classList.add('done'); row.querySelectorAll('.val-in').forEach(i=>i.disabled=true);
-    let restTime = isWarm ? 45 : 60; if(ex.comp && !isWarm) restTime = 90; 
-    startTimer(restTime);
-  }
-}
-
-function closeModal() { document.getElementById('modal').classList.remove('on'); }
-
-function showHistory() {
-  const hist = LS.hist(S.uid);
-  const list = document.getElementById('hList'); const stats = document.getElementById('hStats');
-  
-  if(hist.length === 0) {
-      list.innerHTML = "<p style='color:var(--muted); text-align:center;'>No history found. Go train!</p>"; stats.innerHTML = "";
-  } else {
-      const totalSessions = hist.length;
-      const totalVolume = hist.reduce((sum, s) => sum + s.volume, 0);
-      const avgSets = Math.round(hist.reduce((sum, s) => sum + s.sets, 0) / totalSessions);
-      
-      stats.innerHTML = `<div class="stat"><div class="stat-v">${totalSessions}</div><div class="stat-l">Workouts</div></div>
-                         <div class="stat"><div class="stat-v">${(totalVolume/1000).toFixed(1)}k</div><div class="stat-l">Total Vol</div></div>
-                         <div class="stat"><div class="stat-v">${avgSets}</div><div class="stat-l">Avg Sets</div></div>`;
-      list.innerHTML = hist.map(s => `
-        <div class="hitem">
-          <div><div class="hi-title">${s.title}</div><div class="hi-meta">${new Date(s.date).toLocaleDateString()} · ${s.sets} sets</div></div>
-          <div class="hi-vol">${s.volume} lbs</div>
-        </div>`).join("");
-  }
-  show('scr-history');
-}
-
-function startTimer(sec){
-  clearInterval(S.timerInt); S.timeLeft=sec; 
-  const tsheet = document.getElementById('tsheet');
-  tsheet.classList.add('on'); 
-  updateTimerUI();
-  S.timerInt=setInterval(()=>{
-    S.timeLeft--; updateTimerUI();
-    if(S.timeLeft<=0){ stopTimer(); if(navigator.vibrate) navigator.vibrate([200,100,200]); }
-  }, 1000);
-}
-function addTime(sec) { S.timeLeft += sec; updateTimerUI(); }
-function stopTimer(){ 
-    clearInterval(S.timerInt); 
-    document.getElementById('tsheet').classList.remove('on'); 
-}
-function updateTimerUI(){ let m=Math.floor(S.timeLeft/60), s=S.timeLeft%60; document.getElementById('tDisp').innerText=`0${m}:${s<10?'0':''}${s}`; }
-
-function finishWorkout() {
-  const cards = document.querySelectorAll('.excard');
-  let totalVol = 0; let totalSets = 0;
-  
-  cards.forEach(card => {
-    const exId = card.dataset.exid; let topWeight = 0; let topReps = 0; let validSets = 0;
-    card.querySelectorAll('.done').forEach(row => {
-      validSets++; totalSets++;
-      const isWarm = row.querySelector('.warm') !== null;
-      const wInput = row.querySelector('.wv'); const rInput = row.querySelector('.rv');
-      const w = wInput ? parseInt(wInput.value) || 0 : 0; const r = rInput ? parseInt(rInput.value) || 0 : 0;
-      
-      if(!isWarm) totalVol += (w * r);
-      if(!isWarm && w >= topWeight) { topWeight = w; topReps = Math.max(topReps, r); }
-    });
-
-    if(validSets > 0) {
-      LS.setLast(S.uid, exId, { weight: topWeight, topReps: topReps, date: Date.now() });
-      const currentPr = LS.pr(S.uid, exId);
-      if(!currentPr || topWeight > currentPr.weight || (topWeight === currentPr.weight && topReps > currentPr.reps)){
-         LS.setPr(S.uid, exId, { weight: topWeight, reps: topReps });
-      }
-    }
-  });
-
-  if(totalSets === 0) { showToast("No sets completed!"); return; }
-
-  LS.addHist(S.uid, { title: S.session.title, date: Date.now(), sets: totalSets, volume: totalVol });
-  LS.set(`lastLog_${S.uid}`, new Date().toDateString());
-  
-  let streak = LS.get(`streak_${S.uid}`, 0);
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  const prevLog = LS.get(`lastLog_${S.uid}`);
-  if(prevLog === yesterday) streak++; else if(prevLog !== new Date().toDateString()) streak = 1;
-  LS.set(`streak_${S.uid}`, streak);
-
-  showToast("Workout Saved Successfully!");
-  setTimeout(() => { navBack(); }, 1500);
-}
+const VERSION="2.0.0";
+const EXERCISES=[{"id": "cable_flat_bench_press", "name": "Flat Bench Cable Press", "group": "Chest", "patterns": ["horizontal_push"], "muscles": ["chest", "triceps", "shoulders"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 5, "angle": 8, "lever": 5, "position": "Flat bench centered between arms", "cables": "both", "bench": true}, "level": 2, "minAge": 14, "goals": ["strength", "muscle", "recomp"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Center the flat bench between the pulleys.", "Start handles just outside the chest.", "Press up and slightly together without shrugging."], "tip": "Keep shoulder blades pinned to the bench.", "video": ""}, {"id": "standing_cable_press", "name": "Standing Cable Chest Press", "group": "Chest", "patterns": ["horizontal_push", "core_anti_rotation"], "muscles": ["chest", "triceps", "core"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 5, "angle": 8, "lever": 5, "position": "Standing split stance", "cables": "both", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "recomp", "general"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Step forward until cables are tight.", "Brace ribs down.", "Press forward and control the return."], "tip": "Use a staggered stance so the machine does not pull you backward.", "video": ""}, {"id": "single_arm_cable_press", "name": "Single Arm Cable Press", "group": "Chest", "patterns": ["horizontal_push", "core_anti_rotation"], "muscles": ["chest", "triceps", "core"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 5, "angle": 7, "lever": 5, "position": "Side or split stance", "cables": "single", "bench": false}, "level": 2, "minAge": 12, "goals": ["strength", "athletic", "recomp"], "compound": true, "unilateral": true, "load": "cable", "cues": ["Stand tall with one cable.", "Press without rotating your hips.", "Pause at lockout."], "tip": "This is chest plus core. Lower the load if you twist.", "video": ""}, {"id": "low_to_high_press", "name": "Low-to-High Cable Press", "group": "Chest", "patterns": ["horizontal_push"], "muscles": ["chest", "shoulders", "triceps"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 7, "angle": 8, "lever": 7, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "recomp"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Handles start low beside ribs.", "Press forward and upward toward eye level.", "Keep wrists stacked over elbows."], "tip": "Think of scooping upward, not just pressing straight out.", "video": ""}, {"id": "high_to_low_fly", "name": "High-to-Low Cable Fly", "group": "Chest", "patterns": ["fly", "horizontal_push"], "muscles": ["chest"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 2, "angle": 8, "lever": 4, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "recomp"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Start arms wide with soft elbows.", "Bring hands down and together.", "Pause and squeeze chest."], "tip": "Keep the elbow angle mostly the same all rep.", "video": ""}, {"id": "mid_cable_fly", "name": "Mid Cable Chest Fly", "group": "Chest", "patterns": ["fly", "horizontal_push"], "muscles": ["chest"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 4, "angle": 8, "lever": 5, "position": "Standing centered", "cables": "both", "bench": false}, "level": 1, "minAge": 14, "goals": ["muscle", "general", "recomp"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Stand one step forward.", "Open arms wide with elbows soft.", "Hug a wide tree."], "tip": "If shoulders take over, reduce weight and shorten range.", "video": ""}, {"id": "cable_squeeze_press", "name": "Cable Squeeze Press", "group": "Chest", "patterns": ["horizontal_push"], "muscles": ["chest", "triceps"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 5, "angle": 7, "lever": 5, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "recomp"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Bring handles together at chest.", "Keep them close as you press.", "Squeeze chest at lockout."], "tip": "Great finisher after a press.", "video": ""}, {"id": "close_grip_cable_press", "name": "Close Grip Cable Press", "group": "Chest", "patterns": ["horizontal_push", "triceps"], "muscles": ["chest", "triceps"], "equipment": "functional_trainer", "attachment": "Straight bar", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Standing facing away", "cables": "single", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "strength"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Hold bar close to chest.", "Elbows stay tucked.", "Press forward with control."], "tip": "More triceps than a normal press.", "video": ""}, {"id": "push_up", "name": "Push-up", "group": "Chest", "patterns": ["horizontal_push"], "muscles": ["chest", "triceps", "core"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 2, "minAge": 8, "goals": ["strength", "athletic", "general"], "compound": true, "unilateral": false, "load": "bodyweight", "cues": ["Hands below shoulders.", "Lower as one piece.", "Press the floor away."], "tip": "End sets before hips sag.", "video": ""}, {"id": "incline_push_up_bench", "name": "Incline Push-up on Bench", "group": "Chest", "patterns": ["horizontal_push"], "muscles": ["chest", "triceps", "core"], "equipment": "bench", "attachment": "Bench", "setup": {"height": null, "angle": null, "lever": null, "position": "Hands on flat bench", "cables": "single", "bench": true}, "level": 1, "minAge": 6, "goals": ["general", "fatloss", "athletic"], "compound": true, "unilateral": false, "load": "bodyweight", "cues": ["Hands on bench.", "Body straight.", "Lower chest to bench."], "tip": "Raise or lower the hands to change difficulty.", "video": ""}, {"id": "db_bench_press", "name": "Dumbbell Bench Press", "group": "Chest", "patterns": ["horizontal_push"], "muscles": ["chest", "triceps"], "equipment": "dumbbells", "attachment": "Pair of DBs up to 15 lb", "setup": {"height": null, "angle": null, "lever": null, "position": "Flat bench", "cables": "single", "bench": true}, "level": 1, "minAge": 8, "goals": ["general", "muscle", "athletic"], "compound": true, "unilateral": false, "load": "db", "cues": ["Lie on bench with DBs over chest.", "Lower slowly.", "Press up with control."], "tip": "Use slow tempo because the dumbbells are light.", "video": ""}, {"id": "db_floor_press", "name": "Dumbbell Floor Press", "group": "Chest", "patterns": ["horizontal_push"], "muscles": ["chest", "triceps"], "equipment": "dumbbells", "attachment": "Pair of DBs up to 15 lb", "setup": {"height": null, "angle": null, "lever": null, "position": "Floor", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["general", "athletic"], "compound": true, "unilateral": false, "load": "db", "cues": ["Lie on floor with elbows on ground.", "Press DBs up.", "Lower until triceps touch floor."], "tip": "Shoulder friendly and simple for kids.", "video": ""}, {"id": "seated_cable_row", "name": "Seated Cable Row", "group": "Back", "patterns": ["horizontal_pull"], "muscles": ["back", "biceps"], "equipment": "functional_trainer", "attachment": "V-bar or D-handles", "setup": {"height": 7, "angle": 5, "lever": 3, "position": "Sit on floor facing machine", "cables": "both", "bench": false}, "level": 1, "minAge": 12, "goals": ["strength", "muscle", "recomp", "athletic"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Sit tall with feet braced.", "Start by pulling shoulder blades back.", "Pull handles to lower ribs."], "tip": "Do not turn it into a low-back swing.", "video": ""}, {"id": "standing_cable_row", "name": "Standing Cable Row", "group": "Back", "patterns": ["horizontal_pull"], "muscles": ["back", "biceps", "core"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Standing centered", "cables": "both", "bench": false}, "level": 1, "minAge": 10, "goals": ["muscle", "general", "athletic"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Step back until cables are tight.", "Brace abs and keep ribs stacked.", "Row elbows behind ribs."], "tip": "The body should not rock.", "video": ""}, {"id": "single_arm_cable_row", "name": "Single Arm Cable Row", "group": "Back", "patterns": ["horizontal_pull", "core_anti_rotation"], "muscles": ["back", "biceps", "core"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Split stance facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 10, "goals": ["strength", "muscle", "athletic"], "compound": true, "unilateral": true, "load": "cable", "cues": ["Use one handle.", "Keep chest square.", "Drive elbow toward back pocket."], "tip": "Pause one count with the handle at your ribs.", "video": ""}, {"id": "high_cable_row", "name": "High Cable Row", "group": "Back", "patterns": ["horizontal_pull", "rear_delt"], "muscles": ["back", "shoulders", "biceps"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 2, "angle": 6, "lever": 4, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 12, "goals": ["muscle", "posture", "recomp"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Handles start high.", "Pull elbows wide toward shoulders.", "Squeeze upper back."], "tip": "Keep neck relaxed.", "video": ""}, {"id": "kneeling_lat_pulldown", "name": "Kneeling Lat Pulldown", "group": "Back", "patterns": ["vertical_pull"], "muscles": ["back", "biceps"], "equipment": "functional_trainer", "attachment": "Straight bar or D-handles", "setup": {"height": 1, "angle": 6, "lever": 3, "position": "Kneeling facing machine", "cables": "both", "bench": false}, "level": 2, "minAge": 12, "goals": ["strength", "muscle", "recomp"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Set pulleys high.", "Kneel or sit tall.", "Pull elbows down to ribs."], "tip": "Lead with elbows, not hands.", "video": ""}, {"id": "straight_arm_pulldown", "name": "Straight Arm Pulldown", "group": "Back", "patterns": ["vertical_pull"], "muscles": ["back", "core"], "equipment": "functional_trainer", "attachment": "Straight bar or rope", "setup": {"height": 1, "angle": 6, "lever": 3, "position": "Standing facing machine", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "recomp"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Arms stay mostly straight.", "Pull bar from eye level to thighs.", "Keep ribs down."], "tip": "Great lat isolation without a full lat pulldown station.", "video": ""}, {"id": "face_pull", "name": "Rope Face Pull", "group": "Back", "patterns": ["rear_delt", "horizontal_pull"], "muscles": ["shoulders", "back"], "equipment": "functional_trainer", "attachment": "Rope", "setup": {"height": 2, "angle": 6, "lever": 4, "position": "Standing facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 10, "goals": ["mobility", "muscle", "general", "recomp"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Thumbs point back.", "Pull rope toward ears.", "Finish with elbows high and wide."], "tip": "Go light. This is posture work.", "video": ""}, {"id": "cable_reverse_fly", "name": "Cable Reverse Fly", "group": "Back", "patterns": ["rear_delt"], "muscles": ["shoulders", "back"], "equipment": "functional_trainer", "attachment": "D-handles crossed", "setup": {"height": 4, "angle": 6, "lever": 5, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "posture", "recomp"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Cross handles in front.", "Open arms to a T.", "Pause at shoulder height."], "tip": "Move from rear delts, not by shrugging.", "video": ""}, {"id": "cable_pullover", "name": "Cable Pullover", "group": "Back", "patterns": ["vertical_pull"], "muscles": ["back", "core"], "equipment": "functional_trainer", "attachment": "Rope or straight bar", "setup": {"height": 2, "angle": 6, "lever": 3, "position": "Standing or half kneeling", "cables": "single", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "recomp"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Start with arms high.", "Pull attachment in an arc to thighs.", "Keep elbows soft."], "tip": "Feel lats stretch at the top.", "video": ""}, {"id": "db_bench_row", "name": "One Arm DB Bench Row", "group": "Back", "patterns": ["horizontal_pull"], "muscles": ["back", "biceps"], "equipment": "dumbbells", "attachment": "One DB up to 15 lb", "setup": {"height": null, "angle": null, "lever": null, "position": "One knee and hand on bench", "cables": "single", "bench": true}, "level": 1, "minAge": 8, "goals": ["general", "athletic", "muscle"], "compound": true, "unilateral": true, "load": "db", "cues": ["Support one hand and knee.", "Row DB toward hip.", "Lower slowly."], "tip": "Use tempo and pauses to make light DBs useful.", "video": ""}, {"id": "cable_row_to_hip", "name": "Cable Row to Hip", "group": "Back", "patterns": ["horizontal_pull"], "muscles": ["back", "biceps"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Standing angled to machine", "cables": "single", "bench": false}, "level": 2, "minAge": 12, "goals": ["muscle", "athletic"], "compound": true, "unilateral": true, "load": "cable", "cues": ["Stand at a slight angle.", "Pull elbow toward back pocket.", "Let shoulder blade move."], "tip": "A lat-biased single arm row.", "video": ""}, {"id": "cable_overhead_press", "name": "Cable Overhead Press", "group": "Shoulders", "patterns": ["vertical_push"], "muscles": ["shoulders", "triceps", "core"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 7, "angle": 8, "lever": 7, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["strength", "muscle", "recomp"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Handles start at shoulders.", "Brace ribs down.", "Press up without leaning back."], "tip": "Use a split stance if cables pull you backward.", "video": ""}, {"id": "single_arm_cable_ohp", "name": "Single Arm Cable Overhead Press", "group": "Shoulders", "patterns": ["vertical_push", "core_anti_rotation"], "muscles": ["shoulders", "triceps", "core"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 7, "angle": 7, "lever": 7, "position": "Half kneeling or standing", "cables": "single", "bench": false}, "level": 2, "minAge": 14, "goals": ["strength", "athletic", "muscle"], "compound": true, "unilateral": true, "load": "cable", "cues": ["Start handle at shoulder.", "Brace before pressing.", "Press up and slightly in."], "tip": "Half-kneeling makes it more core-focused.", "video": ""}, {"id": "cable_lateral_raise", "name": "Cable Lateral Raise", "group": "Shoulders", "patterns": ["shoulder_iso"], "muscles": ["shoulders"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 7, "angle": 5, "lever": 5, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "recomp"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Cable starts low across body.", "Lead with elbow.", "Stop around shoulder height."], "tip": "A little forward lean can help.", "video": ""}, {"id": "db_lateral_raise", "name": "DB Lateral Raise", "group": "Shoulders", "patterns": ["shoulder_iso"], "muscles": ["shoulders"], "equipment": "dumbbells", "attachment": "Light DBs", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 10, "goals": ["muscle", "general"], "compound": false, "unilateral": false, "load": "db", "cues": ["Raise elbows to the side.", "Stop at shoulder height.", "Lower for three seconds."], "tip": "Your 15s are enough if the lowering is slow.", "video": ""}, {"id": "cable_front_raise", "name": "Cable Front Raise", "group": "Shoulders", "patterns": ["shoulder_iso"], "muscles": ["shoulders"], "equipment": "functional_trainer", "attachment": "Straight bar or D-handle", "setup": {"height": 7, "angle": 5, "lever": 5, "position": "Facing away from machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "general"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Cable starts low behind you.", "Raise to shoulder height.", "Lower under control."], "tip": "Skip if front shoulders feel irritated.", "video": ""}, {"id": "cable_y_raise", "name": "Cable Y Raise", "group": "Shoulders", "patterns": ["shoulder_iso", "rear_delt"], "muscles": ["shoulders", "back"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 7, "angle": 6, "lever": 6, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["mobility", "posture", "muscle"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Start hands low and crossed.", "Raise into a Y.", "Keep shoulders away from ears."], "tip": "Light weight wins here.", "video": ""}, {"id": "cable_external_rotation", "name": "Cable External Rotation", "group": "Shoulders", "patterns": ["mobility"], "muscles": ["shoulders"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Elbow at side, bent 90 degrees.", "Rotate hand away from belly.", "Keep elbow glued to ribs."], "tip": "Use the lightest plate. This is prehab.", "video": ""}, {"id": "cable_internal_rotation", "name": "Cable Internal Rotation", "group": "Shoulders", "patterns": ["mobility"], "muscles": ["shoulders"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Elbow at side.", "Rotate hand toward belly.", "Control the return."], "tip": "Use this as warmup, not heavy work.", "video": ""}, {"id": "cable_upright_row", "name": "Cable Upright Row", "group": "Shoulders", "patterns": ["shoulder_iso"], "muscles": ["shoulders", "back"], "equipment": "functional_trainer", "attachment": "Straight bar", "setup": {"height": 7, "angle": 5, "lever": 5, "position": "Facing machine", "cables": "single", "bench": false}, "level": 2, "minAge": 16, "goals": ["muscle"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Hands shoulder width.", "Pull only to lower chest.", "Elbows stay below or level with shoulders."], "tip": "Skip if it pinches; swap lateral raises.", "video": ""}, {"id": "db_shoulder_press", "name": "DB Shoulder Press", "group": "Shoulders", "patterns": ["vertical_push"], "muscles": ["shoulders", "triceps"], "equipment": "dumbbells", "attachment": "Pair of DBs up to 15 lb", "setup": {"height": null, "angle": null, "lever": null, "position": "Standing or seated on bench", "cables": "single", "bench": true}, "level": 1, "minAge": 10, "goals": ["general", "muscle", "athletic"], "compound": true, "unilateral": false, "load": "db", "cues": ["Start DBs at shoulders.", "Press overhead.", "Lower slowly."], "tip": "Use higher reps with your DBs.", "video": ""}, {"id": "db_rear_delt_fly", "name": "DB Rear Delt Fly", "group": "Shoulders", "patterns": ["rear_delt"], "muscles": ["shoulders", "back"], "equipment": "dumbbells", "attachment": "Light DBs", "setup": {"height": null, "angle": null, "lever": null, "position": "Hinge or chest supported on bench", "cables": "single", "bench": true}, "level": 1, "minAge": 10, "goals": ["posture", "muscle"], "compound": false, "unilateral": false, "load": "db", "cues": ["Hinge and keep back flat.", "Open arms wide.", "Pause briefly."], "tip": "Go very light and strict.", "video": ""}, {"id": "cable_bar_curl", "name": "Cable Bar Curl", "group": "Arms", "patterns": ["biceps"], "muscles": ["biceps"], "equipment": "functional_trainer", "attachment": "Straight bar", "setup": {"height": 7, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "general"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Elbows stay by sides.", "Curl without leaning back.", "Squeeze at the top."], "tip": "Stop elbows from drifting forward.", "video": ""}, {"id": "rope_hammer_curl", "name": "Rope Hammer Curl", "group": "Arms", "patterns": ["biceps"], "muscles": ["biceps"], "equipment": "functional_trainer", "attachment": "Rope", "setup": {"height": 7, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "general"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Thumbs up grip.", "Curl rope toward chest.", "Control down."], "tip": "Elbow-friendly curl variation.", "video": ""}, {"id": "single_arm_cable_curl", "name": "Single Arm Cable Curl", "group": "Arms", "patterns": ["biceps"], "muscles": ["biceps"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 7, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 10, "goals": ["muscle", "general"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Palm up.", "Curl toward shoulder.", "Do not rotate torso."], "tip": "Great for matching left and right arms.", "video": ""}, {"id": "high_cable_curl", "name": "High Cable Curl", "group": "Arms", "patterns": ["biceps"], "muscles": ["biceps"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 3, "angle": 8, "lever": 5, "position": "Standing centered", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Arms out wide.", "Curl handles toward ears.", "Keep elbows high."], "tip": "Classic cable biceps finisher.", "video": ""}, {"id": "reverse_cable_curl", "name": "Cable Reverse Curl", "group": "Arms", "patterns": ["biceps"], "muscles": ["biceps", "forearms"], "equipment": "functional_trainer", "attachment": "Straight bar", "setup": {"height": 7, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "general"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Overhand grip.", "Curl without wrists bending.", "Lower slowly."], "tip": "Builds forearms and elbow resilience.", "video": ""}, {"id": "db_curl", "name": "DB Curl", "group": "Arms", "patterns": ["biceps"], "muscles": ["biceps"], "equipment": "dumbbells", "attachment": "DBs up to 15 lb", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["general", "muscle"], "compound": false, "unilateral": false, "load": "db", "cues": ["Elbows at ribs.", "Curl and turn pinky up.", "Lower slowly."], "tip": "Use 3 second negatives once 15s get easy.", "video": ""}, {"id": "triceps_pushdown", "name": "Rope Triceps Pushdown", "group": "Arms", "patterns": ["triceps"], "muscles": ["triceps"], "equipment": "functional_trainer", "attachment": "Rope", "setup": {"height": 2, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "general"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Elbows pinned to ribs.", "Push rope down.", "Spread rope at bottom."], "tip": "Only forearms move.", "video": ""}, {"id": "overhead_triceps_extension", "name": "Overhead Cable Triceps Extension", "group": "Arms", "patterns": ["triceps"], "muscles": ["triceps"], "equipment": "functional_trainer", "attachment": "Rope", "setup": {"height": 7, "angle": 5, "lever": 6, "position": "Facing away from machine", "cables": "single", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Rope behind head.", "Elbows point forward.", "Extend arms without rib flare."], "tip": "Great long-head triceps option.", "video": ""}, {"id": "crossbody_triceps_extension", "name": "Crossbody Triceps Extension", "group": "Arms", "patterns": ["triceps"], "muscles": ["triceps"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 4, "angle": 5, "lever": 5, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "general"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Elbow fixed at side.", "Extend hand across body.", "Squeeze triceps."], "tip": "Simple single-arm finisher.", "video": ""}, {"id": "db_triceps_extension", "name": "DB Overhead Triceps Extension", "group": "Arms", "patterns": ["triceps"], "muscles": ["triceps"], "equipment": "dumbbells", "attachment": "One DB", "setup": {"height": null, "angle": null, "lever": null, "position": "Standing or seated", "cables": "single", "bench": false}, "level": 1, "minAge": 10, "goals": ["general", "muscle"], "compound": false, "unilateral": false, "load": "db", "cues": ["Hold one DB overhead.", "Lower behind head.", "Extend tall."], "tip": "Keep ribs down and elbows close.", "video": ""}, {"id": "bench_dip", "name": "Bench Dip", "group": "Arms", "patterns": ["triceps", "horizontal_push"], "muscles": ["triceps", "chest"], "equipment": "bench", "attachment": "Bench", "setup": {"height": null, "angle": null, "lever": null, "position": "Hands on bench", "cables": "single", "bench": true}, "level": 2, "minAge": 12, "goals": ["general", "muscle"], "compound": true, "unilateral": false, "load": "bodyweight", "cues": ["Hands on bench edge.", "Keep chest proud.", "Lower only as far as shoulders tolerate."], "tip": "Skip if shoulders pinch.", "video": ""}, {"id": "cable_front_squat", "name": "Cable Front Squat", "group": "Legs", "patterns": ["squat"], "muscles": ["quads", "glutes", "core"], "equipment": "functional_trainer", "attachment": "Straight bar or rope", "setup": {"height": 7, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "both", "bench": false}, "level": 1, "minAge": 12, "goals": ["strength", "muscle", "fatloss", "athletic"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Hold bar at collarbone.", "Sit between heels.", "Stand tall against cable pull."], "tip": "Use the cable as a counterbalance.", "video": ""}, {"id": "cable_goblet_squat", "name": "Cable Goblet Squat", "group": "Legs", "patterns": ["squat"], "muscles": ["quads", "glutes", "core"], "equipment": "functional_trainer", "attachment": "Rope or V-bar", "setup": {"height": 7, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 10, "goals": ["general", "athletic", "muscle", "recomp"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Hold attachment close to chest.", "Knees track over toes.", "Drive floor away."], "tip": "Great family default.", "video": ""}, {"id": "db_goblet_squat", "name": "DB Goblet Squat", "group": "Legs", "patterns": ["squat"], "muscles": ["quads", "glutes", "core"], "equipment": "dumbbells", "attachment": "One DB", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["general", "athletic", "fatloss"], "compound": true, "unilateral": false, "load": "db", "cues": ["Hold one DB at chest.", "Squat between heels.", "Stand tall."], "tip": "Use high reps or slow tempo.", "video": ""}, {"id": "bodyweight_squat", "name": "Bodyweight Squat", "group": "Legs", "patterns": ["squat"], "muscles": ["quads", "glutes"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 5, "goals": ["general", "athletic", "fatloss"], "compound": true, "unilateral": false, "load": "bodyweight", "cues": ["Feet around shoulder width.", "Sit down and back.", "Stand tall with control."], "tip": "Best movement quality screen for everyone.", "video": ""}, {"id": "cable_rdl", "name": "Cable Romanian Deadlift", "group": "Legs", "patterns": ["hinge"], "muscles": ["hamstrings", "glutes", "back"], "equipment": "functional_trainer", "attachment": "Straight bar", "setup": {"height": 7, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "both", "bench": false}, "level": 2, "minAge": 14, "goals": ["strength", "muscle", "recomp", "athletic"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Soft knees.", "Push hips back.", "Squeeze glutes to stand."], "tip": "Shorten range if low back takes over.", "video": ""}, {"id": "db_rdl", "name": "DB Romanian Deadlift", "group": "Legs", "patterns": ["hinge"], "muscles": ["hamstrings", "glutes"], "equipment": "dumbbells", "attachment": "Pair DBs", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["general", "athletic", "fatloss"], "compound": true, "unilateral": false, "load": "db", "cues": ["DBs slide down thighs.", "Hips move back.", "Stand by squeezing glutes."], "tip": "Slow lowering makes light DBs useful.", "video": ""}, {"id": "cable_pull_through", "name": "Cable Pull-through", "group": "Legs", "patterns": ["hinge", "hip"], "muscles": ["glutes", "hamstrings"], "equipment": "functional_trainer", "attachment": "Rope", "setup": {"height": 8, "angle": 5, "lever": 4, "position": "Facing away from machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "athletic", "general"], "compound": true, "unilateral": false, "load": "cable", "cues": ["Rope between legs.", "Hips back toward machine.", "Squeeze glutes through."], "tip": "Teaches the hinge with less spine loading.", "video": ""}, {"id": "cable_split_squat", "name": "Cable Split Squat", "group": "Legs", "patterns": ["lunge"], "muscles": ["quads", "glutes", "core"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 6, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "both", "bench": false}, "level": 2, "minAge": 12, "goals": ["strength", "muscle", "athletic"], "compound": true, "unilateral": true, "load": "cable", "cues": ["One foot forward, one back.", "Drop back knee toward floor.", "Drive through front foot."], "tip": "Cable can help balance.", "video": ""}, {"id": "cable_reverse_lunge", "name": "Cable Reverse Lunge", "group": "Legs", "patterns": ["lunge"], "muscles": ["quads", "glutes", "core"], "equipment": "functional_trainer", "attachment": "D-handles", "setup": {"height": 6, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "both", "bench": false}, "level": 2, "minAge": 12, "goals": ["athletic", "muscle", "fatloss"], "compound": true, "unilateral": true, "load": "cable", "cues": ["Step back softly.", "Keep front foot planted.", "Return tall."], "tip": "Reverse lunges are often knee-friendly.", "video": ""}, {"id": "db_reverse_lunge", "name": "DB Reverse Lunge", "group": "Legs", "patterns": ["lunge"], "muscles": ["quads", "glutes"], "equipment": "dumbbells", "attachment": "Pair DBs optional", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["athletic", "fatloss", "general"], "compound": true, "unilateral": true, "load": "db", "cues": ["Step back softly.", "Front knee tracks toes.", "Push floor away to stand."], "tip": "Start bodyweight if balance is hard.", "video": ""}, {"id": "cable_glute_kickback", "name": "Cable Glute Kickback", "group": "Legs", "patterns": ["hip"], "muscles": ["glutes"], "equipment": "functional_trainer", "attachment": "Ankle strap", "setup": {"height": 8, "angle": 5, "lever": 4, "position": "Facing machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "general"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Hold frame for balance.", "Kick back from hip.", "Pause at top."], "tip": "No low-back arch.", "video": ""}, {"id": "cable_hip_abduction", "name": "Cable Hip Abduction", "group": "Legs", "patterns": ["hip"], "muscles": ["glutes"], "equipment": "functional_trainer", "attachment": "Ankle strap", "setup": {"height": 8, "angle": 5, "lever": 4, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["muscle", "mobility", "general"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Stand side-on.", "Move leg out to side.", "Return slowly."], "tip": "Excellent glute medius work.", "video": ""}, {"id": "cable_hip_adduction", "name": "Cable Hip Adduction", "group": "Legs", "patterns": ["hip"], "muscles": ["adductors", "quads"], "equipment": "functional_trainer", "attachment": "Ankle strap", "setup": {"height": 8, "angle": 5, "lever": 4, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 12, "goals": ["general", "mobility"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Stand side-on.", "Pull leg across midline.", "Control back out."], "tip": "Use light weight and balance support.", "video": ""}, {"id": "cable_hamstring_curl", "name": "Cable Hamstring Curl", "group": "Legs", "patterns": ["hinge"], "muscles": ["hamstrings"], "equipment": "functional_trainer", "attachment": "Ankle strap", "setup": {"height": 8, "angle": 5, "lever": 4, "position": "Prone on bench or standing", "cables": "single", "bench": true}, "level": 2, "minAge": 14, "goals": ["muscle", "general"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Attach strap to ankle.", "Keep thigh still.", "Curl heel toward glute."], "tip": "Use a slow return.", "video": ""}, {"id": "calf_raise", "name": "Calf Raise", "group": "Legs", "patterns": ["calf"], "muscles": ["calves"], "equipment": "bodyweight", "attachment": "Optional DB", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 7, "goals": ["general", "athletic"], "compound": false, "unilateral": false, "load": "bodyweight", "cues": ["Stand tall.", "Rise onto toes.", "Lower to a stretch."], "tip": "Pause at top and bottom.", "video": ""}, {"id": "wall_sit", "name": "Wall Sit", "group": "Legs", "patterns": ["squat"], "muscles": ["quads", "core"], "equipment": "bodyweight", "attachment": "Wall", "setup": {"height": null, "angle": null, "lever": null, "position": "Wall space", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["athletic", "general"], "compound": false, "unilateral": false, "load": "time", "cues": ["Back against wall.", "Knees roughly 90 degrees.", "Hold and breathe."], "tip": "Safe leg finisher for kids and adults.", "video": ""}, {"id": "bench_step_up", "name": "Bench Step-up", "group": "Legs", "patterns": ["lunge"], "muscles": ["quads", "glutes"], "equipment": "bench", "attachment": "Bench", "setup": {"height": null, "angle": null, "lever": null, "position": "Step onto bench if stable", "cables": "single", "bench": true}, "level": 2, "minAge": 10, "goals": ["athletic", "general"], "compound": true, "unilateral": true, "load": "bodyweight", "cues": ["Foot fully on bench.", "Drive through whole foot.", "Step down slowly."], "tip": "Only use the bench if it is stable and safe.", "video": ""}, {"id": "pallof_press", "name": "Pallof Press", "group": "Core", "patterns": ["core_anti_rotation"], "muscles": ["core"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["core", "athletic", "general", "recomp"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Stand sideways to cable.", "Hold handle at chest.", "Press straight out and resist rotation."], "tip": "If the cable turns you, lower weight or widen stance.", "video": ""}, {"id": "pallof_hold", "name": "Pallof Iso Hold", "group": "Core", "patterns": ["core_anti_rotation"], "muscles": ["core"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 5, "angle": 5, "lever": 5, "position": "Side to machine", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["core", "athletic", "general"], "compound": false, "unilateral": true, "load": "time", "cues": ["Press handle straight out.", "Hold still for time.", "Breathe behind the brace."], "tip": "Try 15 to 30 seconds per side.", "video": ""}, {"id": "high_low_chop", "name": "High-to-Low Cable Chop", "group": "Core", "patterns": ["rotation"], "muscles": ["core", "shoulders"], "equipment": "functional_trainer", "attachment": "D-handle or rope", "setup": {"height": 2, "angle": 5, "lever": 4, "position": "Side to machine", "cables": "single", "bench": false}, "level": 2, "minAge": 12, "goals": ["athletic", "fatloss", "core"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Start high over shoulder.", "Rotate ribs and pull toward opposite hip.", "Control return."], "tip": "Rotate with control, do not yank.", "video": ""}, {"id": "low_high_lift", "name": "Low-to-High Cable Lift", "group": "Core", "patterns": ["rotation"], "muscles": ["core", "shoulders"], "equipment": "functional_trainer", "attachment": "D-handle", "setup": {"height": 8, "angle": 5, "lever": 6, "position": "Side to machine", "cables": "single", "bench": false}, "level": 2, "minAge": 12, "goals": ["athletic", "core", "general"], "compound": false, "unilateral": true, "load": "cable", "cues": ["Start low near pocket.", "Lift diagonally across body.", "Finish tall."], "tip": "Use light weight and own the path.", "video": ""}, {"id": "kneeling_cable_crunch", "name": "Kneeling Cable Crunch", "group": "Core", "patterns": ["core_flexion"], "muscles": ["core"], "equipment": "functional_trainer", "attachment": "Rope", "setup": {"height": 1, "angle": 5, "lever": 3, "position": "Kneeling facing machine", "cables": "single", "bench": false}, "level": 2, "minAge": 14, "goals": ["muscle", "core"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Rope beside ears.", "Curl ribs toward pelvis.", "Do not sit hips back."], "tip": "Abs shorten; arms just hold rope.", "video": ""}, {"id": "dead_bug_pulldown", "name": "Cable Dead Bug Pulldown", "group": "Core", "patterns": ["core_stability"], "muscles": ["core", "back"], "equipment": "functional_trainer", "attachment": "Straight bar", "setup": {"height": 1, "angle": 5, "lever": 3, "position": "Lying on floor, head toward machine", "cables": "single", "bench": false}, "level": 2, "minAge": 12, "goals": ["core", "athletic"], "compound": false, "unilateral": false, "load": "cable", "cues": ["Lie on back holding bar.", "Pull bar over chest and hold.", "Move opposite arm and leg slowly."], "tip": "Advanced anti-extension core work.", "video": ""}, {"id": "plank", "name": "Plank", "group": "Core", "patterns": ["core_stability"], "muscles": ["core", "shoulders"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["core", "general", "athletic"], "compound": false, "unilateral": false, "load": "time", "cues": ["Elbows below shoulders.", "Straight line head to heels.", "Squeeze glutes."], "tip": "End before hips sag.", "video": ""}, {"id": "side_plank", "name": "Side Plank", "group": "Core", "patterns": ["core_stability"], "muscles": ["core", "shoulders"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 7, "goals": ["core", "athletic", "general"], "compound": false, "unilateral": true, "load": "time", "cues": ["Elbow below shoulder.", "Stack or stagger feet.", "Lift hips and hold."], "tip": "Great anti-side-bend core training.", "video": ""}, {"id": "dead_bug", "name": "Dead Bug", "group": "Core", "patterns": ["core_stability"], "muscles": ["core"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["core", "mobility", "general"], "compound": false, "unilateral": false, "load": "reps", "cues": ["Low back gently into floor.", "Reach opposite arm and leg.", "Return without rib flare."], "tip": "Slow is harder than fast.", "video": ""}, {"id": "bird_dog", "name": "Bird Dog", "group": "Core", "patterns": ["core_stability"], "muscles": ["core", "glutes", "back"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["core", "mobility", "general"], "compound": false, "unilateral": false, "load": "reps", "cues": ["Hands and knees.", "Reach opposite arm and leg.", "Keep hips square."], "tip": "Balance a cup of water on your back.", "video": ""}, {"id": "hollow_hold", "name": "Hollow Hold", "group": "Core", "patterns": ["core_stability"], "muscles": ["core"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 2, "minAge": 10, "goals": ["core", "athletic"], "compound": false, "unilateral": false, "load": "time", "cues": ["Low back to floor.", "Reach arms and legs long.", "Hold without arching."], "tip": "Bend knees to make it easier.", "video": ""}, {"id": "mountain_climber", "name": "Mountain Climber", "group": "Core", "patterns": ["conditioning", "core_stability"], "muscles": ["core", "conditioning"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 7, "goals": ["fatloss", "athletic", "general"], "compound": true, "unilateral": false, "load": "time", "cues": ["High plank.", "Drive knees forward.", "Keep shoulders stacked."], "tip": "Use smooth rhythm before speed.", "video": ""}, {"id": "farmer_march", "name": "DB Farmer March or Carry", "group": "Core", "patterns": ["carry", "core_stability"], "muscles": ["core", "conditioning", "traps"], "equipment": "dumbbells", "attachment": "Pair DBs", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["athletic", "general", "fatloss"], "compound": true, "unilateral": false, "load": "time", "cues": ["Stand tall with DBs.", "Walk or march in place.", "Do not lean."], "tip": "Posture plus grip plus core.", "video": ""}, {"id": "broad_jump", "name": "Broad Jump", "group": "Athletic", "patterns": ["power"], "muscles": ["glutes", "quads", "conditioning"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Clear floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["athletic", "fatloss"], "compound": true, "unilateral": false, "load": "reps", "cues": ["Load hips back.", "Swing arms hard.", "Land quiet with knees tracking toes."], "tip": "Quality over quantity. Stop before landings get sloppy.", "video": ""}, {"id": "lateral_shuffle", "name": "Lateral Shuffle", "group": "Athletic", "patterns": ["conditioning", "power"], "muscles": ["conditioning", "glutes"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["athletic", "fatloss"], "compound": true, "unilateral": false, "load": "time", "cues": ["Athletic stance.", "Shuffle side to side.", "Stay low and light."], "tip": "Great kid-friendly conditioning in a small room.", "video": ""}, {"id": "bear_crawl", "name": "Bear Crawl", "group": "Athletic", "patterns": ["conditioning", "core_stability"], "muscles": ["core", "shoulders", "conditioning"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 5, "goals": ["athletic", "general"], "compound": true, "unilateral": false, "load": "time", "cues": ["Hands and toes on floor.", "Knees hover one inch.", "Move opposite hand and foot."], "tip": "For younger kids, make it an animal game.", "video": ""}, {"id": "jumping_jacks", "name": "Jumping Jacks", "group": "Athletic", "patterns": ["conditioning"], "muscles": ["conditioning"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 5, "goals": ["fatloss", "athletic", "general"], "compound": true, "unilateral": false, "load": "time", "cues": ["Soft knees.", "Arms overhead.", "Keep rhythm smooth."], "tip": "Use as warmup or finisher.", "video": ""}, {"id": "basketball_slam", "name": "Basketball Slam", "group": "Athletic", "patterns": ["power", "conditioning"], "muscles": ["core", "conditioning"], "equipment": "ball", "attachment": "Basketball or soft ball", "setup": {"height": null, "angle": null, "lever": null, "position": "Clear floor", "cables": "single", "bench": false}, "level": 1, "minAge": 5, "goals": ["athletic", "fatloss"], "compound": true, "unilateral": false, "load": "reps", "cues": ["Reach ball overhead.", "Slam down hard.", "Reset posture each rep."], "tip": "Use a ball that will not damage the room.", "video": ""}, {"id": "agility_footwork", "name": "Agility Footwork", "group": "Athletic", "patterns": ["conditioning", "power"], "muscles": ["conditioning", "calves"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 5, "goals": ["athletic"], "compound": false, "unilateral": false, "load": "time", "cues": ["Quick feet in place.", "Stay on balls of feet.", "Keep knees soft."], "tip": "Make it a game: 10 seconds fast, 20 seconds easy.", "video": ""}, {"id": "pogo_hops", "name": "Pogo Hops", "group": "Athletic", "patterns": ["power"], "muscles": ["calves", "conditioning"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 7, "goals": ["athletic"], "compound": false, "unilateral": false, "load": "reps", "cues": ["Tall posture.", "Small quick hops.", "Land softly."], "tip": "Stop if ankles or knees hurt.", "video": ""}, {"id": "squat_to_reach", "name": "Squat to Reach", "group": "Athletic", "patterns": ["squat", "mobility"], "muscles": ["quads", "glutes", "mobility"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 5, "goals": ["general", "athletic", "mobility"], "compound": true, "unilateral": false, "load": "reps", "cues": ["Squat down.", "Reach arms overhead.", "Stand tall."], "tip": "Good warmup for the whole family.", "video": ""}, {"id": "shoulder_cars", "name": "Shoulder CARs", "group": "Mobility", "patterns": ["mobility"], "muscles": ["mobility", "shoulders"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "time", "cues": ["Slow big shoulder circle.", "Keep ribs down.", "Use pain-free range."], "tip": "Great before pressing or pulling.", "video": ""}, {"id": "hip_hinge_drill", "name": "Hip Hinge Drill", "group": "Mobility", "patterns": ["mobility", "hinge"], "muscles": ["mobility", "hamstrings"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["mobility", "athletic", "general"], "compound": false, "unilateral": false, "load": "reps", "cues": ["Hands on hips.", "Push hips back.", "Return tall."], "tip": "Teach this before RDLs.", "video": ""}, {"id": "thoracic_rotation", "name": "Open Book Rotation", "group": "Mobility", "patterns": ["mobility", "rotation"], "muscles": ["mobility", "back"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 6, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "reps", "cues": ["Lie on side.", "Rotate top arm open.", "Breathe into stretch."], "tip": "Useful after desk posture or pressing.", "video": ""}, {"id": "couch_stretch", "name": "Hip Flexor Couch Stretch", "group": "Mobility", "patterns": ["mobility"], "muscles": ["mobility", "quads", "glutes"], "equipment": "bench", "attachment": "Bench or wall", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": true}, "level": 1, "minAge": 8, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "time", "cues": ["Back foot on bench or wall.", "Tuck pelvis slightly.", "Squeeze glute on stretch side."], "tip": "Do not crank low back.", "video": ""}, {"id": "hamstring_floss", "name": "Hamstring Floss", "group": "Mobility", "patterns": ["mobility"], "muscles": ["hamstrings", "mobility"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 8, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "reps", "cues": ["Hinge to feel hamstring stretch.", "Bend and straighten knee gently.", "Keep range pain-free."], "tip": "Warm up hamstrings before hinges.", "video": ""}, {"id": "lat_prayer_stretch", "name": "Lat Prayer Stretch on Bench", "group": "Mobility", "patterns": ["mobility"], "muscles": ["back", "mobility"], "equipment": "bench", "attachment": "Bench", "setup": {"height": null, "angle": null, "lever": null, "position": "Kneeling by bench", "cables": "single", "bench": true}, "level": 1, "minAge": 8, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "time", "cues": ["Elbows on bench.", "Sink chest toward floor.", "Breathe into lats."], "tip": "Great after pulldowns and rows.", "video": ""}, {"id": "scap_push_up", "name": "Scap Push-up", "group": "Mobility", "patterns": ["mobility", "horizontal_push"], "muscles": ["shoulders", "back"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 7, "goals": ["mobility", "general", "athletic"], "compound": false, "unilateral": false, "load": "reps", "cues": ["High plank or knees.", "Keep elbows straight.", "Push shoulder blades apart and together."], "tip": "Builds shoulder control.", "video": ""}, {"id": "cat_cow", "name": "Cat Cow", "group": "Mobility", "patterns": ["mobility"], "muscles": ["mobility", "back"], "equipment": "bodyweight", "attachment": "None", "setup": {"height": null, "angle": null, "lever": null, "position": "Open floor", "cables": "single", "bench": false}, "level": 1, "minAge": 5, "goals": ["mobility", "general"], "compound": false, "unilateral": false, "load": "time", "cues": ["Hands and knees.", "Round back, then arch gently.", "Move with breath."], "tip": "Simple recovery reset.", "video": ""}];
+const KEY="familyFitCoachV2";
+const STACK=Array.from({length:20},(_,i)=>(i+1)*10);
+const MUSCLES=["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","core","calves","conditioning","mobility"];
+const GOALS={strength:"Strength",muscle:"Muscle",recomp:"Recomp",fatloss:"Fat loss",athletic:"Athletic",mobility:"Mobility",general:"General fitness"};
+const DURATIONS={quick:{label:"Quick",minutes:22,count:4},standard:{label:"Standard",minutes:42,count:6},extended:{label:"Extended",minutes:58,count:8}};
+const DEFAULT={activeProfileId:"ali",profiles:[{id:"ali",name:"Ali",age:null,type:"adult",goal:"recomp",experience:3,color:"#35a3ff",notes:"Strength and recomposition."},{id:"kristen",name:"Kristen",age:null,type:"adult",goal:"muscle",experience:2,color:"#b45cff",notes:"Strength, tone, and consistency."},{id:"kam",name:"Kam",age:13,type:"youth",goal:"athletic",experience:2,color:"#ff9f43",notes:"Athletic development. Quality reps only.",maxCable:70},{id:"ashton",name:"Ashton",age:8,type:"youth",goal:"athletic",experience:1,color:"#42d17a",notes:"Movement play and confidence.",maxCable:20}],assessment:{readiness:7,duration:"standard",goalOverride:"",sore:[]},history:[],activeWorkout:null,customQueue:[],libraryFilter:{q:"",group:"all",equipment:"all"}};
+let State=loadState();let Current="profiles";let Timer=null;let TimerLeft=0;
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function merge(v,d){if(Array.isArray(d))return Array.isArray(v)?v:d;if(d&&typeof d==="object"){const o={...d};if(v&&typeof v==="object"){Object.keys(v).forEach(k=>o[k]=merge(v[k],d[k]))}return o}return v===undefined?d:v}
+function loadState(){try{const raw=localStorage.getItem(KEY);return raw?merge(JSON.parse(raw),clone(DEFAULT)):clone(DEFAULT)}catch(e){return clone(DEFAULT)}}
+function save(){localStorage.setItem(KEY,JSON.stringify(State))}
+function p(){return State.profiles.find(x=>x.id===State.activeProfileId)||State.profiles[0]}
+function isYouth(profile=p()){return profile.type==="youth"||(profile.age&&profile.age<14)}
+function activeGoal(){return State.assessment.goalOverride||p().goal||"general"}
+function label(s){return String(s||"").replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
+function ex(id){return EXERCISES.find(e=>e.id===id)}
+function byGroup(g){return EXERCISES.filter(e=>e.group===g)}
+function fmt(ts){return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric"})}
+function daysAgo(ts){return (Date.now()-ts)/86400000}
+function nearestStack(w){if(!w||isNaN(w))return 10;return STACK.reduce((b,x)=>Math.abs(x-w)<Math.abs(b-w)?x:b,STACK[0])}
+function screenEl(n){return document.getElementById("screen-"+n)}
+function showScreen(n){Current=n;document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));screenEl(n).classList.add("active");document.getElementById("backBtn").classList.toggle("hidden",n==="profiles"||n==="dashboard");document.getElementById("tabbar").style.display=n==="profiles"?"none":"block";document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",["dashboard","workout","library","history","ai"].indexOf(n)===i));document.documentElement.style.setProperty("--accent",p()?.color||"#35a3ff");window.scrollTo(0,0);render()}
+function goBack(){if(Current==="profiles")return;if(Current==="dashboard")showScreen("profiles");else showScreen("dashboard")}
+function render(){if(Current==="profiles")renderProfiles();if(Current==="dashboard")renderDashboard();if(Current==="workout")renderWorkout();if(Current==="library")renderLibrary();if(Current==="history")renderHistory();if(Current==="ai")renderAI()}
+function renderProfiles(){screenEl("profiles").innerHTML=`<h1>Your home gym,<br>finally smart.</h1><p class="sub">Built for your dual-arm functional trainer, 10 lb stack increments, flat bench, attachments, light dumbbells, and family profiles.</p><div class="grid2">${State.profiles.map(profileCard).join("")}<button class="plus-card" onclick="editProfile(null)"><div><div class="big">+</div><div>Add profile</div><p class="mini">Guest, parent, teen, kid</p></div></button></div><div class="eyebrow">V2 upgrades</div><div class="stack"><div class="soft"><b>Smart rotation</b><p class="mini">Uses recent history so the same person does not get the same workout the next day.</p></div><div class="soft"><b>Large exercise library</b><p class="mini">${EXERCISES.length} exercises tagged by goal, age, equipment, movement pattern, muscle group, setup, and safety level.</p></div><div class="soft"><b>Progression engine</b><p class="mini">Tracks sets, reps, RPE, volume, PRs, and suggests the next load rounded to your stack.</p></div></div>`}
+function profileCard(pr){const initials=(pr.name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();return `<button class="profile-card" style="--pcolor:${pr.color}" onclick="selectProfile('${pr.id}')"><div class="avatar">${initials}</div><div><div class="pname">${escapeHtml(pr.name)}</div><div class="pmeta">${pr.age?pr.age+" yrs":"Adult"} - ${GOALS[pr.goal]||label(pr.goal)} - Level ${pr.experience}</div></div></button>`}
+function selectProfile(id){State.activeProfileId=id;save();showScreen("dashboard")}
+function renderDashboard(){const pr=p();const h=histFor(pr.id);const stats=statsFor(pr.id);const rec=buildRecommendedPlans();screenEl("dashboard").innerHTML=`<div class="dash-layout"><div><h1>Today for ${escapeHtml(pr.name)}</h1><div class="successbox">${coachInsight(pr,h)}</div><div class="eyebrow">Quick stats</div><div class="grid3"><div class="metric"><div class="v">${stats.sessions}</div><div class="l">Sessions</div></div><div class="metric"><div class="v">${Math.round(stats.volume/1000)}k</div><div class="l">Lifetime lb</div></div><div class="metric"><div class="v">${stats.streak}</div><div class="l">Streak</div></div></div><div class="eyebrow">Readiness</div><div class="card pad stack"><div class="row"><div><b>How ready are you?</b><p class="mini">Low readiness reduces sets and intensity.</p></div><div class="big" style="color:var(--accent)">${State.assessment.readiness}</div></div><input type="range" min="1" max="10" value="${State.assessment.readiness}" oninput="setReadiness(this.value)"><div class="row mini"><span>Sore / tired</span><span>Fresh / ready</span></div><div class="eyebrow" style="margin:8px 0 0">Sore areas</div><div class="sore-grid">${MUSCLES.filter(m=>m!=="mobility"&&m!=="conditioning").map(m=>`<button class="chip ${State.assessment.sore.includes(m)?"on":""}" onclick="toggleSore('${m}')">${label(m)}</button>`).join("")}</div></div><div class="eyebrow">Session length</div><div class="toolbar">${Object.entries(DURATIONS).map(([k,v])=>`<button class="pillbtn ${State.assessment.duration===k?"active":""}" onclick="setDuration('${k}')">${v.label}<small>${v.minutes} min</small></button>`).join("")}</div><div class="eyebrow">Smart plans</div><div class="stack">${rec.map((pl,i)=>planCard(pl,i)).join("")}</div></div><div><div class="eyebrow">Recovery map</div><div class="card pad"><div class="recovery-list">${recoveryMapHtml(pr.id)}</div></div><div class="eyebrow">Fast actions</div><div class="stack"><button class="btn secondary" onclick="startManual()">Manual Builder</button><button class="btn secondary" onclick="showScreen('library')">Exercise Library</button><button class="btn secondary" onclick="showScreen('ai')">AI Coach Export</button></div></div></div>`}
+function coachInsight(pr,h){if(isYouth(pr)){return `<b>Youth-safe mode is on.</b><br><span class="mini">The engine biases toward bodyweight, athletic skill, light cable work, and quality reps. No max lifting.</span>`}if(State.assessment.readiness<=3)return `<b>Low readiness detected.</b><br><span class="mini">V2 will reduce volume, avoid sore areas, and favor recovery-friendly work.</span>`;if(h[0]&&daysAgo(h[0].date)<1.2)return `<b>No-repeat logic active.</b><br><span class="mini">Because you trained recently, today's recommendation is shifted away from ${h[0].focus||"yesterday's focus"}.</span>`;return `<b>Green light.</b><br><span class="mini">The app is balancing push, pull, legs, core, and your recent history.</span>`}
+function setReadiness(v){State.assessment.readiness=+v;save();renderDashboard()}
+function setDuration(d){State.assessment.duration=d;save();renderDashboard()}
+function toggleSore(m){const a=State.assessment.sore;const i=a.indexOf(m);if(i>=0)a.splice(i,1);else a.push(m);save();renderDashboard()}
+function planCard(pl,i){return `<div class="plan-card"><div class="plan-head"><div><div class="plan-title">${escapeHtml(pl.title)}</div><div class="chiprow" style="margin-top:8px"><span class="chip hot">${GOALS[pl.goal]||label(pl.goal)}</span><span class="chip">${pl.duration} min</span><span class="chip">${pl.exercises.length} moves</span></div></div><div class="score"><b>${pl.score}</b><span>fit</span></div></div><div class="plan-why">${escapeHtml(pl.why)}</div><div class="ex-preview">${pl.exercises.slice(0,7).map(x=>`<span class="ex-pill">${escapeHtml(ex(x.exId).name)}</span>`).join("")}</div><button class="btn" style="margin-top:13px" onclick="startPlan(${i})">Start this plan</button></div>`}
+const ADULT_SPLITS=[{id:"full_a",title:"Smart Full Body A",focus:"balanced full body",slots:["squat","horizontal_push","horizontal_pull","hinge","core_anti_rotation","shoulder_iso","triceps","biceps"]},{id:"full_b",title:"Smart Full Body B",focus:"posterior chain and press",slots:["hinge","vertical_push","vertical_pull","lunge","rear_delt","core_stability","triceps"]},{id:"upper",title:"Upper Body Cable Build",focus:"upper body",slots:["horizontal_push","horizontal_pull","vertical_pull","shoulder_iso","rear_delt","biceps","triceps"]},{id:"lower",title:"Lower Body and Core",focus:"legs and core",slots:["squat","hinge","lunge","hip","core_anti_rotation","core_stability","calf"]},{id:"pull",title:"Back, Posture, Arms",focus:"pull and posture",slots:["vertical_pull","horizontal_pull","rear_delt","biceps","core_stability","mobility"]},{id:"push",title:"Chest, Shoulders, Triceps",focus:"push",slots:["horizontal_push","vertical_push","fly","shoulder_iso","triceps","core_anti_rotation"]},{id:"conditioning",title:"Full Body Conditioning",focus:"conditioning",slots:["squat","horizontal_push","horizontal_pull","conditioning","core_stability","carry"]}];
+const YOUTH_SPLITS=[{id:"youth_skill",title:"Athletic Skill and Strength",focus:"athletic skill",slots:["power","squat","horizontal_push","horizontal_pull","core_stability","conditioning"]},{id:"youth_game",title:"Movement Game Circuit",focus:"movement play",slots:["power","conditioning","squat","core_stability","mobility"]},{id:"youth_light",title:"Light Cable Basics",focus:"technique",slots:["squat","horizontal_push","horizontal_pull","core_anti_rotation","mobility"]}];
+function buildRecommendedPlans(){const pr=p();const candidates=(isYouth(pr)?YOUTH_SPLITS:ADULT_SPLITS).map(s=>scoreSplit(s,pr)).sort((a,b)=>b.score-a.score).slice(0,3);return candidates.map(c=>buildPlan(c,pr))}
+function scoreSplit(split,pr){let score=75;const h=histFor(pr.id);if(h[0]&&h[0].splitId===split.id)score-=35;if(h[0]&&daysAgo(h[0].date)<1&&split.focus===h[0].focus)score-=25;const rec=recovery(pr.id);for(const slot of split.slots){const ms=slotMuscles(slot);for(const m of ms){score+=(rec[m]||80)/20;if(State.assessment.sore.includes(m))score-=8}}if(activeGoal()==="strength"&&split.id.includes("full"))score+=7;if(activeGoal()==="muscle"&&["upper","push","pull"].includes(split.id))score+=6;if(activeGoal()==="fatloss"&&split.id==="conditioning")score+=12;if(activeGoal()==="athletic"&&split.id.includes("youth"))score+=14;score+=Math.round(Math.random()*4);return {...split,score:Math.max(20,Math.min(99,Math.round(score)))} }
+function buildPlan(split,pr){const durationKey=State.assessment.duration;const count=DURATIONS[durationKey].count;const slots=split.slots.slice(0,count);const used=[];const exercises=slots.map(slot=>selectExercise(slot,pr,used)).filter(Boolean).map(item=>prescribe(item,pr));return {splitId:split.id,title:split.title,focus:split.focus,goal:activeGoal(),duration:DURATIONS[durationKey].minutes,score:split.score,why:planWhy(split,pr),exercises};}
+function planWhy(split,pr){const bits=[];bits.push(`Chosen to train ${split.focus} while avoiding excessive repeat from recent sessions.`);if(State.assessment.sore.length)bits.push(`Sore areas are penalized: ${State.assessment.sore.map(label).join(', ')}.`);if(State.assessment.readiness<=3)bits.push('Readiness is low, so volume is reduced.');if(isYouth(pr))bits.push('Youth mode favors movement quality and lighter loading.');return bits.join(' ')}
+function slotMuscles(slot){const map={horizontal_push:['chest','triceps','shoulders'],vertical_push:['shoulders','triceps'],fly:['chest'],horizontal_pull:['back','biceps'],vertical_pull:['back','biceps'],rear_delt:['shoulders','back'],shoulder_iso:['shoulders'],biceps:['biceps'],triceps:['triceps'],squat:['quads','glutes'],hinge:['hamstrings','glutes'],lunge:['quads','glutes'],hip:['glutes'],calf:['calves'],core_anti_rotation:['core'],core_stability:['core'],core_flexion:['core'],rotation:['core'],conditioning:['conditioning'],power:['conditioning','glutes'],carry:['core'],mobility:['mobility']};return map[slot]||[]}
+function selectExercise(slot,pr,used){const recent=recentExerciseIds(pr.id,3);let pool=EXERCISES.filter(e=>e.patterns.includes(slot)&&!used.includes(e.id));if(!pool.length)pool=EXERCISES.filter(e=>e.patterns.some(x=>slotMuscles(slot).some(m=>e.muscles.includes(m)))&&!used.includes(e.id));pool=pool.filter(e=>ageOk(e,pr));let scored=pool.map(e=>({e,score:exerciseScore(e,slot,pr,recent)})).sort((a,b)=>b.score-a.score);const picked=scored[0]?.e;if(picked)used.push(picked.id);return picked}
+function ageOk(e,pr){const age=pr.age||18;if(age<e.minAge)return false;if(isYouth(pr)&&e.level>2)return false;if(pr.age&&pr.age<10&&e.equipment==="functional_trainer"&&e.compound)return false;return true}
+function exerciseScore(e,slot,pr,recent){let s=0;if(e.patterns.includes(slot))s+=35;if(e.goals.includes(activeGoal()))s+=10;if(e.goals.includes('general'))s+=3;if(pr.experience>=e.level)s+=6;else s-=5;if(!recent.includes(e.id))s+=16;else s-=25;if(isYouth(pr)){if(e.equipment==="bodyweight")s+=12;if(e.equipment==="functional_trainer"&&e.compound)s-=6;if(e.load==="time"||e.load==="reps")s+=4}for(const m of e.muscles){if(State.assessment.sore.includes(m))s-=12}s+=Math.random()*5;return s}
+function prescribe(e,pr){const goal=activeGoal();let sets=3, reps='8-12', rest=60;if(e.load==='time'){reps=isYouth(pr)?'20s':'30s';sets=2;rest=35}else if(e.load==='bodyweight'||e.load==='reps'){reps=isYouth(pr)?'6-10':'10-15';sets=isYouth(pr)?2:3;rest=45}else if(goal==='strength'&&e.compound&&!isYouth(pr)){sets=4;reps='5-8';rest=90}else if(goal==='muscle'||goal==='recomp'){sets=e.compound?3:3;reps=e.compound?'8-12':'10-15';rest=e.compound?75:55}else if(goal==='fatloss'){sets=2;reps='12-15';rest=35}else if(goal==='athletic'){sets=2;reps=e.patterns.includes('power')?'3-6':'8-10';rest=e.patterns.includes('power')?70:45}if(State.assessment.readiness<=3)sets=Math.max(1,sets-1);if(State.assessment.duration==='extended'&&!isYouth(pr)&&!['time','bodyweight','reps'].includes(e.load))sets+=1;const target=loadSuggestion(e,pr,reps);return {exId:e.id,sets:Array.from({length:sets},(_,i)=>({targetWeight:target.weight,targetReps:target.reps||reps,rpe:'8',done:false,weight:target.weight,reps:''})),scheme:{sets,reps,rest},hint:target.hint}}
+function loadSuggestion(e,pr,reps){if(e.load==='bodyweight'||e.load==='time'||e.load==='reps')return {weight:0,reps,hint:e.load==='time'?'Track seconds':'Track quality reps'};if(e.load==='db')return {weight:Math.min(15,pr.age&&pr.age<10?5:10),reps,hint:'Dumbbells cap at 15 lb, so use tempo and clean reps.'};const last=lastExercise(pr.id,e.id);let w=isYouth(pr)?10:30;if(e.compound)w=isYouth(pr)?20:50;if(last){w=last.weight||w;const hi=highRep(reps);if(last.reps>=hi&&Number(last.rpe)<=8)w+=10;if(Number(last.rpe)>=9.5)w-=10}if(pr.maxCable)w=Math.min(w,pr.maxCable);w=Math.max(10,Math.min(200,nearestStack(w)));return {weight:w,reps,hint:last?`Last best: ${last.weight} x ${last.reps} @ RPE ${last.rpe||'?'}. Suggested: ${w}.`:`Start at ${w} lb and adjust after set 1.`}}
+function highRep(r){const m=String(r).match(/(\d+)\D*$/);return m?+m[1]:10}
+function startPlan(idx){const plan=buildRecommendedPlans()[idx];State.activeWorkout={date:Date.now(),title:plan.title,splitId:plan.splitId,focus:plan.focus,goal:plan.goal,duration:plan.duration,readiness:State.assessment.readiness,exercises:plan.exercises};save();showScreen('workout')}
+function startManual(){State.activeWorkout={date:Date.now(),title:'Manual Builder',splitId:'manual',focus:'manual',goal:activeGoal(),duration:0,readiness:State.assessment.readiness,exercises:[]};save();showScreen('workout')}
+function renderWorkout(){const w=State.activeWorkout;screenEl('workout').innerHTML=!w?`<h1>No active workout.</h1><p class="sub">Generate a plan from Today or build one manually.</p><button class="btn" onclick="showScreen('dashboard')">Go to Today</button>`:`<h1>${escapeHtml(w.title)}</h1><p class="sub">${escapeHtml(w.focus)} - ${w.exercises.length} exercises - readiness ${w.readiness}</p>${w.splitId==='manual'?manualAddBox():''}<div class="workout-layout">${w.exercises.map((rx,i)=>exerciseCard(rx,i)).join('')}</div><button class="btn" onclick="finishWorkout()">Complete Session</button>`}
+function manualAddBox(){return `<div class="card pad" style="margin-bottom:16px"><div class="form"><label>Add exercise</label><select id="manualSelect">${EXERCISES.map(e=>`<option value="${e.id}">${e.name} - ${e.group}</option>`).join('')}</select><button class="btn secondary" onclick="addManualExercise()">Add to workout</button></div></div>`}
+function addManualExercise(){const id=document.getElementById('manualSelect').value;State.activeWorkout.exercises.push(prescribe(ex(id),p()));save();renderWorkout()}
+function exerciseCard(rx,i){const e=ex(rx.exId);return `<div class="card exercise"><div class="ex-top row"><div><div class="ex-name">${escapeHtml(e.name)}</div><div class="ex-target">${escapeHtml(e.group)} - ${e.patterns.map(label).join(' / ')}</div></div><div class="ex-actions"><button class="iconbtn" onclick="swapExercise(${i})">Swap</button></div></div>${setupViz(e)}<div class="setup-grid">${setupCells(e)}</div><div class="coach"><details><summary>Coach guide <span>+</span></summary><ul>${e.cues.map(c=>`<li>${escapeHtml(c)}</li>`).join('')}</ul><div class="tip"><b>Tip:</b> ${escapeHtml(e.tip)}</div></details></div><div class="loadhint"><b>Load:</b> ${escapeHtml(rx.hint||'Use clean technique.')}</div><div class="tracker"><div class="labels"><span>Set</span><span>Load</span><span>Reps</span><span>RPE</span><span>Done</span></div>${rx.sets.map((s,j)=>setRow(i,j,s,e)).join('')}</div></div>`}
+function setRow(i,j,s,e){return `<div class="setrow ${s.done?'done':''}" id="row-${i}-${j}"><div class="setlab">${j+1}</div><input class="field" type="number" inputmode="numeric" value="${s.weight||''}" ${e.load==='bodyweight'||e.load==='time'||e.load==='reps'?'placeholder="BW"':''} onchange="updateSet(${i},${j},'weight',this.value)"><input class="field" type="text" value="${s.reps||''}" placeholder="${escapeHtml(s.targetReps)}" onchange="updateSet(${i},${j},'reps',this.value)"><input class="field" type="number" step=".5" min="6" max="10" value="${s.rpe||8}" onchange="updateSet(${i},${j},'rpe',this.value)"><button class="check" onclick="toggleSet(${i},${j})">${s.done?'OK':'+'}</button></div>`}
+function updateSet(i,j,k,v){State.activeWorkout.exercises[i].sets[j][k]=v;save()}
+function toggleSet(i,j){const w=State.activeWorkout;const set=w.exercises[i].sets[j];const e=ex(w.exercises[i].exId);if(!set.done){if(!set.reps)set.reps=set.targetReps;if(e.load==='cable'&&!set.weight)set.weight=w.exercises[i].sets[j].targetWeight;set.done=true;startRest(w.exercises[i].scheme.rest||60)}else set.done=false;save();renderWorkout()}
+function setupCells(e){const s=e.setup;if(e.equipment==='functional_trainer')return `<div class="setup-cell"><small>Attachment</small><b>${escapeHtml(e.attachment)}</b></div><div class="setup-cell"><small>Position</small><b>${escapeHtml(s.position)}</b></div><div class="setup-cell"><small>Track height</small><b>${s.height?`Hole ${s.height}`:'Varies'}</b></div><div class="setup-cell"><small>Angle / lever</small><b>${s.angle?`Angle ${s.angle}`:'Varies'} / ${s.lever?`Lever ${s.lever}`:'Varies'}</b></div>`;return `<div class="setup-cell"><small>Equipment</small><b>${escapeHtml(e.attachment)}</b></div><div class="setup-cell"><small>Where</small><b>${escapeHtml(s.position)}</b></div>`}
+function setupViz(e){if(e.equipment!=='functional_trainer')return `<div class="setup-viz"><div class="soft" style="text-align:center;color:var(--muted)">No cable setup required. Use ${escapeHtml(e.attachment)}.</div></div>`;const s=e.setup;const h=s.height||5,a=s.angle||5,l=s.lever||5;const y=20+((h-1)*16);const leftX=80-(a*4),rightX=120+(a*4);const frontEndY=y+(l*6);return `<div class="setup-viz"><div class="viz-grid"><div class="vizbox"><div class="vizlabel">Top view</div><svg viewBox="0 0 200 160"><rect x="62" y="15" width="76" height="22" rx="5" fill="#364158"/><line x1="80" y1="37" x2="${leftX}" y2="104" stroke="#35a3ff" stroke-width="7" stroke-linecap="round"/><line x1="120" y1="37" x2="${rightX}" y2="104" stroke="#35a3ff" stroke-width="7" stroke-linecap="round"/><circle cx="100" cy="124" r="11" fill="#38d67a"/><line x1="${leftX}" y1="104" x2="96" y2="124" stroke="#ffd166" stroke-dasharray="4 4"/><line x1="${rightX}" y1="104" x2="104" y2="124" stroke="#ffd166" stroke-dasharray="4 4"/><text x="100" y="152" fill="#9aa3b8" font-size="11" text-anchor="middle">You / bench here</text></svg></div><div class="vizbox"><div class="vizlabel">Front height</div><svg viewBox="0 0 200 160"><rect x="76" y="10" width="9" height="140" rx="3" fill="#364158"/><rect x="116" y="10" width="9" height="140" rx="3" fill="#364158"/><line x1="80" y1="${y}" x2="38" y2="${frontEndY}" stroke="#35a3ff" stroke-width="7" stroke-linecap="round"/><line x1="120" y1="${y}" x2="162" y2="${frontEndY}" stroke="#35a3ff" stroke-width="7" stroke-linecap="round"/><circle cx="38" cy="${frontEndY}" r="6" fill="#ffd166"/><circle cx="162" cy="${frontEndY}" r="6" fill="#ffd166"/><rect x="70" y="${y-6}" width="22" height="12" rx="4" fill="#7c5cff"/><rect x="108" y="${y-6}" width="22" height="12" rx="4" fill="#7c5cff"/></svg></div></div></div>`}
+function swapExercise(i){const current=ex(State.activeWorkout.exercises[i].exId);const alts=EXERCISES.filter(e=>e.id!==current.id&&e.group===current.group&&ageOk(e,p())).slice(0,20);openSheet(`<h3>Swap ${escapeHtml(current.name)}</h3><div class="library-list">${alts.map(e=>`<button class="lib-item" onclick="doSwap(${i},'${e.id}')"><div><h4>${escapeHtml(e.name)}</h4><p>${escapeHtml(e.equipment)} - ${e.patterns.map(label).join(', ')}</p></div><span class="tag">Swap</span></button>`).join('')}</div><button class="btn secondary" style="margin-top:12px" onclick="closeSheet()">Cancel</button>`)}
+function doSwap(i,id){State.activeWorkout.exercises[i]=prescribe(ex(id),p());save();closeSheet();renderWorkout()}
+function finishWorkout(){const w=State.activeWorkout;if(!w)return;let totalSets=0,totalVolume=0,muscles=new Set();const details=w.exercises.map(rx=>{const e=ex(rx.exId);e.muscles.forEach(m=>muscles.add(m));let top={weight:0,reps:0,rpe:0};const sets=rx.sets.filter(s=>s.done).map(s=>{const wt=Number(s.weight)||0;const reps=parseInt(s.reps)||0;const rpe=Number(s.rpe)||0;totalSets++;totalVolume+=wt*reps;if(wt>top.weight||(wt===top.weight&&reps>top.reps))top={weight:wt,reps,rpe};return {weight:wt,reps,rpe}});if(sets.length&&e.load==='cable')saveLast(p().id,e.id,top);return {exId:e.id,name:e.name,sets}});if(totalSets===0){alert('Log at least one completed set.');return}State.history.unshift({profileId:p().id,date:Date.now(),title:w.title,splitId:w.splitId,focus:w.focus,goal:w.goal,readiness:w.readiness,totalSets,totalVolume,muscles:[...muscles],exercises:details});State.activeWorkout=null;save();showScreen('history')}
+function histFor(uid){return State.history.filter(h=>h.profileId? h.profileId===uid : true).slice(0,50)}
+function statsFor(uid){const h=histFor(uid);return {sessions:h.length,volume:h.reduce((s,x)=>s+(x.totalVolume||0),0),streak:streak(h)}}
+function streak(h){if(!h.length)return 0;let days=[...new Set(h.map(x=>new Date(x.date).toDateString()))].map(d=>new Date(d).getTime()).sort((a,b)=>b-a);let cur=new Date().setHours(0,0,0,0),st=0;for(const d of days){if(Math.abs((cur-d)/86400000-st)<.1)st++;else if(st===0&&Math.abs((cur-d)/86400000-1)<.1){cur-=86400000;st++}else break}return st}
+function recentExerciseIds(uid,days){const cutoff=Date.now()-days*86400000;return histFor(uid).filter(h=>h.date>=cutoff).flatMap(h=>h.exercises||[]).map(e=>e.exId)}
+function lastExercise(uid,id){const all=histFor(uid).flatMap(h=>(h.exercises||[]).map(e=>({...e,date:h.date}))).filter(e=>e.exId===id&&e.sets&&e.sets.length);if(!all.length)return null;const last=all.sort((a,b)=>b.date-a.date)[0];let best={weight:0,reps:0,rpe:8};last.sets.forEach(s=>{if(s.weight>best.weight||(s.weight===best.weight&&s.reps>best.reps))best=s});return best}
+function saveLast(uid,id,best){const key='last_'+uid+'_'+id;localStorage.setItem(key,JSON.stringify(best))}
+function recovery(uid){const map={};MUSCLES.forEach(m=>map[m]=100);histFor(uid).slice(0,15).forEach(h=>{const d=daysAgo(h.date);(h.muscles||[]).forEach(m=>{const val=d<1?20:d<2?50:d<3?70:90;map[m]=Math.min(map[m]||100,val)})});State.assessment.sore.forEach(m=>map[m]=Math.min(map[m]||100,25));return map}
+function recoveryMapHtml(uid){const r=recovery(uid);return MUSCLES.filter(m=>m!=='mobility').map(m=>`<div class="rec-row"><span>${label(m)}</span><div class="bar"><i style="width:${r[m]||100}%"></i></div><span>${r[m]||100}%</span></div>`).join('')}
+function renderLibrary(){const f=State.libraryFilter;let list=EXERCISES.filter(e=>(f.group==='all'||e.group===f.group)&&(f.equipment==='all'||e.equipment===f.equipment)&&(!f.q||e.name.toLowerCase().includes(f.q.toLowerCase())||e.muscles.join(' ').includes(f.q.toLowerCase())));screenEl('library').innerHTML=`<h1>Library</h1><p class="sub">${EXERCISES.length} movements custom-tagged for this room.</p><div class="card pad form" style="margin-bottom:14px"><label>Search</label><input value="${escapeHtml(f.q)}" oninput="State.libraryFilter.q=this.value;save();renderLibrary()" placeholder="row, chest, core..."><div class="grid2"><select onchange="State.libraryFilter.group=this.value;save();renderLibrary()"><option value="all">All groups</option>${[...new Set(EXERCISES.map(e=>e.group))].map(g=>`<option ${f.group===g?'selected':''}>${g}</option>`).join('')}</select><select onchange="State.libraryFilter.equipment=this.value;save();renderLibrary()"><option value="all">All equipment</option>${[...new Set(EXERCISES.map(e=>e.equipment))].map(g=>`<option ${f.equipment===g?'selected':''}>${g}</option>`).join('')}</select></div></div><div class="library-list">${list.map(e=>libItem(e)).join('')}</div>`}
+function libItem(e){return `<div class="lib-item"><div><h4>${escapeHtml(e.name)}</h4><p>${escapeHtml(e.group)} - ${escapeHtml(e.equipment)} - ${e.patterns.map(label).join(', ')}</p></div><button class="btn small secondary" onclick="libraryDetails('${e.id}')">View</button></div>`}
+function libraryDetails(id){const e=ex(id);openSheet(`<h3>${escapeHtml(e.name)}</h3><p class="sub">${escapeHtml(e.group)} - ${escapeHtml(e.equipment)}</p>${setupViz(e)}<div class="setup-grid">${setupCells(e)}</div><div class="eyebrow">Cues</div><ul style="margin-left:20px;color:#d7dcea;line-height:1.5">${e.cues.map(c=>`<li>${escapeHtml(c)}</li>`).join('')}</ul><div class="tip"><b>Tip:</b> ${escapeHtml(e.tip)}</div><button class="btn secondary" style="margin-top:14px" onclick="closeSheet()">Close</button>`) }
+function renderHistory(){const h=histFor(p().id);const stats=statsFor(p().id);screenEl('history').innerHTML=`<h1>History</h1><p class="sub">Recent sessions, volume, and PR signals.</p><div class="grid3"><div class="metric"><div class="v">${stats.sessions}</div><div class="l">Sessions</div></div><div class="metric"><div class="v">${Math.round(stats.volume/1000)}k</div><div class="l">Total lb</div></div><div class="metric"><div class="v">${stats.streak}</div><div class="l">Streak</div></div></div><div class="eyebrow">Recent</div>${h.length?h.map(sessionHtml).join(''):'<div class="empty">No workouts yet.</div>'}<div class="eyebrow">Data</div><div class="grid2"><button class="btn secondary" onclick="exportData()">Export JSON</button><button class="btn secondary" onclick="importData()">Import JSON</button></div>`}
+function sessionHtml(s){return `<div class="history-item"><h4>${escapeHtml(s.title)}</h4><p>${fmt(s.date)} - ${s.focus||''} - ${s.totalSets} sets - ${s.totalVolume} lb - readiness ${s.readiness}</p></div>`}
+function renderAI(){const pr=p();const h=histFor(pr.id).slice(0,5);const payload={mission:'Create or refine a home-gym training plan for this family gym app.',equipment:{machine:'Dual-arm functional trainer',stack:'10 lb increments up to 200 lb per arm',adjustments:'height track, arm angle, lever position per arm',extras:['flat bench','attachments','dumbbells up to 15 lb','open floor','ball']},activeProfile:pr,assessment:State.assessment,recentHistory:h,libraryCount:EXERCISES.length,requestedOutput:'Return safe workout logic, exercise additions, progression rules, and UX improvements.'};screenEl('ai').innerHTML=`<h1>AI Coach Export</h1><p class="sub">This gives you the AI flex without exposing API keys in a public GitHub file. Copy the context into ChatGPT, or later wire it to a private serverless endpoint.</p><div class="warnbox"><b>Important:</b> Keep API keys out of public GitHub Pages. For real in-app AI later, use a tiny private backend/proxy.</div><div class="eyebrow">Context package</div><textarea id="aiText" style="width:100%;min-height:360px;border-radius:18px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:white;padding:14px;font-family:ui-monospace,Menlo,monospace;font-size:12px">${escapeHtml(JSON.stringify(payload,null,2))}</textarea><button class="btn" style="margin-top:12px" onclick="copyAI()">Copy AI Context</button>`}
+function copyAI(){navigator.clipboard?.writeText(document.getElementById('aiText').value);alert('Copied.');}
+function openSettings(){openSheet(`<h3>Menu</h3><div class="stack"><button class="btn secondary" onclick="editProfile('${p().id}')">Edit active profile</button><button class="btn secondary" onclick="editProfile(null)">Add profile</button><button class="btn secondary" onclick="showScreen('profiles');closeSheet()">Switch profile</button><button class="btn secondary" onclick="resetDemo()">Reset local demo data</button><button class="btn secondary" onclick="closeSheet()">Close</button></div>`)}
+function editProfile(id){const pr=id?State.profiles.find(x=>x.id===id):{id:'p'+Date.now(),name:'New Profile',age:30,type:'adult',goal:'general',experience:1,color:'#35a3ff',notes:''};openSheet(`<h3>${id?'Edit':'Add'} profile</h3><div class="form"><label>Name</label><input id="pfName" value="${escapeHtml(pr.name)}"><label>Age</label><input id="pfAge" type="number" value="${pr.age||''}"><label>Type</label><select id="pfType"><option ${pr.type==='adult'?'selected':''} value="adult">Adult</option><option ${pr.type==='youth'?'selected':''} value="youth">Youth</option></select><label>Goal</label><select id="pfGoal">${Object.entries(GOALS).map(([k,v])=>`<option value="${k}" ${pr.goal===k?'selected':''}>${v}</option>`).join('')}</select><label>Experience 1-5</label><input id="pfExp" type="number" min="1" max="5" value="${pr.experience||1}"><label>Color</label><input id="pfColor" type="color" value="${pr.color||'#35a3ff'}"><label>Notes</label><textarea id="pfNotes">${escapeHtml(pr.notes||'')}</textarea><button class="btn" onclick="saveProfile('${pr.id}',${id?'true':'false'})">Save profile</button><button class="btn secondary" onclick="closeSheet()">Cancel</button></div>`)}
+function saveProfile(id,exists){const pr={id,name:document.getElementById('pfName').value||'Profile',age:Number(document.getElementById('pfAge').value)||null,type:document.getElementById('pfType').value,goal:document.getElementById('pfGoal').value,experience:Number(document.getElementById('pfExp').value)||1,color:document.getElementById('pfColor').value,notes:document.getElementById('pfNotes').value};if(exists){const i=State.profiles.findIndex(x=>x.id===id);State.profiles[i]=pr}else State.profiles.push(pr);State.activeProfileId=id;save();closeSheet();showScreen('dashboard')}
+function resetDemo(){if(confirm('Clear local app data on this device?')){localStorage.removeItem(KEY);State=clone(DEFAULT);closeSheet();showScreen('profiles')}}
+function exportData(){const blob=new Blob([JSON.stringify(State,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='family-fit-data.json';a.click()}
+function importData(){openSheet(`<h3>Import data</h3><p class="sub">Paste a previous export JSON.</p><textarea id="importBox" style="width:100%;height:220px;border-radius:16px;background:rgba(0,0,0,.25);color:white;border:1px solid var(--line);padding:12px"></textarea><button class="btn" onclick="doImport()">Import</button><button class="btn secondary" style="margin-top:10px" onclick="closeSheet()">Cancel</button>`)}
+function doImport(){try{State=merge(JSON.parse(document.getElementById('importBox').value),clone(DEFAULT));save();closeSheet();render()}catch(e){alert('Invalid JSON')}}
+function startRest(sec){TimerLeft=sec;document.getElementById('timer').classList.add('on');tickRest();clearInterval(Timer);Timer=setInterval(()=>{TimerLeft--;tickRest();if(TimerLeft<=0)stopRest()},1000)}
+function tickRest(){const m=Math.floor(Math.max(0,TimerLeft)/60),s=Math.max(0,TimerLeft)%60;document.getElementById('timerValue').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+function addRest(sec){TimerLeft+=sec;tickRest()}
+function stopRest(){clearInterval(Timer);document.getElementById('timer').classList.remove('on')}
+function openSheet(html){document.getElementById('sheet').innerHTML=html;document.getElementById('modal').classList.add('on')}
+function closeSheet(){document.getElementById('modal').classList.remove('on')}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+showScreen('profiles');
 </script>
 </body>
 </html>
