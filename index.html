@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#080908">
+  <meta name="theme-color" content="#0b0d0c">
   <title>Chitsaz Training Lab</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <button class="brand" onclick="setView('today')" aria-label="Chitsaz Training Lab home">
+      <button class="brand" onclick="setView('home')" aria-label="Chitsaz Training Lab home">
         <span class="brand-mark">CF</span>
         <span class="brand-copy">
           <strong>Chitsaz Training Lab</strong>
@@ -18,19 +18,17 @@
         </span>
       </button>
       <nav class="nav" id="nav" aria-label="Primary"></nav>
-      <button class="primary top-start" onclick="startWorkout()">Start plan</button>
+      <button class="who" id="who" onclick="setView('profiles')"></button>
     </header>
-
     <section class="workspace">
       <main class="main" id="main"></main>
     </section>
   </div>
-
   <nav class="tabbar" id="tabs" aria-label="Mobile navigation"></nav>
   <div class="timer hide" id="timer"></div>
   <div class="drawer hide" id="drawer"></div>
-
   <script src="data.js"></script>
+  <script src="biomechanics.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
