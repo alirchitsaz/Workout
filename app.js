@@ -1,11 +1,4 @@
-const KEY = "chitsaz-training-lab-v2";
-
-const ASSETS = {
-  front: "assets/gym-front.svg",
-  angle: "assets/gym-angle.svg",
-  dumbbells: "assets/dumbbells.svg",
-  arm: "assets/arm-detail.svg",
-};
+const KEY = "chitsaz-training-lab-v5";
 
 const GOALS = {
   strength: "Strength",
@@ -31,13 +24,11 @@ const MUSCLES = [
 ];
 
 const VIEWS = [
-  ["today", "Today"],
+  ["home", "Home"],
   ["workout", "Workout"],
-  ["gym", "Gym"],
   ["library", "Library"],
-  ["history", "History"],
-  ["profiles", "Family"],
-  ["coach", "Coach"],
+  ["history", "Progress"],
+  ["menu", "Menu"],
 ];
 
 const PRESETS = [
@@ -78,7 +69,7 @@ const PRESETS = [
   },
 ];
 
-let view = "today";
+let view = "home";
 let rest = 0;
 let restTick = null;
 let state = load();
@@ -166,11 +157,12 @@ function setView(next) {
 function render() {
   save();
   renderShell();
-  if (view === "today") today();
+  if (view === "home" || view === "today") home();
   if (view === "workout") workout();
   if (view === "gym") gym();
   if (view === "library") library();
   if (view === "history") history();
+  if (view === "menu") menuView();
   if (view === "profiles") profilesView();
   if (view === "coach") coach();
 }
@@ -184,33 +176,15 @@ function renderShell() {
     `<button class="${view === id ? "on" : ""}" onclick="setView('${id}')">${label[0]}<br>${label}</button>`
   ).join("");
 
-  document.getElementById("profiles").innerHTML = state.profiles.map((profile) =>
-    `<button class="profile-btn ${profile.id === state.active ? "on" : ""}" style="--c:${profile.color}" onclick="selectProfile('${profile.id}')"><b>${esc(initials(profile.name))}</b>${esc(profile.name)}</button>`
-  ).join("") + `<button class="profile-btn" onclick="addProfile()"><b>+</b>Add</button>`;
+  const profiles = document.getElementById("profiles");
+  if (profiles) {
+    profiles.innerHTML = state.profiles.map((profile) =>
+      `<button class="profile-btn ${profile.id === state.active ? "on" : ""}" style="--c:${profile.color}" onclick="selectProfile('${profile.id}')"><b>${esc(initials(profile.name))}</b>${esc(profile.name)}</button>`
+    ).join("") + `<button class="profile-btn" onclick="addProfile()"><b>+</b>Add</button>`;
+  }
 
-  const stats = statSummary();
-  const plan = buildPlan();
-  const gymStatus = state.gym.stackVerified ? "verified" : "needs live check";
-  document.getElementById("rail").innerHTML = `
-    <article class="rail-card">
-      <span class="label">Active profile</span>
-      <div class="row"><b>${esc(p().name)}</b><span class="status verified">${esc(p().mode)}</span></div>
-      <p>${esc(GOALS[p().goal])}. Cable cap ${p().max} lb. Next: ${esc(plan.title)}.</p>
-      <div class="metric-grid">
-        <div class="metric"><b>${stats.sessions}</b><small>Sessions</small></div>
-        <div class="metric"><b>${stats.streak}</b><small>Day streak</small></div>
-      </div>
-    </article>
-    <article class="rail-card">
-      <span class="label">Room inventory</span>
-      <p>Functional trainer, bench, mat lane, light dumbbells, D-handles, rope, straight bar.</p>
-      <div class="chips">
-        <span class="status ${state.gym.stackVerified ? "verified" : "testing"}">${gymStatus}</span>
-        <span class="status">${state.gym.max} lb stacks</span>
-      </div>
-      <button class="primary" onclick="setView('gym')">Open Gym Setup</button>
-    </article>
-  `;
+  const rail = document.getElementById("rail");
+  if (rail) rail.innerHTML = "";
 }
 
 function initials(name) {
@@ -233,37 +207,36 @@ function setIntensity(level) {
   render();
 }
 
-function installAssetVariables() {
-  document.documentElement.style.setProperty("--hero-photo", `url("${ASSETS.front}")`);
-}
-
-function today() {
+function home() {
   const plan = buildPlan();
   main(`
     <div class="stack">
-      <section class="section">
-        <div>
-          <span class="section-kicker">Today for ${esc(p().name)}</span>
-          <h2>${esc(plan.title)}</h2>
-          <p>${esc(plan.reason)}</p>
+      <section class="panel home-panel">
+        <div class="home-head">
+          <div>
+            <span class="section-kicker">Start here</span>
+            <h2>Who's training today?</h2>
+            <p>Pick a profile. The workout, loads, and exercise filters adapt to that person.</p>
+          </div>
+          <button class="ghost" onclick="setView('profiles')">Edit profiles</button>
         </div>
-        <button class="primary" onclick="startWorkout()">Start plan</button>
+        <div class="profile-grid">${state.profiles.map(profileCard).join("")}</div>
       </section>
 
-      <section class="summary">
-        <b>${plan.minutes} min - ${plan.items.length} movements</b>
-        <p>${esc(plan.focus)}. Load targets use your profile cap, the stack range, recent logged work, and selected vibe.</p>
-      </section>
-
-      ${assessmentHtml()}
-      ${sorenessHtml()}
-
-      <section class="panel">
+      <section class="panel today-command">
         <div class="section">
           <div>
-            <span class="section-kicker">Session flow</span>
-            <h2>Grouped by setup</h2>
+            <span class="section-kicker">Next for ${esc(p().name)}</span>
+            <h2>${esc(plan.title)}</h2>
+            <p>${esc(plan.focus)}. ${plan.minutes} minutes, ${plan.items.length} movements.</p>
           </div>
+          <button class="primary" onclick="startWorkout()">Start plan</button>
+        </div>
+        ${assessmentHtml(plan)}
+        ${sorenessHtml()}
+        <div class="summary inline-summary">
+          <b>Setup grouped</b>
+          <p>Exercises are ordered to reduce cable arm changes.</p>
         </div>
         <div class="preview-grid">${plan.items.map(mini).join("")}</div>
       </section>
@@ -271,17 +244,28 @@ function today() {
   `);
 }
 
-function assessmentHtml() {
+function profileCard(profile) {
+  const active = profile.id === state.active;
+  const stats = statSummary(profile.id);
+  return `
+    <button class="profile-card ${active ? "on" : ""}" style="--c:${profile.color}" onclick="selectProfile('${profile.id}')">
+      <span class="profile-avatar">${esc(initials(profile.name))}</span>
+      <span class="profile-main">
+        <b>${esc(profile.name)}</b>
+        <small>${esc(GOALS[profile.goal])} / ${profile.max} lb cap</small>
+      </span>
+      <span class="profile-meta">${stats.sessions} sessions</span>
+    </button>
+  `;
+}
+
+function assessmentHtml(plan) {
   const selectedSummary = `${state.assessment.minutes} minutes, ${state.assessment.intensity} vibe`;
   return `
-    <section class="panel quick-plan">
-      <div class="section">
-        <div>
-          <span class="section-kicker">Quick choices</span>
-          <h2>${esc(selectedSummary)}</h2>
-          <p>Pick the kind of session. The workout below changes instantly.</p>
-        </div>
-        <button type="button" class="primary" onclick="startWorkout()">Start</button>
+    <div class="quick-plan">
+      <div class="split-row">
+        <div><span class="label">Plan</span><b>${esc(selectedSummary)}</b></div>
+        <span class="status verified">${plan.items.length} moves</span>
       </div>
       <div class="micro-grid">
       <label class="control">
@@ -301,7 +285,7 @@ function assessmentHtml() {
         <small class="choice-meta">Selected: ${state.assessment.intensity}</small>
       </div>
       </div>
-    </section>
+    </div>
   `;
 }
 
@@ -313,13 +297,13 @@ function vibeCopy(level) {
 
 function sorenessHtml() {
   return `
-    <section class="control">
+    <div class="avoid-strip">
       <div class="row">
-        <b>Soreness check</b>
+        <b>Avoid today</b>
         <label class="toggle"><input type="checkbox" ${state.assessment.pain ? "checked" : ""} onchange="state.assessment.pain=this.checked;render()"> Pain today</label>
       </div>
       <div class="chips">${MUSCLES.map((muscle) => `<button class="chip ${state.assessment.sore.includes(muscle) ? "on" : ""}" onclick="toggleSore('${muscle}')">${muscle}</button>`).join("")}</div>
-    </section>
+    </div>
   `;
 }
 
@@ -553,7 +537,8 @@ function setupHtml(exercise) {
     const zone = nonCableZone(exercise);
     return `
       <div class="setup-panel">
-        <div class="photo-card" style="--photo:url('${zone.photo}')">
+        <div class="graphic-card ${zone.kind}">
+          ${equipmentSvg(zone.kind)}
           <span class="setup-label">${esc(zone.label)}</span>
           <b>${esc(zone.title)}</b>
         </div>
@@ -632,14 +617,71 @@ function trainerSvg(setup, title = "Functional trainer setup") {
   `;
 }
 
+function equipmentSvg(kind) {
+  if (kind === "functional") {
+    return `
+      <svg class="equipment-svg" viewBox="0 0 220 150" aria-hidden="true">
+        <path class="deck" d="M30 122 L190 122 L208 140 L12 140 Z"></path>
+        <rect class="tower" x="88" y="22" width="44" height="96" rx="8"></rect>
+        <line class="rail" x1="72" y1="28" x2="72" y2="118"></line>
+        <line class="rail" x1="148" y1="28" x2="148" y2="118"></line>
+        <line class="arm" x1="72" y1="60" x2="28" y2="78"></line>
+        <line class="arm" x1="148" y1="60" x2="192" y2="78"></line>
+        <line class="cable" x1="28" y1="78" x2="106" y2="122"></line>
+        <line class="cable" x1="192" y1="78" x2="114" y2="122"></line>
+        <circle class="node" cx="28" cy="78" r="7"></circle>
+        <circle class="node" cx="192" cy="78" r="7"></circle>
+      </svg>
+    `;
+  }
+  if (kind === "dumbbells") {
+    return `
+      <svg class="equipment-svg" viewBox="0 0 220 150" aria-hidden="true">
+        <line class="bar" x1="48" y1="64" x2="172" y2="86"></line>
+        <line class="bar" x1="48" y1="92" x2="172" y2="60"></line>
+        <rect class="plate" x="24" y="48" width="28" height="34" rx="7"></rect>
+        <rect class="plate" x="168" y="74" width="28" height="34" rx="7"></rect>
+        <rect class="plate alt" x="24" y="78" width="28" height="34" rx="7"></rect>
+        <rect class="plate alt" x="168" y="44" width="28" height="34" rx="7"></rect>
+      </svg>
+    `;
+  }
+  if (kind === "bench") {
+    return `
+      <svg class="equipment-svg" viewBox="0 0 220 150" aria-hidden="true">
+        <rect class="bench-pad" x="52" y="58" width="116" height="24" rx="8"></rect>
+        <line class="leg" x1="78" y1="82" x2="56" y2="124"></line>
+        <line class="leg" x1="142" y1="82" x2="164" y2="124"></line>
+        <line class="floor-line" x1="34" y1="124" x2="186" y2="124"></line>
+      </svg>
+    `;
+  }
+  return `
+    <svg class="equipment-svg" viewBox="0 0 220 150" aria-hidden="true">
+      <rect class="mat" x="46" y="42" width="128" height="80" rx="14"></rect>
+      <path class="route" d="M72 98 C92 54 128 54 150 98"></path>
+      <circle class="node" cx="72" cy="98" r="7"></circle>
+      <circle class="node" cx="150" cy="98" r="7"></circle>
+    </svg>
+  `;
+}
+
+function equipmentGlyph(exercise) {
+  if (exercise.setup) return "FT";
+  if (exercise.equipment === "dumbbells") return "DB";
+  if (exercise.equipment === "bench") return "BN";
+  if (exercise.equipment === "floor") return "FL";
+  return "BW";
+}
+
 function nonCableZone(exercise) {
   if (exercise.equipment === "dumbbells") {
-    return { photo: ASSETS.dumbbells, label: "Dumbbell zone", title: "Light dumbbell lane", note: "Use the mat or bench area. Since weight is limited, progress with tempo, pauses, extra reps, and cleaner range." };
+    return { kind: "dumbbells", label: "Dumbbell zone", title: "Light dumbbell lane", note: "Use the mat or bench area. Since weight is limited, progress with tempo, pauses, extra reps, and cleaner range." };
   }
   if (exercise.equipment === "bench") {
-    return { photo: ASSETS.angle, label: "Bench lane", title: "Bench plus open floor", note: "Set the bench clear of the cable path and keep the mat lane open for step-ups, incline work, and support." };
+    return { kind: "bench", label: "Bench lane", title: "Bench plus open floor", note: "Set the bench clear of the cable path and keep the mat lane open for step-ups, incline work, and support." };
   }
-  return { photo: ASSETS.angle, label: "Floor zone", title: "Open mat lane", note: "Use the open mat space in front of the trainer. Keep reps controlled and stop if the movement gets sloppy." };
+  return { kind: "floor", label: "Floor zone", title: "Open mat lane", note: "Use the open mat space in front of the trainer. Keep reps controlled and stop if the movement gets sloppy." };
 }
 
 function gym() {
@@ -650,15 +692,15 @@ function gym() {
         <div>
           <span class="section-kicker">Your room</span>
           <h2>Gym Setup</h2>
-          <p>Real photos, real equipment, and starting machine positions for the movements in the app.</p>
+          <p>A clean map of the equipment this app actually programs.</p>
         </div>
       </section>
 
-      <div class="photo-grid">
-        ${photoCard(ASSETS.front, "Functional trainer", "Dual adjustable arms, two stacks, open mat lane")}
-        ${photoCard(ASSETS.angle, "Bench lane", "Bench centered for press, rows, step-ups, and support")}
-        ${photoCard(ASSETS.dumbbells, "Dumbbells", "Light pairs for controlled accessory work")}
-        ${photoCard(ASSETS.arm, "Arm adjustment", "Track, angle, and depth positions drive cable setup")}
+      <div class="equipment-strip">
+        ${equipmentTile("functional", "Functional trainer", "Dual arms, tracks 1-8, angles 1-11, depth 1-5")}
+        ${equipmentTile("bench", "Bench lane", "Centered for press, rows, step-ups, support")}
+        ${equipmentTile("dumbbells", "Dumbbells", "Light load, high control, tempo and pauses")}
+        ${equipmentTile("floor", "Open floor", "Core, mobility, athletic work, family-safe circuits")}
       </div>
 
       <section class="gym-grid">
@@ -703,8 +745,8 @@ function gym() {
   `);
 }
 
-function photoCard(photo, title, text) {
-  return `<article class="photo-card" style="--photo:url('${photo}')"><b>${esc(title)}</b><span>${esc(text)}</span></article>`;
+function equipmentTile(kind, title, text) {
+  return `<article class="equipment-card compact-equipment">${equipmentSvg(kind)}<b>${esc(title)}</b><p>${esc(text)}</p></article>`;
 }
 
 function equipmentCard(title, text, status) {
@@ -748,7 +790,8 @@ function library() {
 
 function libraryItem(exercise) {
   return `
-    <button class="library-item" style="--photo:url('${photoFor(exercise)}')" onclick="detail('${exercise.id}')">
+    <button class="library-item ${exercise.cat}" onclick="detail('${exercise.id}')">
+      <span class="library-mark">${equipmentGlyph(exercise)}</span>
       <span class="status ${exercise.status}">${statusLabel(exercise.status)}</span>
       <b>${esc(exercise.name)}</b>
       <small>${esc(exercise.muscles.join(", "))}</small>
@@ -814,6 +857,50 @@ function history() {
       </div>
     </div>
   `);
+}
+
+function menuView() {
+  const stats = statSummary();
+  main(`
+    <div class="stack">
+      <section class="section">
+        <div>
+          <span class="section-kicker">Menu</span>
+          <h2>Settings and tools</h2>
+          <p>Daily training stays clean. Setup, profiles, and exports live here.</p>
+        </div>
+      </section>
+
+      <section class="menu-grid">
+        ${menuRow("Equipment Setup", "Machine presets, stack labels, attachments", "gym", "FT")}
+        ${menuRow("Family Profiles", "Names, goals, cable caps, safe modes", "profiles", "PF")}
+        ${menuRow("Coach Export", "Copy a private training brief for ChatGPT", "coach", "AI")}
+        ${menuRow("Progress", `${stats.sessions} sessions, ${stats.sets} logged sets`, "history", "PR")}
+      </section>
+
+      <section class="panel about-panel">
+        <div>
+          <span class="section-kicker">About</span>
+          <h2>Chitsaz Training Lab</h2>
+          <p>Local-first workout planning for your functional trainer, bench, dumbbells, and floor space. No account required.</p>
+        </div>
+        <div class="metric-grid">
+          <div class="metric"><b>${EX.length}</b><small>Exercises</small></div>
+          <div class="metric"><b>${PRESETS.length}</b><small>Machine presets</small></div>
+        </div>
+      </section>
+    </div>
+  `);
+}
+
+function menuRow(title, detail, target, mark) {
+  return `
+    <button class="menu-row" onclick="setView('${target}')">
+      <span class="menu-mark">${esc(mark)}</span>
+      <span><b>${esc(title)}</b><small>${esc(detail)}</small></span>
+      <span class="chevron">&gt;</span>
+    </button>
+  `;
 }
 
 function profilesView() {
@@ -1018,8 +1105,8 @@ function finishWorkout() {
   render();
 }
 
-function statSummary() {
-  const history = state.history.filter((session) => session.profile === p().id);
+function statSummary(profileId = p().id) {
+  const history = state.history.filter((session) => session.profile === profileId);
   return {
     sessions: history.length,
     sets: history.reduce((sum, session) => sum + session.totalSets, 0),
@@ -1092,16 +1179,8 @@ function statusLabel(status) {
   return status;
 }
 
-function photoFor(exercise) {
-  if (exercise.equipment === "dumbbells") return ASSETS.dumbbells;
-  if (exercise.setup && (exercise.setup.track === 1 || exercise.setup.track === 8)) return ASSETS.arm;
-  if (exercise.equipment === "bench" || exercise.equipment === "floor" || exercise.equipment === "bodyweight") return ASSETS.angle;
-  return ASSETS.front;
-}
-
 function main(html) {
   document.getElementById("main").innerHTML = html;
 }
 
-installAssetVariables();
 render();
