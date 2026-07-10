@@ -1,5 +1,5 @@
-/* app.js - Chitsaz Training Lab v3.1 (layered UX + posture-aware figures). */
-var KEY = "ctl-v31";
+/* app.js - Chitsaz Training Lab v3.2 (layered UX + posture-aware figures, corrected lying orientation). */
+var KEY = "ctl-v32";
 var GOALS = { strength:"Strength", hypertrophy:"Muscle", "fat-loss":"Fat loss", posture:"Posture",
   mobility:"Mobility", "youth-athletic":"Athletic", "guest-safe":"Guest" };
 var MUSCLES = ["chest","back","lats","shoulders","rear delts","quads","glutes","hamstrings","core","mobility"];
@@ -10,7 +10,6 @@ var TABS=[["home","Today","\u25C9"],["workout","Workout","\u25B6"],["progress","
 var view="home", wIndex=0, rest=0, restTick=null, activeWorkout=null, _color=null;
 var state=load();
 
-/* ---------- state ---------- */
 function defaults(){
   return {
     activeId:null,
@@ -44,7 +43,6 @@ function mach(){ return {positions:state.gym.positions,minHeightIn:state.gym.min
 function el(id){ return document.getElementById(id); }
 function app(html){ el("app").innerHTML=html; }
 
-/* ---------- router ---------- */
 function go(v){ view=v; render(); window.scrollTo(0,0); }
 function render(){
   save();
@@ -57,8 +55,6 @@ function renderTabs(){
   var html='<nav class="tabbar">'+TABS.map(function(t){return '<button class="'+(view===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')"><span class="ti">'+t[2]+'</span>'+t[1]+'</button>';}).join("")+'</nav>';
   if(ex0) ex0.outerHTML=html; else document.body.insertAdjacentHTML("beforeend",html);
 }
-
-/* ---------- gate ---------- */
 function gate(){
   var tb=document.querySelector(".tabbar"); if(tb) tb.remove();
   app('<div class="gate"><div><div class="kicker">Chitsaz Training Lab</div><h1>Who\u2019s training?</h1>'+
@@ -78,8 +74,6 @@ function switchUser(){
     }).join("")+'</div><div class="sheet-actions"><button class="btn" onclick="sheetAddPerson()">+ Add person</button>'+
     '<button class="btn" onclick="state.activeId=null;closeSheet();render()">Sign out to gate</button></div>');
 }
-
-/* ---------- home ---------- */
 function greeting(){ var h=new Date().getHours(); return h<12?"Good morning":h<18?"Good afternoon":"Good evening"; }
 function home(){
   var plan=buildPlan();
@@ -104,7 +98,6 @@ function sheetAdjust(){
 }
 function toggleSore(m){ var s=state.assess.sore; state.assess.sore=s.indexOf(m)>=0?s.filter(function(x){return x!==m;}):s.concat(m); save(); sheetAdjust(); }
 
-/* ---------- plan engine ---------- */
 function buildPlan(){
   var count=state.assess.minutes===20?4:state.assess.minutes===35?5:7;
   var lastT=state.history[0]?state.history[0].template:null;
@@ -150,7 +143,6 @@ function lastPerf(id){var h=state.history.filter(function(x){return x.profile===
   for(var i=0;i<h.length;i++){var e=h[i].exercises.filter(function(x){return x.id===id;})[0];
     if(e&&e.sets.length)return e.sets.slice().sort(function(a,b){return b.weight-a.weight;})[0];} return null;}
 
-/* ---------- workout player ---------- */
 function startWorkout(){ activeWorkout=buildPlan(); wIndex=0; view="workout"; render(); window.scrollTo(0,0); }
 function workout(){
   if(!activeWorkout){ app('<header class="appbar"><h1>Workout</h1></header><div class="empty"><div class="big">\u25B6</div><b>No active workout</b><p>Head to Today and press Start.</p><button class="btn primary" onclick="go(\'home\')">Go to Today</button></div>'); renderTabs(); return; }
@@ -193,7 +185,7 @@ function swap(i){var cur=ex(activeWorkout.items[i].id);
   if(rep)activeWorkout.items[i]=prescribe(rep); render();}
 function removeEx(i){ if(activeWorkout.items.length<=1)return; activeWorkout.items.splice(i,1); wIndex=Math.min(wIndex,activeWorkout.items.length-1); render(); }
 
-/* ========== POSTURE-AWARE FIGURE RENDERER ========== */
+/* ========== POSTURE-AWARE FIGURE ========== */
 function figureCard(e){
   if(!e.setup||!BIO.hasMove(e.id)) return zoneCard(e);
   var s=BIO.solve(e.id,hIn(),mach());
@@ -209,24 +201,22 @@ function zoneCard(e){
     '<div style="font-size:3rem">'+g+'</div><b>'+esc(e.equipment)+'</b></div>'+
     '<div class="callout"><span class="badge">Setup</span><span class="txt">'+esc(note)+'</span></div></div>';
 }
-// Main SVG. Chooses a body drawing based on posture, then draws tower+pulley+cable to the hands.
 function figSvg(s,mini){
   var W=340,H=mini?150:280,floorY=H-20,pad=16;
   var topIn=Math.max(s.machine.maxHeightIn,s.userHeightIn*1.25)+4;
   var ppi=(floorY-pad)/topIn; function y(v){return floorY-v*ppi;}
-  var toward=s.face==="toward";
-  var towerX = toward?300:(s.posture==="lying"?300:300);
+  // For lying head-to-machine, the tower is best on the LEFT (head end). Otherwise right.
+  var towerLeft = (s.posture==="lying" && s.headToMachine);
+  var towerX = towerLeft?40:300;
   var py=y(s.pulley.actualIn);
-  // build body + get hand point {hx,hy}
-  var drawn = drawBody(s,y,floorY,mini);
+  var drawn = drawBody(s,y,floorY,mini,towerX,towerLeft);
   var svg='<svg class="fig" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" aria-label="'+esc(s.posture)+' setup">';
   svg+='<line class="floor" x1="10" y1="'+floorY+'" x2="'+(W-10)+'" y2="'+floorY+'"></line>';
   if(!mini){ [0,24,48,72].filter(function(t){return t<=topIn;}).forEach(function(t){
-    svg+='<line class="tick" x1="12" y1="'+y(t)+'" x2="17" y2="'+y(t)+'"></line><text class="tt" x="20" y="'+(y(t)+3)+'">'+t+'"</text>';});}
-  // tower + rail + pulley
+    var tx = towerLeft? (W-30):20;
+    svg+='<line class="tick" x1="'+(towerLeft?W-18:12)+'" y1="'+y(t)+'" x2="'+(towerLeft?W-13:17)+'" y2="'+y(t)+'"></line><text class="tt" x="'+tx+'" y="'+(y(t)+3)+'" text-anchor="'+(towerLeft?"end":"start")+'">'+t+'"</text>';});}
   svg+='<rect class="tower" x="'+(towerX-9)+'" y="'+y(s.machine.maxHeightIn)+'" width="18" height="'+(floorY-y(s.machine.maxHeightIn))+'" rx="6"></rect>';
   svg+='<line class="rail" x1="'+towerX+'" y1="'+y(s.machine.maxHeightIn)+'" x2="'+towerX+'" y2="'+y(s.machine.minHeightIn)+'"></line>';
-  // cable from pulley to hands
   svg+='<line class="cable" x1="'+towerX+'" y1="'+py+'" x2="'+drawn.hx+'" y2="'+drawn.hy+'"></line>';
   svg+='<circle class="pulley" cx="'+towerX+'" cy="'+py+'" r="7"></circle>';
   svg+=drawn.svg;
@@ -235,78 +225,66 @@ function figSvg(s,mini){
   svg+='</svg>';
   return svg;
 }
-// Returns {svg, hx, hy} for the body per posture. bodyX kept left of tower.
-function drawBody(s,y,floorY,mini){
-  var bodyX=150, h=s.userHeightIn;
+function drawBody(s,y,floorY,mini,towerX,towerLeft){
+  var h=s.userHeightIn;
   function limb(x1,y1,x2,y2){return '<path class="limb" d="M '+x1+' '+y1+' L '+x2+' '+y2+'"></path>';}
-  function headR(a,b){return Math.max(8,(a-b));}
-  var sy=y(s.startIn);
+
   if(s.posture==="lying"){
-    // horizontal body on a flat bench; head left, feet right; arms press UP toward handles
+    // Head at the machine (tower) end; feet away. Tower is on the LEFT, so head is left, feet right.
     var benchY=y(18), padH=8;
-    var bx0=bodyX-58, bx1=bodyX+70;
+    // bench spans under the torso, from near the tower outward
+    var headX = towerX+34;        // head just past the tower
+    var feetX = headX+150;        // feet far from machine
+    var bx0=headX-8, bx1=feetX+6;
     var svg='';
-    // bench pad + legs
     svg+='<rect class="bench" x="'+bx0+'" y="'+benchY+'" width="'+(bx1-bx0)+'" height="'+padH+'" rx="4"></rect>';
-    svg+='<line class="bench-leg" x1="'+(bx0+10)+'" y1="'+(benchY+padH)+'" x2="'+(bx0+4)+'" y2="'+floorY+'"></line>';
-    svg+='<line class="bench-leg" x1="'+(bx1-10)+'" y1="'+(benchY+padH)+'" x2="'+(bx1-4)+'" y2="'+floorY+'"></line>';
+    svg+='<line class="bench-leg" x1="'+(bx0+12)+'" y1="'+(benchY+padH)+'" x2="'+(bx0+6)+'" y2="'+floorY+'"></line>';
+    svg+='<line class="bench-leg" x1="'+(bx1-12)+'" y1="'+(benchY+padH)+'" x2="'+(bx1-6)+'" y2="'+floorY+'"></line>';
     var torsoY=benchY-2;
-    // torso (horizontal capsule) + head
-    svg+='<rect class="body" x="'+(bodyX-30)+'" y="'+(torsoY-11)+'" width="60" height="20" rx="10"></rect>';
-    svg+='<circle class="body" cx="'+(bodyX-40)+'" cy="'+(torsoY-1)+'" r="10"></circle>';
-    // legs bent over end of bench
-    svg+=limb(bodyX+28,torsoY,bx1-6,torsoY-2);
-    svg+=limb(bx1-6,torsoY-2,bx1+2,floorY-2);
-    // pressing arms up toward handle height (sy above chest)
-    var handY=Math.min(torsoY-14, y(s.pulley.actualIn+14));
-    var hx=bodyX+8, hy=handY;
-    svg+=limb(bodyX+6,torsoY-6,hx,hy);
-    svg+=limb(bodyX-6,torsoY-6,hx-2,hy+2);
+    // horizontal torso capsule (chest near head end) + head at machine end
+    svg+='<rect class="body" x="'+(headX+8)+'" y="'+(torsoY-11)+'" width="64" height="20" rx="10"></rect>';
+    svg+='<circle class="body" cx="'+headX+'" cy="'+(torsoY-1)+'" r="10"></circle>';
+    // legs bent over the far end
+    svg+=limb(headX+72,torsoY,feetX-6,torsoY-2);
+    svg+=limb(feetX-6,torsoY-2,feetX+2,floorY-2);
+    // pressing arms: hands go UP and AWAY from the machine (up-and-to-the-right)
+    var chestX = headX+22;
+    var hx = chestX+30;                                   // away from tower
+    var hy = Math.min(torsoY-16, y(s.pulley.actualIn+16));// pressed up above chest
+    svg+=limb(chestX,torsoY-6,hx,hy);
+    svg+=limb(chestX+8,torsoY-6,hx-2,hy+2);
     return {svg:svg,hx:hx,hy:hy};
   }
   if(s.posture==="seated"){
-    // upright seated on bench facing tower (toward). knees forward.
     var benchY=y(18);
-    var seatX0=bodyX-30, seatX1=bodyX+28;
-    var hipY=benchY-2, shoulderY=hipY-(h*0.34)*(y(0)-y(1)); // approximate torso length
-    shoulderY=hipY-52; var crownY=shoulderY-22;
+    var seatX0=150-30, seatX1=150+28, bodyX=150;
+    var hipY=benchY-2, shoulderY=hipY-52, crownY=shoulderY-22;
     var svg='';
     svg+='<rect class="bench" x="'+seatX0+'" y="'+benchY+'" width="'+(seatX1-seatX0)+'" height="8" rx="4"></rect>';
     svg+='<line class="bench-leg" x1="'+(seatX0+8)+'" y1="'+(benchY+8)+'" x2="'+(seatX0+3)+'" y2="'+floorY+'"></line>';
     svg+='<line class="bench-leg" x1="'+(seatX1-8)+'" y1="'+(benchY+8)+'" x2="'+(seatX1-3)+'" y2="'+floorY+'"></line>';
-    // torso + head
     svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
     svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
-    // thighs forward + shins down to floor
     svg+=limb(bodyX+4,hipY,bodyX+40,hipY+2);
     svg+=limb(bodyX+40,hipY+2,bodyX+44,floorY);
-    // arms reaching toward handle (pulley low ~24in)
     var hx=bodyX+46, hy=y(s.startIn);
     svg+=limb(bodyX,shoulderY+8,hx,hy);
     return {svg:svg,hx:hx,hy:hy};
   }
   if(s.posture==="kneel"||s.posture==="half-kneel"){
-    var kneeY=y(6);
+    var bodyX=150, kneeY=y(6);
     var hipY=kneeY-(s.posture==="kneel"?38:44), shoulderY=hipY-48, crownY=shoulderY-20;
     var svg='';
-    // torso + head (upright, facing tower/toward)
     svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
     svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
-    if(s.posture==="kneel"){
-      // both shins on floor behind
-      svg+=limb(bodyX-4,hipY,bodyX-16,floorY); svg+=limb(bodyX+4,hipY,bodyX+16,floorY);
-    } else {
-      // half-kneel: front knee up, back knee down
-      svg+=limb(bodyX+4,hipY,bodyX+26,y(3)); svg+=limb(bodyX+26,y(3),bodyX+30,floorY); // front leg
-      svg+=limb(bodyX-4,hipY,bodyX-14,floorY); // back shin down
-    }
-    // arms up toward high pulley overhead
+    if(s.posture==="kneel"){ svg+=limb(bodyX-4,hipY,bodyX-16,floorY); svg+=limb(bodyX+4,hipY,bodyX+16,floorY); }
+    else { svg+=limb(bodyX+4,hipY,bodyX+26,y(3)); svg+=limb(bodyX+26,y(3),bodyX+30,floorY); svg+=limb(bodyX-4,hipY,bodyX-14,floorY); }
     var hx=bodyX+6, hy=y(Math.min(s.startIn,s.machine.maxHeightIn-4));
     svg+=limb(bodyX,shoulderY+6,hx,hy);
     return {svg:svg,hx:hx,hy:hy};
   }
-  // ---- standing (default) ----
-  var crownY=y(h), shoulderY=y(h*0.82), hipY=y(h*0.50);
+  // standing
+  var bodyX=150, crownY=y(h), shoulderY=y(h*0.82), hipY=y(h*0.50);
   var hr=Math.max(8,(shoulderY-crownY)/2.2);
   var toward=s.face==="toward";
   var hx=toward?bodyX+50:bodyX-34, hy=y(s.startIn);
@@ -329,7 +307,6 @@ function sheetInfo(id){
   openSheet(body);
 }
 
-/* ---------- logging ---------- */
 function setVal(ei,si,k,v){var s=activeWorkout.items[ei].done[si];s[k]=(k==="weight"||k==="rpe")?Number(v):v;save();}
 function addSet(ei){var it=activeWorkout.items[ei];it.done.push({weight:it.load.weight||"",reps:"",rpe:7,done:false});render();}
 function toggleSet(ei,si){var it=activeWorkout.items[ei],s=it.done[si];s.done=!s.done;
@@ -354,7 +331,6 @@ function commitWorkout(){
   activeWorkout=null; closeSheet(); view="progress"; render();
 }
 
-/* ---------- library ---------- */
 function library(){
   var q=state.q.toLowerCase(),f=state.filter;
   var list=EX.filter(function(e){var hay=(e.name+" "+e.cat+" "+e.muscles.join(" ")+" "+e.equipment).toLowerCase();
@@ -367,8 +343,6 @@ function library(){
       '<span class="lm"><b>'+esc(e.name)+'</b><small>'+esc(e.muscles.join(", "))+'</small></span><span class="dotpill '+e.status+'">'+statusLabel(e.status)+'</span></button>';}).join("")+'</div>');
   renderTabs();
 }
-
-/* ---------- progress ---------- */
 function progress(){
   var items=state.history.filter(function(s){return s.profile===p().id;});
   var st=stats();
@@ -388,7 +362,6 @@ function stats(pid){pid=pid||p().id;var h=state.history.filter(function(s){retur
   return {sessions:h.length,sets:h.reduce(function(a,s){return a+s.totalSets;},0),volume:h.reduce(function(a,s){return a+s.totalVolume;},0),streak:streak(h)};}
 function streak(h){if(!h.length)return 0;var d={};h.forEach(function(s){d[new Date(s.date).toDateString()]=1;});var c=0,day=new Date();while(d[day.toDateString()]){c++;day.setDate(day.getDate()-1);}return c||1;}
 
-/* ---------- settings ---------- */
 function settings(){
   app('<header class="appbar"><div class="appbar-left"><h1>Settings</h1></div>'+
     '<button class="avatar" style="--c:'+p().color+'" onclick="switchUser()">'+ini(p().name)+'</button></header>'+
@@ -450,13 +423,11 @@ function sheetAttach(){
     '<div class="sheet-actions"><button class="btn primary block" onclick="closeSheet();render()">Done</button></div>'); }
 function toggleAttach(a){var arr=state.gym.attachments;state.gym.attachments=arr.indexOf(a)>=0?arr.filter(function(x){return x!==a;}):arr.concat(a);sheetAttach();}
 
-/* ---------- sheet plumbing ---------- */
 function openSheet(html){var s=el("sheet"),sc=el("scrim");s.innerHTML='<div class="grabber"></div>'+html;
   s.classList.remove("hide");sc.classList.remove("hide");requestAnimationFrame(function(){s.classList.add("show");sc.classList.add("show");});}
 function closeSheet(){var s=el("sheet"),sc=el("scrim");s.classList.remove("show");sc.classList.remove("show");
   setTimeout(function(){s.classList.add("hide");sc.classList.add("hide");},260);}
 
-/* ---------- misc ---------- */
 function grp(e){return e.setup?e.setup.group:e.equipment;}
 function statusLabel(s){return s==="testing"?"start light":s;}
 

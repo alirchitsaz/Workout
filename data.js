@@ -9,7 +9,7 @@ function F(id,name,cat,muscles,equipment,goals,cues,reps,sets,rest,load){
 }
 var EX = [
   C('standing-cable-chest-press','Standing Cable Chest Press','push','chest,triceps,core','d-handle','mid-dual-press','strength,hypertrophy,fat-loss','Ribs down|Press slightly together|Control the return','8-12',3,65),
-  C('flat-bench-cable-press','Flat Bench Cable Press','push','chest,triceps,shoulders','d-handle','bench-mid-press','strength,hypertrophy','Pin shoulder blades|Wrists stacked|Press smoothly','8-12',3,75),
+  C('flat-bench-cable-press','Bench Cable Press \u00b7 Decline + Core','push','lower chest,triceps,core','d-handle','bench-mid-press','strength,hypertrophy','Head toward the machine|Press up and toward your feet|Brace hard, ribs down','8-12',3,75),
   C('low-to-high-cable-press','Low-to-High Cable Press','push','upper chest,shoulders,triceps','d-handle','low-dual-press','hypertrophy,fat-loss','Press up toward eye line|Keep ribs stacked|No shrug','10-12',3,60),
   C('mid-cable-fly','Mid Cable Fly','push','chest,shoulders','d-handle','mid-dual-fly','hypertrophy,posture','Soft elbows|Hug wide|Pause at center','10-15',3,50),
   C('single-arm-cable-press','Single-Arm Cable Press','push','chest,triceps,core','d-handle','mid-single-press','strength,posture,hypertrophy','Resist rotation|Press across ribs|Slow return','8-12 each side',3,55),

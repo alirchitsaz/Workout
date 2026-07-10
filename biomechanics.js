@@ -10,7 +10,7 @@
   var MOVES = {
     "standing-cable-chest-press":{posture:"standing",face:"away",pulley:"shoulder",start:"armpit",finish:"sternum",why:"Pulleys at shoulder height keep the push horizontal so tension stays on the pecs."},
     "single-arm-cable-press":{posture:"standing",face:"away",pulley:"shoulder",start:"armpit",finish:"sternum",why:"Same as the two-arm press; the anti-rotation demand is a bonus."},
-    "flat-bench-cable-press":{posture:"lying",bench:true,face:"up",pulleyIn:20,start:"chestLie",finish:"lockoutLie",why:"Lying on a flat bench between the towers, set the pulleys low (~18-22in) so the cable pulls level with your shoulders."},
+    "flat-bench-cable-press":{posture:"lying",bench:true,headToMachine:true,face:"up",pulleyIn:16,start:"chestLie",finish:"lockoutLie",why:"Lie with your HEAD toward the machine and the low pulleys behind your head. The cable then pulls low-to-high across your torso, so you press up and toward your feet. That makes this a decline-emphasis press (lower chest, triceps) with a heavy anti-extension core demand - not a flat-chest builder."},
     "low-to-high-cable-press":{posture:"standing",face:"away",pulley:"hip",start:"hip",finish:"eye",why:"Low pulley so you press up and in - biases the upper chest."},
     "mid-cable-fly":{posture:"standing",face:"away",pulley:"shoulder",start:"shoulder",finish:"sternum",why:"Shoulder-height pulleys keep the fly arc in the chest plane."},
     "seated-cable-row":{posture:"seated",bench:true,face:"toward",pulleyIn:24,start:"navel",finish:"navel",why:"Seated on the bench facing the tower, pull to the lower chest with a low pulley (~24in)."},
@@ -59,12 +59,13 @@
     var startIn = landmarkIn(mv.start, h, posture);
     var finishIn = landmarkIn(mv.finish, h, posture);
     var startTooHigh = mv.face === "away" && posture==="standing" && (setting.actualIn - startIn) > h * 0.10;
-    var pulleyDesc = mv.pulleyIn != null ? (posture==="lying"?"low, level with your shoulders":"low, ~"+mv.pulleyIn+" in") : LABEL[mv.pulley];
-    return { id:exId, move:mv, machine:m, userHeightIn:h, posture:posture, face:mv.face, bench:!!mv.bench, pulley:setting,
+    var pulleyDesc = mv.pulleyIn != null ? (posture==="lying"?"low, behind your head":"low, ~"+mv.pulleyIn+" in") : LABEL[mv.pulley];
+    var bench = mv.headToMachine ? " Lie head-toward-machine, bench centered." : (mv.bench?" Bench centered between the towers.":"");
+    return { id:exId, move:mv, machine:m, userHeightIn:h, posture:posture, face:mv.face, bench:!!mv.bench, headToMachine:!!mv.headToMachine, pulley:setting,
       startIn:startIn, finishIn:finishIn, startLandmark:landmarkLabel(mv.start), finishLandmark:landmarkLabel(mv.finish),
       why:mv.why, startTooHigh:startTooHigh,
       short:"Pulley notch "+setting.notch+" (~"+setting.actualIn+" in)",
-      instruction:"Set the pulley to notch "+setting.notch+" of "+m.positions+" (~"+setting.actualIn+" in, "+pulleyDesc+")." + (mv.bench?" Bench centered between the towers.":"") };
+      instruction:"Set the pulley to notch "+setting.notch+" of "+m.positions+" (~"+setting.actualIn+" in, "+pulleyDesc+")."+bench };
   }
   function landmarkLabel(n){ if(n==="chestLie") return "chest (lying)"; if(n==="lockoutLie") return "arms extended"; return LABEL[n]||"chest"; }
   window.BIO = { MACHINE:MACHINE, MOVES:MOVES, LANDMARK:L, solve:solve, settingForHeight:settingForHeight, hasMove:function(id){return !!MOVES[id];} };
