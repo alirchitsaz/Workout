@@ -1,5 +1,5 @@
-/* app.js - Chitsaz Training Lab v3 (layered UX). Needs data.js + biomechanics.js first. */
-var KEY = "ctl-v3";
+/* app.js - Chitsaz Training Lab v3.1 (layered UX + posture-aware figures). */
+var KEY = "ctl-v31";
 var GOALS = { strength:"Strength", hypertrophy:"Muscle", "fat-loss":"Fat loss", posture:"Posture",
   mobility:"Mobility", "youth-athletic":"Athletic", "guest-safe":"Guest" };
 var MUSCLES = ["chest","back","lats","shoulders","rear delts","quads","glutes","hamstrings","core","mobility"];
@@ -7,13 +7,13 @@ var MODES=["adult","teen","youth","guest"];
 var COLORS=["#3ddc84","#7cc4ff","#f5c451","#ff5d6c","#c58cff","#4fd6c8","#ff9f6b"];
 var TABS=[["home","Today","\u25C9"],["workout","Workout","\u25B6"],["progress","Progress","\u2197"],["settings","Settings","\u2699"]];
 
-var view="home", wIndex=0, rest=0, restTick=null;
+var view="home", wIndex=0, rest=0, restTick=null, activeWorkout=null, _color=null;
 var state=load();
 
 /* ---------- state ---------- */
 function defaults(){
   return {
-    activeId:null, // null => show gate
+    activeId:null,
     profiles:[
       {id:"ali",name:"Ali",mode:"adult",goal:"strength",max:120,heightIn:72,testing:true,color:"#3ddc84"},
       {id:"kristen",name:"Kristen",mode:"adult",goal:"posture",max:70,heightIn:61,testing:true,color:"#7cc4ff"},
@@ -22,7 +22,7 @@ function defaults(){
     ],
     gym:{positions:20,minHeightIn:6,maxHeightIn:78,attachments:["d-handle","rope","straight-bar","ankle-strap","none"],min:10,max:200,inc:10},
     assess:{sore:[],minutes:35,goal:"strength",intensity:"moderate",pain:false},
-    history:[], active:null, filter:"all", q:""
+    history:[], filter:"all", q:""
   };
 }
 function load(){
@@ -53,23 +53,21 @@ function render(){
   renderTabs();
 }
 function renderTabs(){
-  var existing=document.querySelector(".tabbar");
+  var ex0=document.querySelector(".tabbar");
   var html='<nav class="tabbar">'+TABS.map(function(t){return '<button class="'+(view===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')"><span class="ti">'+t[2]+'</span>'+t[1]+'</button>';}).join("")+'</nav>';
-  if(existing) existing.outerHTML=html; else document.body.insertAdjacentHTML("beforeend",html);
+  if(ex0) ex0.outerHTML=html; else document.body.insertAdjacentHTML("beforeend",html);
 }
 
-/* ---------- LAYER 1: profile gate ---------- */
+/* ---------- gate ---------- */
 function gate(){
   var tb=document.querySelector(".tabbar"); if(tb) tb.remove();
-  app('<div class="gate">'+
-    '<div><div class="kicker">Chitsaz Training Lab</div><h1>Who\u2019s training?</h1>'+
+  app('<div class="gate"><div><div class="kicker">Chitsaz Training Lab</div><h1>Who\u2019s training?</h1>'+
     '<p>Pick a profile. We\u2019ll remember you next time.</p></div>'+
     '<div class="gate-list">'+state.profiles.map(function(pr){
       return '<button class="gate-person" onclick="pick(\''+pr.id+'\')"><span class="avatar" style="--c:'+pr.color+'">'+ini(pr.name)+'</span>'+
         '<span class="meta"><b>'+esc(pr.name)+'</b><small>'+GOALS[pr.goal]+' \u00b7 '+ftin(pr.heightIn)+'</small></span><span class="go">\u203A</span></button>';
     }).join("")+
-    '<button class="gate-add" onclick="sheetAddPerson()"><span class="plus">+</span><span>Add a person</span></button>'+
-    '</div></div>');
+    '<button class="gate-add" onclick="sheetAddPerson()"><span class="plus">+</span><span>Add a person</span></button></div></div>');
 }
 function pick(id){ state.activeId=id; state.assess.goal=p().goal; view="home"; render(); }
 function switchUser(){
@@ -77,29 +75,23 @@ function switchUser(){
     '<div class="rows">'+state.profiles.map(function(pr){
       return '<button class="lrow" onclick="pick(\''+pr.id+'\');closeSheet()"><span class="avatar sm" style="--c:'+pr.color+'">'+ini(pr.name)+'</span>'+
         '<span class="lm"><b>'+esc(pr.name)+'</b><small>'+GOALS[pr.goal]+' \u00b7 '+ftin(pr.heightIn)+'</small></span>'+(pr.id===state.activeId?'<span style="color:var(--green)">\u2713</span>':'<span class="go">\u203A</span>')+'</button>';
-    }).join("")+'</div>'+
-    '<div class="sheet-actions"><button class="btn" onclick="sheetAddPerson()">+ Add person</button>'+
+    }).join("")+'</div><div class="sheet-actions"><button class="btn" onclick="sheetAddPerson()">+ Add person</button>'+
     '<button class="btn" onclick="state.activeId=null;closeSheet();render()">Sign out to gate</button></div>');
 }
 
-/* ---------- LAYER 2: home ---------- */
+/* ---------- home ---------- */
 function greeting(){ var h=new Date().getHours(); return h<12?"Good morning":h<18?"Good afternoon":"Good evening"; }
 function home(){
   var plan=buildPlan();
-  app(
-  '<header class="appbar"><div class="appbar-left"><h1>'+greeting()+',<br>'+esc(p().name)+'</h1></div>'+
+  app('<header class="appbar"><div class="appbar-left"><h1>'+greeting()+',<br>'+esc(p().name)+'</h1></div>'+
     '<button class="avatar" style="--c:'+p().color+'" onclick="switchUser()">'+ini(p().name)+'</button></header>'+
-  '<div class="stack">'+
-    '<section class="card hero"><div class="kicker">Today\u2019s session</div>'+
-      '<h2>'+esc(plan.title)+'</h2>'+
-      '<div class="facts">'+esc(plan.focus)+' \u00b7 '+plan.minutes+' min \u00b7 '+plan.items.length+' exercises</div>'+
-      '<button class="start" onclick="startWorkout()">Start workout \u2192</button>'+
-      '<button class="adjust" onclick="sheetAdjust()">Adjust\u2026</button>'+
-      '<div class="plist">'+plan.items.map(function(it,i){var e=ex(it.id);
-        return '<div class="prow"><span class="n">'+(i+1)+'</span><span class="pm"><b>'+esc(e.name)+'</b><small>'+it.sets+' \u00d7 '+esc(it.reps)+'</small></span><span class="dotpill '+e.status+'">'+statusLabel(e.status)+'</span></div>';
-      }).join("")+'</div>'+
-    '</section>'+
-  '</div>');
+  '<div class="stack"><section class="card hero"><div class="kicker">Today\u2019s session</div>'+
+    '<h2>'+esc(plan.title)+'</h2><div class="facts">'+esc(plan.focus)+' \u00b7 '+plan.minutes+' min \u00b7 '+plan.items.length+' exercises</div>'+
+    '<button class="start" onclick="startWorkout()">Start workout \u2192</button>'+
+    '<button class="adjust" onclick="sheetAdjust()">Adjust\u2026</button>'+
+    '<div class="plist">'+plan.items.map(function(it,i){var e=ex(it.id);
+      return '<div class="prow"><span class="n">'+(i+1)+'</span><span class="pm"><b>'+esc(e.name)+'</b><small>'+it.sets+' \u00d7 '+esc(it.reps)+'</small></span><span class="dotpill '+e.status+'">'+statusLabel(e.status)+'</span></div>';
+    }).join("")+'</div></section></div>');
 }
 function sheetAdjust(){
   openSheet('<h3>Adjust today</h3><p class="sub">Tune the plan to how you feel.</p>'+
@@ -158,15 +150,13 @@ function lastPerf(id){var h=state.history.filter(function(x){return x.profile===
   for(var i=0;i<h.length;i++){var e=h[i].exercises.filter(function(x){return x.id===id;})[0];
     if(e&&e.sets.length)return e.sets.slice().sort(function(a,b){return b.weight-a.weight;})[0];} return null;}
 
-/* ---------- LAYER 3: workout player ---------- */
-var activeWorkout=null;
+/* ---------- workout player ---------- */
 function startWorkout(){ activeWorkout=buildPlan(); wIndex=0; view="workout"; render(); window.scrollTo(0,0); }
 function workout(){
   if(!activeWorkout){ app('<header class="appbar"><h1>Workout</h1></header><div class="empty"><div class="big">\u25B6</div><b>No active workout</b><p>Head to Today and press Start.</p><button class="btn primary" onclick="go(\'home\')">Go to Today</button></div>'); renderTabs(); return; }
   var wp=activeWorkout; wIndex=Math.min(wIndex,wp.items.length-1);
   var it=wp.items[wIndex]; var e=ex(it.id);
-  app(
-  '<div class="player-bar"><button class="link" onclick="'+(wIndex>0?"prevEx()":"go(\'home\')")+'">\u2039 '+(wIndex>0?"Back":"Home")+'</button>'+
+  app('<div class="player-bar"><button class="link" onclick="'+(wIndex>0?"prevEx()":"go(\'home\')")+'">\u2039 '+(wIndex>0?"Back":"Home")+'</button>'+
     '<div class="mid"><b>Exercise '+(wIndex+1)+' of '+wp.items.length+'</b><small>'+esc(wp.title)+'</small></div>'+
     '<button class="link" onclick="'+(wIndex<wp.items.length-1?"nextEx()":"sheetFinish()")+'">'+(wIndex<wp.items.length-1?"Next \u203A":"Finish")+'</button></div>'+
   '<div class="progress-dots">'+wp.items.map(function(x,i){return '<span class="pd '+(i===wIndex?"on":"")+' '+(x.done.some(function(s){return s.done;})?"done":"")+'"></span>';}).join("")+'</div>'+
@@ -191,7 +181,6 @@ function nextStrip(it){var e=ex(it.id);return '<div class="next-strip"><div><div
 function nextEx(){ if(wIndex<activeWorkout.items.length-1){wIndex++;render();window.scrollTo(0,0);} }
 function prevEx(){ if(wIndex>0){wIndex--;render();window.scrollTo(0,0);} }
 function cat(c){return {push:"Push",pull:"Pull",legs:"Legs",core:"Core",mobility:"Mobility",athletic:"Athletic"}[c]||c;}
-
 function sheetExMenu(i){
   var e=ex(activeWorkout.items[i].id);
   openSheet('<h3>'+esc(e.name)+'</h3><p class="sub">Exercise options</p>'+
@@ -204,7 +193,7 @@ function swap(i){var cur=ex(activeWorkout.items[i].id);
   if(rep)activeWorkout.items[i]=prescribe(rep); render();}
 function removeEx(i){ if(activeWorkout.items.length<=1)return; activeWorkout.items.splice(i,1); wIndex=Math.min(wIndex,activeWorkout.items.length-1); render(); }
 
-/* ---------- figure (clean filled silhouette) ---------- */
+/* ========== POSTURE-AWARE FIGURE RENDERER ========== */
 function figureCard(e){
   if(!e.setup||!BIO.hasMove(e.id)) return zoneCard(e);
   var s=BIO.solve(e.id,hIn(),mach());
@@ -220,38 +209,114 @@ function zoneCard(e){
     '<div style="font-size:3rem">'+g+'</div><b>'+esc(e.equipment)+'</b></div>'+
     '<div class="callout"><span class="badge">Setup</span><span class="txt">'+esc(note)+'</span></div></div>';
 }
-// filled body silhouette, front-ish, height-aware; ONE pulley badge, legend below via callout.
+// Main SVG. Chooses a body drawing based on posture, then draws tower+pulley+cable to the hands.
 function figSvg(s,mini){
-  var W=340,H=mini?150:280,floorY=H-20,pad=14;
+  var W=340,H=mini?150:280,floorY=H-20,pad=16;
   var topIn=Math.max(s.machine.maxHeightIn,s.userHeightIn*1.25)+4;
   var ppi=(floorY-pad)/topIn; function y(v){return floorY-v*ppi;}
-  var toward=s.face==="toward", towerX=toward?302:300, bodyX=150;
-  var handleX=toward?bodyX+50:bodyX-34;
-  var py=y(s.pulley.actualIn), sy=y(s.startIn), fy=y(s.finishIn);
-  var crown=y(s.userHeightIn), shoulder=y(s.userHeightIn*0.82), hip=y(s.userHeightIn*0.50), headR=Math.max(8,(shoulder-crown)/2.2);
-  var ticks=mini?[]:[0,24,48,72].filter(function(t){return t<=topIn;});
-  // torso as a rounded filled path
-  var torso='M '+(bodyX-13)+' '+shoulder+' Q '+(bodyX-16)+' '+((shoulder+hip)/2)+' '+(bodyX-9)+' '+hip+' L '+(bodyX+9)+' '+hip+' Q '+(bodyX+16)+' '+((shoulder+hip)/2)+' '+(bodyX+13)+' '+shoulder+' Q '+bodyX+' '+(shoulder-6)+' '+(bodyX-13)+' '+shoulder+' Z';
-  return '<svg class="fig" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" aria-label="setup">'+
-    '<line class="floor" x1="10" y1="'+floorY+'" x2="'+(W-10)+'" y2="'+floorY+'"></line>'+
-    ticks.map(function(t){return '<line class="tick" x1="12" y1="'+y(t)+'" x2="17" y2="'+y(t)+'"></line><text class="tt" x="20" y="'+(y(t)+3)+'">'+t+'"</text>';}).join("")+
-    '<rect class="tower" x="'+(towerX-9)+'" y="'+y(s.machine.maxHeightIn)+'" width="18" height="'+(floorY-y(s.machine.maxHeightIn))+'" rx="6"></rect>'+
-    '<line class="rail" x1="'+towerX+'" y1="'+y(s.machine.maxHeightIn)+'" x2="'+towerX+'" y2="'+y(s.machine.minHeightIn)+'"></line>'+
-    '<line class="cable" x1="'+towerX+'" y1="'+py+'" x2="'+handleX+'" y2="'+sy+'"></line>'+
-    '<path class="arc" d="M '+handleX+' '+sy+' Q '+((handleX+towerX)/2)+' '+(((sy+fy)/2)-18)+' '+handleX+' '+fy+'"></path>'+
-    '<circle class="handle ghost" cx="'+handleX+'" cy="'+fy+'" r="7"></circle>'+
-    '<circle class="pulley" cx="'+towerX+'" cy="'+py+'" r="7"></circle>'+
-    // legs
-    '<path class="limb" d="M '+(bodyX-6)+' '+hip+' L '+(bodyX-12)+' '+floorY+'"></path>'+
-    '<path class="limb" d="M '+(bodyX+6)+' '+hip+' L '+(bodyX+12)+' '+floorY+'"></path>'+
+  var toward=s.face==="toward";
+  var towerX = toward?300:(s.posture==="lying"?300:300);
+  var py=y(s.pulley.actualIn);
+  // build body + get hand point {hx,hy}
+  var drawn = drawBody(s,y,floorY,mini);
+  var svg='<svg class="fig" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" aria-label="'+esc(s.posture)+' setup">';
+  svg+='<line class="floor" x1="10" y1="'+floorY+'" x2="'+(W-10)+'" y2="'+floorY+'"></line>';
+  if(!mini){ [0,24,48,72].filter(function(t){return t<=topIn;}).forEach(function(t){
+    svg+='<line class="tick" x1="12" y1="'+y(t)+'" x2="17" y2="'+y(t)+'"></line><text class="tt" x="20" y="'+(y(t)+3)+'">'+t+'"</text>';});}
+  // tower + rail + pulley
+  svg+='<rect class="tower" x="'+(towerX-9)+'" y="'+y(s.machine.maxHeightIn)+'" width="18" height="'+(floorY-y(s.machine.maxHeightIn))+'" rx="6"></rect>';
+  svg+='<line class="rail" x1="'+towerX+'" y1="'+y(s.machine.maxHeightIn)+'" x2="'+towerX+'" y2="'+y(s.machine.minHeightIn)+'"></line>';
+  // cable from pulley to hands
+  svg+='<line class="cable" x1="'+towerX+'" y1="'+py+'" x2="'+drawn.hx+'" y2="'+drawn.hy+'"></line>';
+  svg+='<circle class="pulley" cx="'+towerX+'" cy="'+py+'" r="7"></circle>';
+  svg+=drawn.svg;
+  svg+='<circle class="handle" cx="'+drawn.hx+'" cy="'+drawn.hy+'" r="8"></circle>';
+  if(!mini) svg+='<text class="cap g" x="'+towerX+'" y="'+(py-11)+'" text-anchor="middle">notch '+s.pulley.notch+'</text>';
+  svg+='</svg>';
+  return svg;
+}
+// Returns {svg, hx, hy} for the body per posture. bodyX kept left of tower.
+function drawBody(s,y,floorY,mini){
+  var bodyX=150, h=s.userHeightIn;
+  function limb(x1,y1,x2,y2){return '<path class="limb" d="M '+x1+' '+y1+' L '+x2+' '+y2+'"></path>';}
+  function headR(a,b){return Math.max(8,(a-b));}
+  var sy=y(s.startIn);
+  if(s.posture==="lying"){
+    // horizontal body on a flat bench; head left, feet right; arms press UP toward handles
+    var benchY=y(18), padH=8;
+    var bx0=bodyX-58, bx1=bodyX+70;
+    var svg='';
+    // bench pad + legs
+    svg+='<rect class="bench" x="'+bx0+'" y="'+benchY+'" width="'+(bx1-bx0)+'" height="'+padH+'" rx="4"></rect>';
+    svg+='<line class="bench-leg" x1="'+(bx0+10)+'" y1="'+(benchY+padH)+'" x2="'+(bx0+4)+'" y2="'+floorY+'"></line>';
+    svg+='<line class="bench-leg" x1="'+(bx1-10)+'" y1="'+(benchY+padH)+'" x2="'+(bx1-4)+'" y2="'+floorY+'"></line>';
+    var torsoY=benchY-2;
+    // torso (horizontal capsule) + head
+    svg+='<rect class="body" x="'+(bodyX-30)+'" y="'+(torsoY-11)+'" width="60" height="20" rx="10"></rect>';
+    svg+='<circle class="body" cx="'+(bodyX-40)+'" cy="'+(torsoY-1)+'" r="10"></circle>';
+    // legs bent over end of bench
+    svg+=limb(bodyX+28,torsoY,bx1-6,torsoY-2);
+    svg+=limb(bx1-6,torsoY-2,bx1+2,floorY-2);
+    // pressing arms up toward handle height (sy above chest)
+    var handY=Math.min(torsoY-14, y(s.pulley.actualIn+14));
+    var hx=bodyX+8, hy=handY;
+    svg+=limb(bodyX+6,torsoY-6,hx,hy);
+    svg+=limb(bodyX-6,torsoY-6,hx-2,hy+2);
+    return {svg:svg,hx:hx,hy:hy};
+  }
+  if(s.posture==="seated"){
+    // upright seated on bench facing tower (toward). knees forward.
+    var benchY=y(18);
+    var seatX0=bodyX-30, seatX1=bodyX+28;
+    var hipY=benchY-2, shoulderY=hipY-(h*0.34)*(y(0)-y(1)); // approximate torso length
+    shoulderY=hipY-52; var crownY=shoulderY-22;
+    var svg='';
+    svg+='<rect class="bench" x="'+seatX0+'" y="'+benchY+'" width="'+(seatX1-seatX0)+'" height="8" rx="4"></rect>';
+    svg+='<line class="bench-leg" x1="'+(seatX0+8)+'" y1="'+(benchY+8)+'" x2="'+(seatX0+3)+'" y2="'+floorY+'"></line>';
+    svg+='<line class="bench-leg" x1="'+(seatX1-8)+'" y1="'+(benchY+8)+'" x2="'+(seatX1-3)+'" y2="'+floorY+'"></line>';
     // torso + head
-    '<path class="body" d="'+torso+'"></path>'+
-    '<circle class="body" cx="'+bodyX+'" cy="'+(crown+headR)+'" r="'+headR+'"></circle>'+
-    // working arm to handle
-    '<path class="limb" d="M '+bodyX+' '+(shoulder+2)+' L '+handleX+' '+sy+'"></path>'+
-    '<circle class="handle" cx="'+handleX+'" cy="'+sy+'" r="8"></circle>'+
-    (mini?'':'<text class="cap g" x="'+towerX+'" y="'+(py-11)+'" text-anchor="middle">notch '+s.pulley.notch+'</text>')+
-  '</svg>';
+    svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
+    svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
+    // thighs forward + shins down to floor
+    svg+=limb(bodyX+4,hipY,bodyX+40,hipY+2);
+    svg+=limb(bodyX+40,hipY+2,bodyX+44,floorY);
+    // arms reaching toward handle (pulley low ~24in)
+    var hx=bodyX+46, hy=y(s.startIn);
+    svg+=limb(bodyX,shoulderY+8,hx,hy);
+    return {svg:svg,hx:hx,hy:hy};
+  }
+  if(s.posture==="kneel"||s.posture==="half-kneel"){
+    var kneeY=y(6);
+    var hipY=kneeY-(s.posture==="kneel"?38:44), shoulderY=hipY-48, crownY=shoulderY-20;
+    var svg='';
+    // torso + head (upright, facing tower/toward)
+    svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
+    svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
+    if(s.posture==="kneel"){
+      // both shins on floor behind
+      svg+=limb(bodyX-4,hipY,bodyX-16,floorY); svg+=limb(bodyX+4,hipY,bodyX+16,floorY);
+    } else {
+      // half-kneel: front knee up, back knee down
+      svg+=limb(bodyX+4,hipY,bodyX+26,y(3)); svg+=limb(bodyX+26,y(3),bodyX+30,floorY); // front leg
+      svg+=limb(bodyX-4,hipY,bodyX-14,floorY); // back shin down
+    }
+    // arms up toward high pulley overhead
+    var hx=bodyX+6, hy=y(Math.min(s.startIn,s.machine.maxHeightIn-4));
+    svg+=limb(bodyX,shoulderY+6,hx,hy);
+    return {svg:svg,hx:hx,hy:hy};
+  }
+  // ---- standing (default) ----
+  var crownY=y(h), shoulderY=y(h*0.82), hipY=y(h*0.50);
+  var hr=Math.max(8,(shoulderY-crownY)/2.2);
+  var toward=s.face==="toward";
+  var hx=toward?bodyX+50:bodyX-34, hy=y(s.startIn);
+  var torso='M '+(bodyX-13)+' '+shoulderY+' Q '+(bodyX-16)+' '+((shoulderY+hipY)/2)+' '+(bodyX-9)+' '+hipY+' L '+(bodyX+9)+' '+hipY+' Q '+(bodyX+16)+' '+((shoulderY+hipY)/2)+' '+(bodyX+13)+' '+shoulderY+' Q '+bodyX+' '+(shoulderY-6)+' '+(bodyX-13)+' '+shoulderY+' Z';
+  var svg='';
+  svg+=limb(bodyX-6,hipY,bodyX-12,floorY); svg+=limb(bodyX+6,hipY,bodyX+12,floorY);
+  svg+='<path class="body" d="'+torso+'"></path>';
+  svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+hr)+'" r="'+hr+'"></circle>';
+  svg+=limb(bodyX,shoulderY+2,hx,hy);
+  return {svg:svg,hx:hx,hy:hy};
 }
 function sheetInfo(id){
   var e=ex(id);
@@ -344,9 +409,8 @@ function personForm(pr){
     '<div class="field-2"><div class="field"><label>Mode</label><select id="f-mode">'+MODES.map(function(m){return '<option '+(pr.mode===m?"selected":"")+'>'+m+'</option>';}).join("")+'</select></div>'+
     '<div class="field"><label>Cable cap (lb)</label><input id="f-max" inputmode="numeric" value="'+pr.max+'"></div></div>'+
     '<div class="field"><label>Goal</label><select id="f-goal">'+Object.keys(GOALS).map(function(k){return '<option value="'+k+'" '+(pr.goal===k?"selected":"")+'>'+GOALS[k]+'</option>';}).join("")+'</select></div>'+
-    '<div class="field"><label>Color</label><div class="chips" id="f-color">'+COLORS.map(function(c){return '<button class="chip '+(pr.color===c?"on":"")+'" style="background:'+c+'22" onclick="pickColor(this,\''+c+'\')" data-c="'+c+'"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:'+c+'"></span></button>';}).join("")+'</div></div>';
+    '<div class="field"><label>Color</label><div class="chips" id="f-color">'+COLORS.map(function(c){return '<button class="chip '+(pr.color===c?"on":"")+'" onclick="pickColor(this,\''+c+'\')" data-c="'+c+'"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:'+c+'"></span></button>';}).join("")+'</div></div>';
 }
-var _color=null;
 function pickColor(btn,c){_color=c;var box=el("f-color");Array.prototype.forEach.call(box.children,function(x){x.classList.remove("on");});btn.classList.add("on");}
 function sheetAddPerson(){ _color=COLORS[state.profiles.length%COLORS.length];
   openSheet('<h3>Add person</h3><p class="sub">They get their own plan, height, and history.</p>'+personForm({name:"",heightIn:68,mode:"adult",max:60,goal:"hypertrophy",color:_color})+
@@ -355,8 +419,7 @@ function saveNewPerson(){
   var id="p"+Date.now();
   state.profiles.push({id:id,name:el("f-name").value||"New Person",mode:el("f-mode").value,goal:el("f-goal").value,
     max:+el("f-max").value||60,heightIn:(+el("f-ft").value||5)*12+(+el("f-in").value||8),testing:true,color:_color||COLORS[0]});
-  closeSheet();
-  if(!state.activeId){ pick(id); } else render();
+  closeSheet(); if(!state.activeId){ pick(id); } else render();
 }
 function sheetEditPerson(id){var pr=state.profiles.filter(function(x){return x.id===id;})[0];_color=pr.color;
   openSheet('<h3>Edit '+esc(pr.name)+'</h3>'+personForm(pr)+
