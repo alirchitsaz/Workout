@@ -13,9 +13,9 @@ var EX = [
   C('low-to-high-cable-press','Low-to-High Cable Press','push','upper chest,shoulders,triceps','d-handle','low-dual-press','hypertrophy,fat-loss','Press up toward eye line|Keep ribs stacked|No shrug','10-12',3,60),
   C('mid-cable-fly','Mid Cable Fly','push','chest,shoulders','d-handle','mid-dual-fly','hypertrophy,posture','Soft elbows|Hug wide|Pause at center','10-15',3,50),
   C('single-arm-cable-press','Single-Arm Cable Press','push','chest,triceps,core','d-handle','mid-single-press','strength,posture,hypertrophy','Resist rotation|Press across ribs|Slow return','8-12 each side',3,55),
-  C('seated-cable-row','Seated Cable Row','pull','back,biceps,rear delts','d-handle','bench-mid-row','strength,hypertrophy,posture','Tall chest|Pull elbows back|Do not shrug','8-12',3,65),
+  C('seated-cable-row','Seated Cable Row','pull','back,biceps,rear delts','v-bar','bench-mid-row','strength,hypertrophy,posture','Tall chest|Pull elbows back|Do not shrug','8-12',3,65),
   C('standing-cable-row','Standing Cable Row','pull','back,biceps,core','d-handle','mid-dual-row','strength,hypertrophy,posture','Brace first|Elbows to back pockets|Slow reach','8-12',3,65),
-  C('half-kneeling-lat-pulldown','Half-Kneeling Lat Pulldown','pull','lats,biceps,core','d-handle','high-dual-pulldown','strength,hypertrophy,posture','Elbows to ribs|Long neck|Slow return','8-12',3,70),
+  C('half-kneeling-lat-pulldown','Half-Kneeling Lat Pulldown','pull','lats,biceps,core','lat-bar','high-dual-pulldown','strength,hypertrophy,posture','Elbows to ribs|Long neck|Slow return','8-12',3,70),
   C('straight-arm-pulldown','Straight Arm Pulldown','pull','lats,core,triceps','straight-bar','high-bar-pull','hypertrophy,posture','Arms long|Pull to thighs|Feel lats','10-15',3,55),
   C('face-pull','Rope Face Pull','pull','rear delts,upper back,shoulders','rope','high-rope-posture','posture,mobility,hypertrophy','Pull rope apart|Elbows high|Neck relaxed','12-15',2,45),
   C('high-cable-row','High Cable Row','pull','upper back,lats,biceps','d-handle','high-dual-row','hypertrophy,posture','Lead with elbows|Squeeze upper back|Reach long','10-12',3,55),
@@ -45,6 +45,7 @@ var EX = [
   F('split-squat-support','Supported Split Squat','legs','quads,glutes,core','bench','strength,guest-safe,youth-athletic','Use rail for balance|Drop straight down|Drive front foot','6-10 each side',2,45,'bodyweight'),
   F('push-up','Push-Up','push','chest,triceps,core','bodyweight','strength,guest-safe,youth-athletic','Hands under shoulders|Body as one piece|Press floor away','6-12',2,45,'bodyweight'),
   F('incline-push-up','Incline Push-Up','push','chest,triceps,core','bench','guest-safe,youth-athletic,strength','Hands on bench|Straight line|Chest to bench','6-12',2,45,'bodyweight'),
+  F('bosu-plank','BOSU Plank','core','core,shoulders,glutes','bosu','guest-safe,youth-athletic,posture','Ribs tucked|Glutes on|Breathe','20-40 sec',2,35,'time'),
   F('plank','Plank','core','core,shoulders,glutes','floor','guest-safe,youth-athletic,posture','Ribs tucked|Glutes on|Breathe','20-40 sec',2,35,'time'),
   F('side-plank','Side Plank','core','core,shoulders,glutes','floor','guest-safe,posture,youth-athletic','Stack ribs|Push floor away|Long line','15-30 sec each side',2,30,'time'),
   F('dead-bug','Dead Bug','core','core,hip flexors','floor','guest-safe,posture,mobility','Low back quiet|Move slow|Exhale','6-10 each side',2,30,'bodyweight'),
@@ -64,5 +65,5 @@ var TEMPLATES = [
   T('total','Total Body','Push, pull, legs, core','strength,fat-loss,hypertrophy','standing-cable-row,standing-cable-chest-press,goblet-squat,cable-pull-through,face-pull,pallof-press'),
   T('posture','Posture Reset','Upper back, shoulders, trunk','posture,mobility','face-pull,standing-cable-row,cable-lift,pallof-press,scap-push-up,dead-bug,side-plank,mobility-flow'),
   T('guest','Guest Circuit','Simple full-body','guest-safe,fat-loss,mobility','bodyweight-squat,incline-push-up,dumbbell-floor-press,goblet-squat,dead-bug,side-plank,mobility-flow'),
-  T('youth','Youth Athletic','Coordination, light strength','youth-athletic,fat-loss','agility-footwork,broad-jump,bear-crawl,squat-to-reach,bodyweight-squat,bench-step-up,push-up,plank,mobility-flow')
+  T('youth','Youth Athletic','Coordination, light strength','youth-athletic,fat-loss','agility-footwork,broad-jump,bear-crawl,squat-to-reach,bodyweight-squat,bench-step-up,push-up,bosu-plank,mobility-flow')
 ];

@@ -1,12 +1,11 @@
-/* app.js - Chitsaz Training Lab v3.2 (layered UX + posture-aware figures, corrected lying orientation). */
-var KEY = "ctl-v32";
+/* app.js - Chitsaz Training Lab v3.3 - Apex Free-Arm Trainer accurate model. */
+var KEY = "ctl-v33";
 var GOALS = { strength:"Strength", hypertrophy:"Muscle", "fat-loss":"Fat loss", posture:"Posture",
   mobility:"Mobility", "youth-athletic":"Athletic", "guest-safe":"Guest" };
 var MUSCLES = ["chest","back","lats","shoulders","rear delts","quads","glutes","hamstrings","core","mobility"];
 var MODES=["adult","teen","youth","guest"];
 var COLORS=["#3ddc84","#7cc4ff","#f5c451","#ff5d6c","#c58cff","#4fd6c8","#ff9f6b"];
 var TABS=[["home","Today","\u25C9"],["workout","Workout","\u25B6"],["progress","Progress","\u2197"],["settings","Settings","\u2699"]];
-
 var view="home", wIndex=0, rest=0, restTick=null, activeWorkout=null, _color=null;
 var state=load();
 
@@ -19,7 +18,8 @@ function defaults(){
       {id:"kam",name:"Kam",mode:"teen",goal:"youth-athletic",max:50,heightIn:60,testing:true,color:"#f5c451"},
       {id:"ashton",name:"Ashton",mode:"youth",goal:"youth-athletic",max:25,heightIn:49,testing:false,color:"#ff5d6c"}
     ],
-    gym:{positions:20,minHeightIn:6,maxHeightIn:78,attachments:["d-handle","rope","straight-bar","ankle-strap","none"],min:10,max:200,inc:10},
+    gym:{tracks:8,trackTopIn:76,trackBottomIn:6,armAngles:11,armDepth:5,min:10,max:200,inc:10,
+      dumbbells:[3,5,8,10,12], attachments:["d-handle","rope","straight-bar","v-bar","lat-bar","ankle-strap"]},
     assess:{sore:[],minutes:35,goal:"strength",intensity:"moderate",pain:false},
     history:[], filter:"all", q:""
   };
@@ -39,7 +39,7 @@ function esc(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){retu
 function ini(n){ return String(n||"?").trim().charAt(0).toUpperCase(); }
 function ftin(inch){ return Math.floor(inch/12)+"'"+(inch%12)+'"'; }
 function hIn(){ return p().heightIn||69; }
-function mach(){ return {positions:state.gym.positions,minHeightIn:state.gym.minHeightIn,maxHeightIn:state.gym.maxHeightIn,armAngles:11,depthSteps:5}; }
+function mach(){ var g=state.gym; return {tracks:g.tracks,trackTopIn:g.trackTopIn,trackBottomIn:g.trackBottomIn,armAngles:g.armAngles,armDepth:g.armDepth,stackMin:g.min,stackMax:g.max,stackInc:g.inc}; }
 function el(id){ return document.getElementById(id); }
 function app(html){ el("app").innerHTML=html; }
 
@@ -128,16 +128,20 @@ function prescribe(e){var sets=e.sets;
   if(state.assess.intensity==="easy")sets=Math.max(1,sets-1); if(state.assess.intensity==="hard"&&p().mode!=="guest")sets+=1;
   var load=loadFor(e); var done=[]; for(var i=0;i<sets;i++)done.push({weight:load.weight||"",reps:"",rpe:7,done:false});
   return {id:e.id,sets:sets,reps:e.reps,rest:e.rest,load:load,done:done}; }
+function nearestDumbbell(target){
+  var d=state.gym.dumbbells&&state.gym.dumbbells.length?state.gym.dumbbells:[5];
+  return d.reduce(function(a,b){return Math.abs(b-target)<Math.abs(a-target)?b:a;});
+}
 function loadFor(e){
   if(e.load==="time")return {weight:0,hint:"Track crisp seconds; stop before form fades."};
   if(e.load==="bodyweight")return {weight:0,hint:"Progress by range, tempo, and extra reps."};
-  if(e.load==="dumbbell"){var w=(p().mode==="teen"||p().mode==="youth")?5:p().mode==="guest"?8:15;return {weight:w,hint:"Start "+w+" lb; slow the lowering if easy."};}
+  if(e.load==="dumbbell"){var t=(p().mode==="teen"||p().mode==="youth")?5:p().mode==="guest"?5:12;var w=nearestDumbbell(t);return {weight:w,hint:"Use your "+w+" lb dumbbells; slow the lowering if easy."};}
   var last=lastPerf(e.id); var target=e.cat==="legs"?50:e.cat==="pull"?40:30;
   if(p().mode==="teen"||p().mode==="youth")target=Math.min(target,30); if(p().mode==="guest")target=10;
   if(state.assess.intensity==="hard")target+=10;
   if(last){target=last.weight; if(parseInt(last.reps,10)>=hi(e.reps)&&last.rpe<=8)target+=state.gym.inc; if(last.rpe>=9.5)target-=state.gym.inc;}
   var capped=Math.min(target,p().max,state.gym.max); var r=Math.max(state.gym.min,Math.floor(capped/state.gym.inc)*state.gym.inc);
-  return {weight:r,hint:(last?"Last "+last.weight+"\u00d7"+last.reps+" @ RPE "+last.rpe+". ":"")+"Suggested "+r+" lb."}; }
+  return {weight:r,hint:(last?"Last "+last.weight+"\u00d7"+last.reps+" @ RPE "+last.rpe+". ":"")+"Suggested "+r+" lb per stack."}; }
 function hi(r){var m=String(r).match(/(\d+)(?!.*\d)/);return m?+m[1]:10;}
 function lastPerf(id){var h=state.history.filter(function(x){return x.profile===p().id;});
   for(var i=0;i<h.length;i++){var e=h[i].exercises.filter(function(x){return x.id===id;})[0];
@@ -185,79 +189,78 @@ function swap(i){var cur=ex(activeWorkout.items[i].id);
   if(rep)activeWorkout.items[i]=prescribe(rep); render();}
 function removeEx(i){ if(activeWorkout.items.length<=1)return; activeWorkout.items.splice(i,1); wIndex=Math.min(wIndex,activeWorkout.items.length-1); render(); }
 
-/* ========== POSTURE-AWARE FIGURE ========== */
+/* ===== FIGURE (machine-accurate) ===== */
 function figureCard(e){
   if(!e.setup||!BIO.hasMove(e.id)) return zoneCard(e);
   var s=BIO.solve(e.id,hIn(),mach());
   return '<div class="figure-card">'+figSvg(s,false)+
-    '<div class="callout '+(s.startTooHigh?"warn":"")+'"><span class="badge">Notch '+s.pulley.notch+'</span>'+
-    '<span class="txt">'+esc(s.instruction)+'</span></div></div>';
+    '<div class="setrow">'+
+      '<div class="setpill"><b>'+s.track+' / 8</b><small>Track</small></div>'+
+      '<div class="setpill"><b>'+s.ang+' / 11</b><small>Arm tilt</small></div>'+
+      '<div class="setpill"><b>'+s.dep+' / 5</b><small>Arm in\u2013out</small></div>'+
+    '</div>'+
+    '<div class="callout '+(s.startTooHigh?"warn":"")+'" style="border-radius:14px;margin-top:10px;border:1px solid var(--line)"><span class="badge">Set up</span><span class="txt">'+esc(s.instruction)+'</span></div></div>';
 }
 function zoneCard(e){
-  var g=e.equipment==="dumbbells"?"\uD83C\uDFCB\uFE0F":e.equipment==="bench"?"\uD83E\uDE91":"\uD83E\uDDD8";
-  var note=e.equipment==="dumbbells"?"Light dumbbells \u2014 progress with tempo and clean range.":
-    e.equipment==="bench"?"Set the bench clear of the cable path.":"Open mat in front of the trainer. Controlled reps.";
+  var g=e.equipment==="dumbbells"?"\uD83C\uDFCB\uFE0F":e.equipment==="bench"?"\uD83E\uDE91":e.equipment==="bosu"?"\uD83D\uDD35":"\uD83E\uDDD8";
+  var note=e.equipment==="dumbbells"?("Use your "+(state.gym.dumbbells.join(", "))+" lb dumbbells."):
+    e.equipment==="bench"?"Flat bench, clear of the cable path.":e.equipment==="bosu"?"BOSU dome up for an unstable base.":"Open mat in front of the trainer.";
   return '<div class="figure-card"><div style="display:grid;place-items:center;gap:8px;padding:40px 16px;background:var(--bg2)">'+
     '<div style="font-size:3rem">'+g+'</div><b>'+esc(e.equipment)+'</b></div>'+
     '<div class="callout"><span class="badge">Setup</span><span class="txt">'+esc(note)+'</span></div></div>';
 }
 function figSvg(s,mini){
-  var W=340,H=mini?150:280,floorY=H-20,pad=16;
-  var topIn=Math.max(s.machine.maxHeightIn,s.userHeightIn*1.25)+4;
+  var W=340,H=mini?150:280,floorY=H-20,pad=16,m=s.machine;
+  var topIn=Math.max(m.trackTopIn,s.userHeightIn*1.25)+4;
   var ppi=(floorY-pad)/topIn; function y(v){return floorY-v*ppi;}
-  // For lying head-to-machine, the tower is best on the LEFT (head end). Otherwise right.
   var towerLeft = (s.posture==="lying" && s.headToMachine);
-  var towerX = towerLeft?40:300;
-  var py=y(s.pulley.actualIn);
+  var towerX = towerLeft?42:298;
+  var py=y(s.actualIn);
   var drawn = drawBody(s,y,floorY,mini,towerX,towerLeft);
   var svg='<svg class="fig" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" aria-label="'+esc(s.posture)+' setup">';
   svg+='<line class="floor" x1="10" y1="'+floorY+'" x2="'+(W-10)+'" y2="'+floorY+'"></line>';
-  if(!mini){ [0,24,48,72].filter(function(t){return t<=topIn;}).forEach(function(t){
-    var tx = towerLeft? (W-30):20;
-    svg+='<line class="tick" x1="'+(towerLeft?W-18:12)+'" y1="'+y(t)+'" x2="'+(towerLeft?W-13:17)+'" y2="'+y(t)+'"></line><text class="tt" x="'+tx+'" y="'+(y(t)+3)+'" text-anchor="'+(towerLeft?"end":"start")+'">'+t+'"</text>';});}
-  svg+='<rect class="tower" x="'+(towerX-9)+'" y="'+y(s.machine.maxHeightIn)+'" width="18" height="'+(floorY-y(s.machine.maxHeightIn))+'" rx="6"></rect>';
-  svg+='<line class="rail" x1="'+towerX+'" y1="'+y(s.machine.maxHeightIn)+'" x2="'+towerX+'" y2="'+y(s.machine.minHeightIn)+'"></line>';
-  svg+='<line class="cable" x1="'+towerX+'" y1="'+py+'" x2="'+drawn.hx+'" y2="'+drawn.hy+'"></line>';
-  svg+='<circle class="pulley" cx="'+towerX+'" cy="'+py+'" r="7"></circle>';
+  // machine column
+  svg+='<rect class="tower" x="'+(towerX-10)+'" y="'+y(m.trackTopIn)+'" width="20" height="'+(floorY-y(m.trackTopIn))+'" rx="6"></rect>';
+  svg+='<line class="rail" x1="'+towerX+'" y1="'+y(m.trackTopIn)+'" x2="'+towerX+'" y2="'+y(m.trackBottomIn)+'"></line>';
+  // track ticks 1(top)..8(bottom)
+  if(!mini){ for(var t=1;t<=m.tracks;t++){ var ty=y(BIO.trackHeight(t,m)); var on=(t===s.track);
+    var lx=towerLeft?(towerX+14):(towerX-14);
+    svg+='<circle class="tickdot '+(on?"on":"")+'" cx="'+lx+'" cy="'+ty+'" r="'+(on?4:2.5)+'"></circle>';
+    svg+='<text class="tt '+(on?"on":"")+'" x="'+(towerLeft?lx+8:lx-8)+'" y="'+(ty+3)+'" text-anchor="'+(towerLeft?"start":"end")+'">'+t+'</text>';
+  }}
+  // swing arm from tower at active track out toward hands, then cable
+  var armX = towerLeft ? towerX+26 : towerX-26;
+  svg+='<line class="arm" x1="'+towerX+'" y1="'+py+'" x2="'+armX+'" y2="'+py+'"></line>';
+  svg+='<circle class="pulley" cx="'+armX+'" cy="'+py+'" r="6"></circle>';
+  svg+='<line class="cable" x1="'+armX+'" y1="'+py+'" x2="'+drawn.hx+'" y2="'+drawn.hy+'"></line>';
   svg+=drawn.svg;
   svg+='<circle class="handle" cx="'+drawn.hx+'" cy="'+drawn.hy+'" r="8"></circle>';
-  if(!mini) svg+='<text class="cap g" x="'+towerX+'" y="'+(py-11)+'" text-anchor="middle">notch '+s.pulley.notch+'</text>';
+  if(!mini) svg+='<text class="cap g" x="'+armX+'" y="'+(py-11)+'" text-anchor="middle">track '+s.track+'</text>';
   svg+='</svg>';
   return svg;
 }
 function drawBody(s,y,floorY,mini,towerX,towerLeft){
   var h=s.userHeightIn;
   function limb(x1,y1,x2,y2){return '<path class="limb" d="M '+x1+' '+y1+' L '+x2+' '+y2+'"></path>';}
-
   if(s.posture==="lying"){
-    // Head at the machine (tower) end; feet away. Tower is on the LEFT, so head is left, feet right.
     var benchY=y(18), padH=8;
-    // bench spans under the torso, from near the tower outward
-    var headX = towerX+34;        // head just past the tower
-    var feetX = headX+150;        // feet far from machine
-    var bx0=headX-8, bx1=feetX+6;
+    var headX = towerX+40, feetX = headX+150, bx0=headX-8, bx1=feetX+6;
     var svg='';
     svg+='<rect class="bench" x="'+bx0+'" y="'+benchY+'" width="'+(bx1-bx0)+'" height="'+padH+'" rx="4"></rect>';
     svg+='<line class="bench-leg" x1="'+(bx0+12)+'" y1="'+(benchY+padH)+'" x2="'+(bx0+6)+'" y2="'+floorY+'"></line>';
     svg+='<line class="bench-leg" x1="'+(bx1-12)+'" y1="'+(benchY+padH)+'" x2="'+(bx1-6)+'" y2="'+floorY+'"></line>';
     var torsoY=benchY-2;
-    // horizontal torso capsule (chest near head end) + head at machine end
     svg+='<rect class="body" x="'+(headX+8)+'" y="'+(torsoY-11)+'" width="64" height="20" rx="10"></rect>';
     svg+='<circle class="body" cx="'+headX+'" cy="'+(torsoY-1)+'" r="10"></circle>';
-    // legs bent over the far end
     svg+=limb(headX+72,torsoY,feetX-6,torsoY-2);
     svg+=limb(feetX-6,torsoY-2,feetX+2,floorY-2);
-    // pressing arms: hands go UP and AWAY from the machine (up-and-to-the-right)
     var chestX = headX+22;
-    var hx = chestX+30;                                   // away from tower
-    var hy = Math.min(torsoY-16, y(s.pulley.actualIn+16));// pressed up above chest
-    svg+=limb(chestX,torsoY-6,hx,hy);
-    svg+=limb(chestX+8,torsoY-6,hx-2,hy+2);
+    var hx = chestX+30, hy = Math.min(torsoY-16, y(s.actualIn+16));
+    svg+=limb(chestX,torsoY-6,hx,hy); svg+=limb(chestX+8,torsoY-6,hx-2,hy+2);
     return {svg:svg,hx:hx,hy:hy};
   }
   if(s.posture==="seated"){
-    var benchY=y(18);
-    var seatX0=150-30, seatX1=150+28, bodyX=150;
+    var benchY=y(18), bodyX=150, seatX0=bodyX-32, seatX1=bodyX+30;
     var hipY=benchY-2, shoulderY=hipY-52, crownY=shoulderY-22;
     var svg='';
     svg+='<rect class="bench" x="'+seatX0+'" y="'+benchY+'" width="'+(seatX1-seatX0)+'" height="8" rx="4"></rect>';
@@ -265,32 +268,26 @@ function drawBody(s,y,floorY,mini,towerX,towerLeft){
     svg+='<line class="bench-leg" x1="'+(seatX1-8)+'" y1="'+(benchY+8)+'" x2="'+(seatX1-3)+'" y2="'+floorY+'"></line>';
     svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
     svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
-    svg+=limb(bodyX+4,hipY,bodyX+40,hipY+2);
-    svg+=limb(bodyX+40,hipY+2,bodyX+44,floorY);
-    var hx=bodyX+46, hy=y(s.startIn);
+    svg+=limb(bodyX+4,hipY,bodyX+40,hipY+2); svg+=limb(bodyX+40,hipY+2,bodyX+44,floorY);
+    var hx=bodyX+48, hy=y(s.startIn);
     svg+=limb(bodyX,shoulderY+8,hx,hy);
     return {svg:svg,hx:hx,hy:hy};
   }
   if(s.posture==="kneel"||s.posture==="half-kneel"){
-    var bodyX=150, kneeY=y(6);
-    var hipY=kneeY-(s.posture==="kneel"?38:44), shoulderY=hipY-48, crownY=shoulderY-20;
+    var bodyX=150, kneeY=y(6), hipY=kneeY-(s.posture==="kneel"?38:44), shoulderY=hipY-48, crownY=shoulderY-20;
     var svg='';
     svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
     svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
     if(s.posture==="kneel"){ svg+=limb(bodyX-4,hipY,bodyX-16,floorY); svg+=limb(bodyX+4,hipY,bodyX+16,floorY); }
     else { svg+=limb(bodyX+4,hipY,bodyX+26,y(3)); svg+=limb(bodyX+26,y(3),bodyX+30,floorY); svg+=limb(bodyX-4,hipY,bodyX-14,floorY); }
-    var hx=bodyX+6, hy=y(Math.min(s.startIn,s.machine.maxHeightIn-4));
+    var hx=bodyX+8, hy=y(Math.min(s.startIn,s.machine.trackTopIn-4));
     svg+=limb(bodyX,shoulderY+6,hx,hy);
     return {svg:svg,hx:hx,hy:hy};
   }
-  // standing
-  var bodyX=150, crownY=y(h), shoulderY=y(h*0.82), hipY=y(h*0.50);
-  var hr=Math.max(8,(shoulderY-crownY)/2.2);
-  var toward=s.face==="toward";
-  var hx=toward?bodyX+50:bodyX-34, hy=y(s.startIn);
+  var bodyX=150, crownY=y(h), shoulderY=y(h*0.82), hipY=y(h*0.50), hr=Math.max(8,(shoulderY-crownY)/2.2);
+  var toward=s.face==="toward"; var hx=toward?bodyX+50:bodyX-34, hy=y(s.startIn);
   var torso='M '+(bodyX-13)+' '+shoulderY+' Q '+(bodyX-16)+' '+((shoulderY+hipY)/2)+' '+(bodyX-9)+' '+hipY+' L '+(bodyX+9)+' '+hipY+' Q '+(bodyX+16)+' '+((shoulderY+hipY)/2)+' '+(bodyX+13)+' '+shoulderY+' Q '+bodyX+' '+(shoulderY-6)+' '+(bodyX-13)+' '+shoulderY+' Z';
-  var svg='';
-  svg+=limb(bodyX-6,hipY,bodyX-12,floorY); svg+=limb(bodyX+6,hipY,bodyX+12,floorY);
+  var svg=''; svg+=limb(bodyX-6,hipY,bodyX-12,floorY); svg+=limb(bodyX+6,hipY,bodyX+12,floorY);
   svg+='<path class="body" d="'+torso+'"></path>';
   svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+hr)+'" r="'+hr+'"></circle>';
   svg+=limb(bodyX,shoulderY+2,hx,hy);
@@ -369,9 +366,10 @@ function settings(){
     '<div class="rows" style="margin-bottom:18px">'+state.profiles.map(function(pr){return '<button class="lrow" onclick="sheetEditPerson(\''+pr.id+'\')">'+
       '<span class="avatar sm" style="--c:'+pr.color+'">'+ini(pr.name)+'</span><span class="lm"><b>'+esc(pr.name)+'</b><small>'+GOALS[pr.goal]+' \u00b7 '+ftin(pr.heightIn)+' \u00b7 '+pr.max+' lb cap</small></span><span class="go">\u203A</span></button>';}).join("")+
       '<button class="lrow" onclick="sheetAddPerson()"><span class="ic">+</span><span class="lm"><b>Add person</b></span></button></div>'+
-    '<div class="kicker" style="margin:4px 0 8px">Machine</div>'+
-    '<div class="rows"><button class="lrow" onclick="sheetMachine()"><span class="ic">\u2699</span><span class="lm"><b>Functional trainer</b><small>'+state.gym.positions+' positions \u00b7 '+state.gym.minHeightIn+'\u2013'+state.gym.maxHeightIn+'"</small></span><span class="go">\u203A</span></button>'+
-    '<button class="lrow" onclick="sheetAttach()"><span class="ic">\uD83D\uDD17</span><span class="lm"><b>Attachments</b><small>'+state.gym.attachments.filter(function(a){return a!=="none";}).join(", ")+'</small></span><span class="go">\u203A</span></button></div>'+
+    '<div class="kicker" style="margin:4px 0 8px">Equipment</div>'+
+    '<div class="rows"><button class="lrow" onclick="sheetMachine()"><span class="ic">\u2699</span><span class="lm"><b>Apex Free-Arm Trainer</b><small>8 tracks \u00b7 tilt 1-11 \u00b7 in/out 1-5 \u00b7 2\u00d7'+state.gym.max+' lb</small></span><span class="go">\u203A</span></button>'+
+    '<button class="lrow" onclick="sheetDumbbells()"><span class="ic">\uD83C\uDFCB\uFE0F</span><span class="lm"><b>Dumbbells</b><small>'+state.gym.dumbbells.join(", ")+' lb</small></span><span class="go">\u203A</span></button>'+
+    '<button class="lrow" onclick="sheetAttach()"><span class="ic">\uD83D\uDD17</span><span class="lm"><b>Attachments</b><small>'+state.gym.attachments.join(", ")+'</small></span><span class="go">\u203A</span></button></div>'+
     '<div class="fab-note" style="margin-top:20px">Chitsaz Training Lab \u00b7 '+EX.length+' exercises \u00b7 local-first, no account.</div>');
   renderTabs();
 }
@@ -408,17 +406,29 @@ function delPerson(id){ if(state.profiles.length<=1)return;
   state.profiles=state.profiles.filter(function(x){return x.id!==id;});
   if(state.activeId===id)state.activeId=state.profiles[0].id; closeSheet();render(); }
 function sheetMachine(){
-  openSheet('<h3>Machine setup</h3><p class="sub">Drives every pulley notch the app tells you.</p>'+
-    '<div class="field-2"><div class="field"><label>Positions</label><input id="m-pos" inputmode="numeric" value="'+state.gym.positions+'"></div>'+
-    '<div class="field"><label>Step (lb)</label><input id="m-inc" inputmode="numeric" value="'+state.gym.inc+'"></div></div>'+
-    '<div class="field-2"><div class="field"><label>Lowest pulley (in)</label><input id="m-min" inputmode="numeric" value="'+state.gym.minHeightIn+'"></div>'+
-    '<div class="field"><label>Highest pulley (in)</label><input id="m-max" inputmode="numeric" value="'+state.gym.maxHeightIn+'"></div></div>'+
+  openSheet('<h3>Apex Free-Arm Trainer</h3><p class="sub">These drive every setup the app shows.</p>'+
+    '<div class="legend"><b>Your machine\u2019s levers</b>'+
+      '<div><b>Track 1\u20138</b> \u2014 vertical height. 1 = highest, 8 = lowest.</div>'+
+      '<div><b>Arm tilt 1\u201311</b> \u2014 swings the arm on its dial axis.</div>'+
+      '<div><b>Arm in/out 1\u20135</b> \u2014 1 = all the way in, 5 = all the way out.</div>'+
+      '<div><b>Dual stacks</b> \u2014 '+state.gym.min+'\u2013'+state.gym.max+' lb in '+state.gym.inc+' lb steps, per side.</div></div>'+
+    '<div class="field-2"><div class="field"><label>Highest track height (in)</label><input id="m-top" inputmode="numeric" value="'+state.gym.trackTopIn+'"></div>'+
+    '<div class="field"><label>Lowest track height (in)</label><input id="m-bot" inputmode="numeric" value="'+state.gym.trackBottomIn+'"></div></div>'+
+    '<div class="field-3"><div class="field"><label>Stack min</label><input id="m-min" inputmode="numeric" value="'+state.gym.min+'"></div>'+
+    '<div class="field"><label>Stack max</label><input id="m-max" inputmode="numeric" value="'+state.gym.max+'"></div>'+
+    '<div class="field"><label>Step</label><input id="m-inc" inputmode="numeric" value="'+state.gym.inc+'"></div></div>'+
     '<div class="sheet-actions"><button class="btn primary block" onclick="saveMachine()">Save</button></div>'); }
-function saveMachine(){state.gym.positions=+el("m-pos").value||20;state.gym.inc=+el("m-inc").value||10;
-  state.gym.minHeightIn=+el("m-min").value||6;state.gym.maxHeightIn=+el("m-max").value||78;closeSheet();render();}
+function saveMachine(){state.gym.trackTopIn=+el("m-top").value||76;state.gym.trackBottomIn=+el("m-bot").value||6;
+  state.gym.min=+el("m-min").value||10;state.gym.max=+el("m-max").value||200;state.gym.inc=+el("m-inc").value||10;closeSheet();render();}
+function sheetDumbbells(){
+  openSheet('<h3>Dumbbells</h3><p class="sub">List the pairs you own (lb), comma separated.</p>'+
+    '<div class="field"><label>Owned dumbbells</label><input id="d-list" value="'+state.gym.dumbbells.join(", ")+'"></div>'+
+    '<div class="sheet-actions"><button class="btn primary block" onclick="saveDumbbells()">Save</button></div>'); }
+function saveDumbbells(){var v=el("d-list").value.split(",").map(function(x){return parseInt(x.trim(),10);}).filter(function(n){return n>0;});
+  if(v.length)state.gym.dumbbells=v.sort(function(a,b){return a-b;});closeSheet();render();}
 function sheetAttach(){
-  var all=["d-handle","rope","straight-bar","curl-bar","v-bar","ankle-strap"];
-  openSheet('<h3>Attachments</h3><p class="sub">What\u2019s available in your room.</p>'+
+  var all=["d-handle","rope","straight-bar","v-bar","lat-bar","curl-bar","ankle-strap"];
+  openSheet('<h3>Attachments</h3><p class="sub">What\u2019s in your bin. Exercises filter to these.</p>'+
     '<div class="chips">'+all.map(function(a){return '<button class="chip '+(state.gym.attachments.indexOf(a)>=0?"on":"")+'" onclick="toggleAttach(\''+a+'\')">'+a+'</button>';}).join("")+'</div>'+
     '<div class="sheet-actions"><button class="btn primary block" onclick="closeSheet();render()">Done</button></div>'); }
 function toggleAttach(a){var arr=state.gym.attachments;state.gym.attachments=arr.indexOf(a)>=0?arr.filter(function(x){return x!==a;}):arr.concat(a);sheetAttach();}
