@@ -1,4 +1,4 @@
-/* app.js - Chitsaz Training Lab v3.3 - Apex Free-Arm Trainer accurate model. */
+/* app.js - Chitsaz Training Lab v3.4 - arm-geometry figure (handle at arm end). */
 var KEY = "ctl-v33";
 var GOALS = { strength:"Strength", hypertrophy:"Muscle", "fat-loss":"Fat loss", posture:"Posture",
   mobility:"Mobility", "youth-athletic":"Athletic", "guest-safe":"Guest" };
@@ -18,7 +18,7 @@ function defaults(){
       {id:"kam",name:"Kam",mode:"teen",goal:"youth-athletic",max:50,heightIn:60,testing:true,color:"#f5c451"},
       {id:"ashton",name:"Ashton",mode:"youth",goal:"youth-athletic",max:25,heightIn:49,testing:false,color:"#ff5d6c"}
     ],
-    gym:{tracks:8,trackTopIn:76,trackBottomIn:6,armAngles:11,armDepth:5,min:10,max:200,inc:10,
+    gym:{tracks:8,trackTopIn:76,trackBottomIn:6,armLenIn:30,armAngles:11,armDepth:5,min:10,max:200,inc:10,
       dumbbells:[3,5,8,10,12], attachments:["d-handle","rope","straight-bar","v-bar","lat-bar","ankle-strap"]},
     assess:{sore:[],minutes:35,goal:"strength",intensity:"moderate",pain:false},
     history:[], filter:"all", q:""
@@ -39,7 +39,7 @@ function esc(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){retu
 function ini(n){ return String(n||"?").trim().charAt(0).toUpperCase(); }
 function ftin(inch){ return Math.floor(inch/12)+"'"+(inch%12)+'"'; }
 function hIn(){ return p().heightIn||69; }
-function mach(){ var g=state.gym; return {tracks:g.tracks,trackTopIn:g.trackTopIn,trackBottomIn:g.trackBottomIn,armAngles:g.armAngles,armDepth:g.armDepth,stackMin:g.min,stackMax:g.max,stackInc:g.inc}; }
+function mach(){ var g=state.gym; return {tracks:g.tracks,trackTopIn:g.trackTopIn,trackBottomIn:g.trackBottomIn,armLenIn:g.armLenIn,armAngles:g.armAngles,armDepth:g.armDepth,stackMin:g.min,stackMax:g.max,stackInc:g.inc}; }
 function el(id){ return document.getElementById(id); }
 function app(html){ el("app").innerHTML=html; }
 
@@ -189,7 +189,7 @@ function swap(i){var cur=ex(activeWorkout.items[i].id);
   if(rep)activeWorkout.items[i]=prescribe(rep); render();}
 function removeEx(i){ if(activeWorkout.items.length<=1)return; activeWorkout.items.splice(i,1); wIndex=Math.min(wIndex,activeWorkout.items.length-1); render(); }
 
-/* ===== FIGURE (machine-accurate) ===== */
+/* ===== FIGURE: arm-geometry (handle at arm end lines up with body) ===== */
 function figureCard(e){
   if(!e.setup||!BIO.hasMove(e.id)) return zoneCard(e);
   var s=BIO.solve(e.id,hIn(),mach());
@@ -199,7 +199,7 @@ function figureCard(e){
       '<div class="setpill"><b>'+s.ang+' / 11</b><small>Arm tilt</small></div>'+
       '<div class="setpill"><b>'+s.dep+' / 5</b><small>Arm in\u2013out</small></div>'+
     '</div>'+
-    '<div class="callout '+(s.startTooHigh?"warn":"")+'" style="border-radius:14px;margin-top:10px;border:1px solid var(--line)"><span class="badge">Set up</span><span class="txt">'+esc(s.instruction)+'</span></div></div>';
+    '<div class="callout" style="border-radius:14px;margin-top:10px;border:1px solid var(--line)"><span class="badge">Set up</span><span class="txt">'+esc(s.instruction)+'</span></div></div>';
 }
 function zoneCard(e){
   var g=e.equipment==="dumbbells"?"\uD83C\uDFCB\uFE0F":e.equipment==="bench"?"\uD83E\uDE91":e.equipment==="bosu"?"\uD83D\uDD35":"\uD83E\uDDD8";
@@ -213,38 +213,36 @@ function figSvg(s,mini){
   var W=340,H=mini?150:280,floorY=H-20,pad=16,m=s.machine;
   var topIn=Math.max(m.trackTopIn,s.userHeightIn*1.25)+4;
   var ppi=(floorY-pad)/topIn; function y(v){return floorY-v*ppi;}
-  var towerLeft = (s.posture==="lying" && s.headToMachine);
-  var towerX = towerLeft?42:298;
-  var py=y(s.actualIn);
-  var drawn = drawBody(s,y,floorY,mini,towerX,towerLeft);
+  var towerLeft=(s.posture==="lying"&&s.headToMachine);
+  var towerX=towerLeft?42:298;
+  var mountY=y(s.mountIn);
+  var drawn=drawBody(s,y,floorY,mini,towerX,towerLeft);
   var svg='<svg class="fig" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" aria-label="'+esc(s.posture)+' setup">';
   svg+='<line class="floor" x1="10" y1="'+floorY+'" x2="'+(W-10)+'" y2="'+floorY+'"></line>';
-  // machine column
   svg+='<rect class="tower" x="'+(towerX-10)+'" y="'+y(m.trackTopIn)+'" width="20" height="'+(floorY-y(m.trackTopIn))+'" rx="6"></rect>';
   svg+='<line class="rail" x1="'+towerX+'" y1="'+y(m.trackTopIn)+'" x2="'+towerX+'" y2="'+y(m.trackBottomIn)+'"></line>';
-  // track ticks 1(top)..8(bottom)
   if(!mini){ for(var t=1;t<=m.tracks;t++){ var ty=y(BIO.trackHeight(t,m)); var on=(t===s.track);
     var lx=towerLeft?(towerX+14):(towerX-14);
     svg+='<circle class="tickdot '+(on?"on":"")+'" cx="'+lx+'" cy="'+ty+'" r="'+(on?4:2.5)+'"></circle>';
     svg+='<text class="tt '+(on?"on":"")+'" x="'+(towerLeft?lx+8:lx-8)+'" y="'+(ty+3)+'" text-anchor="'+(towerLeft?"start":"end")+'">'+t+'</text>';
   }}
-  // swing arm from tower at active track out toward hands, then cable
-  var armX = towerLeft ? towerX+26 : towerX-26;
-  svg+='<line class="arm" x1="'+towerX+'" y1="'+py+'" x2="'+armX+'" y2="'+py+'"></line>';
-  svg+='<circle class="pulley" cx="'+armX+'" cy="'+py+'" r="6"></circle>';
-  svg+='<line class="cable" x1="'+armX+'" y1="'+py+'" x2="'+drawn.hx+'" y2="'+drawn.hy+'"></line>';
+  // RIGID ARM from mount pivot on tower out to the handle at the body
+  svg+='<line class="arm" x1="'+towerX+'" y1="'+mountY+'" x2="'+drawn.hx+'" y2="'+drawn.hy+'"></line>';
+  svg+='<circle class="pivot" cx="'+towerX+'" cy="'+mountY+'" r="5"></circle>';
+  // body
   svg+=drawn.svg;
-  svg+='<circle class="handle" cx="'+drawn.hx+'" cy="'+drawn.hy+'" r="8"></circle>';
-  if(!mini) svg+='<text class="cap g" x="'+armX+'" y="'+(py-11)+'" text-anchor="middle">track '+s.track+'</text>';
+  // handle at the arm end (this is what lines up with the body)
+  svg+='<circle class="handle" cx="'+drawn.hx+'" cy="'+drawn.hy+'" r="7"></circle>';
+  if(!mini) svg+='<text class="cap g" x="'+towerX+'" y="'+(mountY-10)+'" text-anchor="middle">track '+s.track+'</text>';
   svg+='</svg>';
   return svg;
 }
 function drawBody(s,y,floorY,mini,towerX,towerLeft){
   var h=s.userHeightIn;
   function limb(x1,y1,x2,y2){return '<path class="limb" d="M '+x1+' '+y1+' L '+x2+' '+y2+'"></path>';}
+  var handleY=y(s.handleIn);
   if(s.posture==="lying"){
-    var benchY=y(18), padH=8;
-    var headX = towerX+40, feetX = headX+150, bx0=headX-8, bx1=feetX+6;
+    var benchY=y(18), padH=8, headX=towerX+46, feetX=headX+150, bx0=headX-8, bx1=feetX+6;
     var svg='';
     svg+='<rect class="bench" x="'+bx0+'" y="'+benchY+'" width="'+(bx1-bx0)+'" height="'+padH+'" rx="4"></rect>';
     svg+='<line class="bench-leg" x1="'+(bx0+12)+'" y1="'+(benchY+padH)+'" x2="'+(bx0+6)+'" y2="'+floorY+'"></line>';
@@ -252,15 +250,13 @@ function drawBody(s,y,floorY,mini,towerX,towerLeft){
     var torsoY=benchY-2;
     svg+='<rect class="body" x="'+(headX+8)+'" y="'+(torsoY-11)+'" width="64" height="20" rx="10"></rect>';
     svg+='<circle class="body" cx="'+headX+'" cy="'+(torsoY-1)+'" r="10"></circle>';
-    svg+=limb(headX+72,torsoY,feetX-6,torsoY-2);
-    svg+=limb(feetX-6,torsoY-2,feetX+2,floorY-2);
-    var chestX = headX+22;
-    var hx = chestX+30, hy = Math.min(torsoY-16, y(s.actualIn+16));
+    svg+=limb(headX+72,torsoY,feetX-6,torsoY-2); svg+=limb(feetX-6,torsoY-2,feetX+2,floorY-2);
+    var chestX=headX+22, hx=chestX+26, hy=Math.min(torsoY-18, handleY);
     svg+=limb(chestX,torsoY-6,hx,hy); svg+=limb(chestX+8,torsoY-6,hx-2,hy+2);
     return {svg:svg,hx:hx,hy:hy};
   }
   if(s.posture==="seated"){
-    var benchY=y(18), bodyX=150, seatX0=bodyX-32, seatX1=bodyX+30;
+    var benchY=y(18), bodyX=180, seatX0=bodyX-32, seatX1=bodyX+30;
     var hipY=benchY-2, shoulderY=hipY-52, crownY=shoulderY-22;
     var svg='';
     svg+='<rect class="bench" x="'+seatX0+'" y="'+benchY+'" width="'+(seatX1-seatX0)+'" height="8" rx="4"></rect>';
@@ -268,24 +264,27 @@ function drawBody(s,y,floorY,mini,towerX,towerLeft){
     svg+='<line class="bench-leg" x1="'+(seatX1-8)+'" y1="'+(benchY+8)+'" x2="'+(seatX1-3)+'" y2="'+floorY+'"></line>';
     svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
     svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
-    svg+=limb(bodyX+4,hipY,bodyX+40,hipY+2); svg+=limb(bodyX+40,hipY+2,bodyX+44,floorY);
-    var hx=bodyX+48, hy=y(s.startIn);
+    svg+=limb(bodyX-4,hipY,bodyX-40,hipY+2); svg+=limb(bodyX-40,hipY+2,bodyX-44,floorY);
+    var hx=bodyX-42, hy=handleY;   // reach toward tower (left)
     svg+=limb(bodyX,shoulderY+8,hx,hy);
     return {svg:svg,hx:hx,hy:hy};
   }
   if(s.posture==="kneel"||s.posture==="half-kneel"){
-    var bodyX=150, kneeY=y(6), hipY=kneeY-(s.posture==="kneel"?38:44), shoulderY=hipY-48, crownY=shoulderY-20;
+    var bodyX=180, kneeY=y(6), hipY=kneeY-(s.posture==="kneel"?38:44), shoulderY=hipY-48, crownY=shoulderY-20;
     var svg='';
     svg+='<rect class="body" x="'+(bodyX-11)+'" y="'+shoulderY+'" width="22" height="'+(hipY-shoulderY)+'" rx="10"></rect>';
     svg+='<circle class="body" cx="'+bodyX+'" cy="'+(crownY+10)+'" r="10"></circle>';
     if(s.posture==="kneel"){ svg+=limb(bodyX-4,hipY,bodyX-16,floorY); svg+=limb(bodyX+4,hipY,bodyX+16,floorY); }
-    else { svg+=limb(bodyX+4,hipY,bodyX+26,y(3)); svg+=limb(bodyX+26,y(3),bodyX+30,floorY); svg+=limb(bodyX-4,hipY,bodyX-14,floorY); }
-    var hx=bodyX+8, hy=y(Math.min(s.startIn,s.machine.trackTopIn-4));
+    else { svg+=limb(bodyX-4,hipY,bodyX-26,y(3)); svg+=limb(bodyX-26,y(3),bodyX-30,floorY); svg+=limb(bodyX+4,hipY,bodyX+14,floorY); }
+    var hx=bodyX-8, hy=handleY;  // hands up toward overhead handle
     svg+=limb(bodyX,shoulderY+6,hx,hy);
     return {svg:svg,hx:hx,hy:hy};
   }
-  var bodyX=150, crownY=y(h), shoulderY=y(h*0.82), hipY=y(h*0.50), hr=Math.max(8,(shoulderY-crownY)/2.2);
-  var toward=s.face==="toward"; var hx=toward?bodyX+50:bodyX-34, hy=y(s.startIn);
+  // standing
+  var bodyX=168, crownY=y(h), shoulderY=y(h*0.82), hipY=y(h*0.50), hr=Math.max(8,(shoulderY-crownY)/2.2);
+  var toward=s.face==="toward", side=s.face==="side";
+  var hx = toward ? bodyX-42 : (side ? bodyX+40 : bodyX+48);  // toward=reach to tower(left); away=press out(right)
+  var hy = handleY;
   var torso='M '+(bodyX-13)+' '+shoulderY+' Q '+(bodyX-16)+' '+((shoulderY+hipY)/2)+' '+(bodyX-9)+' '+hipY+' L '+(bodyX+9)+' '+hipY+' Q '+(bodyX+16)+' '+((shoulderY+hipY)/2)+' '+(bodyX+13)+' '+shoulderY+' Q '+bodyX+' '+(shoulderY-6)+' '+(bodyX-13)+' '+shoulderY+' Z';
   var svg=''; svg+=limb(bodyX-6,hipY,bodyX-12,floorY); svg+=limb(bodyX+6,hipY,bodyX+12,floorY);
   svg+='<path class="body" d="'+torso+'"></path>';
@@ -297,8 +296,8 @@ function sheetInfo(id){
   var e=ex(id);
   var body='<h3>'+esc(e.name)+'</h3><p class="sub">'+esc(e.muscles.join(" \u00b7 "))+'</p>';
   if(e.setup&&BIO.hasMove(e.id)){ var s=BIO.solve(e.id,hIn(),mach());
-    body+='<div class="mini-figs"><div class="mini-fig">'+figSvg(Object.assign({},s,{finishIn:s.startIn}),true)+'<div class="lbl start">Start \u00b7 '+esc(s.startLandmark)+'</div></div>'+
-      '<div class="mini-fig">'+figSvg(Object.assign({},s,{startIn:s.finishIn}),true)+'<div class="lbl">Finish \u00b7 '+esc(s.finishLandmark)+'</div></div></div>'+
+    body+='<div class="mini-figs"><div class="mini-fig">'+figSvg(Object.assign({},s,{handleIn:s.startIn}),true)+'<div class="lbl start">Start \u00b7 '+esc(s.startLandmark)+'</div></div>'+
+      '<div class="mini-fig">'+figSvg(Object.assign({},s,{handleIn:s.finishIn}),true)+'<div class="lbl">Finish \u00b7 '+esc(s.finishLandmark)+'</div></div></div>'+
       '<div class="callout" style="border-radius:14px;margin-top:14px;border:1px solid var(--line)"><span class="badge">Why</span><span class="txt">'+esc(s.why)+'</span></div>'; }
   body+='<div class="cues" style="margin-top:14px">'+e.cues.map(function(c){return '<span class="cue"><span class="ck">\u2713</span>'+esc(c)+'</span>';}).join("")+'</div>';
   openSheet(body);
@@ -408,18 +407,20 @@ function delPerson(id){ if(state.profiles.length<=1)return;
 function sheetMachine(){
   openSheet('<h3>Apex Free-Arm Trainer</h3><p class="sub">These drive every setup the app shows.</p>'+
     '<div class="legend"><b>Your machine\u2019s levers</b>'+
-      '<div><b>Track 1\u20138</b> \u2014 vertical height. 1 = highest, 8 = lowest.</div>'+
-      '<div><b>Arm tilt 1\u201311</b> \u2014 swings the arm on its dial axis.</div>'+
-      '<div><b>Arm in/out 1\u20135</b> \u2014 1 = all the way in, 5 = all the way out.</div>'+
+      '<div><b>Track 1\u20138</b> \u2014 vertical mount height. 1 = highest, 8 = lowest.</div>'+
+      '<div><b>Arm tilt 1\u201311</b> \u2014 swings the arm up/down (6 = level).</div>'+
+      '<div><b>Arm in/out 1\u20135</b> \u2014 1 = all in, 5 = all out.</div>'+
+      '<div>The <b>handle at the arm end</b> is what you line up with your body \u2014 pick the track, then tilt/extend the arm so the handles meet the right spot.</div>'+
       '<div><b>Dual stacks</b> \u2014 '+state.gym.min+'\u2013'+state.gym.max+' lb in '+state.gym.inc+' lb steps, per side.</div></div>'+
     '<div class="field-2"><div class="field"><label>Highest track height (in)</label><input id="m-top" inputmode="numeric" value="'+state.gym.trackTopIn+'"></div>'+
     '<div class="field"><label>Lowest track height (in)</label><input id="m-bot" inputmode="numeric" value="'+state.gym.trackBottomIn+'"></div></div>'+
+    '<div class="field"><label>Arm length (in)</label><input id="m-arm" inputmode="numeric" value="'+state.gym.armLenIn+'"></div>'+
     '<div class="field-3"><div class="field"><label>Stack min</label><input id="m-min" inputmode="numeric" value="'+state.gym.min+'"></div>'+
     '<div class="field"><label>Stack max</label><input id="m-max" inputmode="numeric" value="'+state.gym.max+'"></div>'+
     '<div class="field"><label>Step</label><input id="m-inc" inputmode="numeric" value="'+state.gym.inc+'"></div></div>'+
     '<div class="sheet-actions"><button class="btn primary block" onclick="saveMachine()">Save</button></div>'); }
 function saveMachine(){state.gym.trackTopIn=+el("m-top").value||76;state.gym.trackBottomIn=+el("m-bot").value||6;
-  state.gym.min=+el("m-min").value||10;state.gym.max=+el("m-max").value||200;state.gym.inc=+el("m-inc").value||10;closeSheet();render();}
+  state.gym.armLenIn=+el("m-arm").value||30;state.gym.min=+el("m-min").value||10;state.gym.max=+el("m-max").value||200;state.gym.inc=+el("m-inc").value||10;closeSheet();render();}
 function sheetDumbbells(){
   openSheet('<h3>Dumbbells</h3><p class="sub">List the pairs you own (lb), comma separated.</p>'+
     '<div class="field"><label>Owned dumbbells</label><input id="d-list" value="'+state.gym.dumbbells.join(", ")+'"></div>'+

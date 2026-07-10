@@ -88,12 +88,11 @@ button,input,select{font:inherit;color:inherit;border:0;background:none}button{c
 .mini-figs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
 .mini-fig{border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;background:var(--bg2);text-align:center}
 .mini-fig svg{width:100%;height:130px}.mini-fig .lbl{margin-top:6px;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}.mini-fig .lbl.start{color:var(--green)}
-.fig .floor{stroke:rgba(243,241,234,.14);stroke-width:2}.fig .tick{stroke:rgba(243,241,234,.16)}.fig .tt{fill:var(--soft);font-size:9px;font-weight:700}
+.fig .floor{stroke:rgba(243,241,234,.14);stroke-width:2}.fig .tt{fill:var(--soft);font-size:9px;font-weight:700}
 .fig .tt.on{fill:var(--gold)}.fig .tickdot{fill:rgba(243,241,234,.25)}.fig .tickdot.on{fill:var(--gold)}
 .fig .tower{fill:#22261f}.fig .rail{stroke:#3a3f37;stroke-width:5;stroke-linecap:round}
-.fig .arm{stroke:#4a5048;stroke-width:6;stroke-linecap:round}.fig .pulley{fill:var(--gold)}
+.fig .arm{stroke:#c9cfc6;stroke-width:6;stroke-linecap:round}.fig .pivot{fill:#c9cfc6}.fig .pulley{fill:var(--gold)}
 .fig .cable{stroke:var(--green);stroke-width:2.5;stroke-linecap:round;fill:none}
-.fig .arc{stroke:var(--green);stroke-width:2;stroke-dasharray:3 5;opacity:.5;fill:none}
 .fig .body{fill:rgba(124,196,255,.92)}.fig .limb{stroke:#a9d4ff;stroke-width:8;stroke-linecap:round;fill:none}
 .fig .bench{fill:#3a2f26;stroke:rgba(255,255,255,.12)}.fig .bench-leg{stroke:#3a2f26;stroke-width:6;stroke-linecap:round}
 .fig .handle{fill:var(--gold)}.fig .cap{fill:var(--fg);font-size:11px;font-weight:800}.fig .cap.g{fill:var(--green)}
